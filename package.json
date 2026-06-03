@@ -1,0 +1,25 @@
+{
+  "name": "lyzsniper-blog-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "刘酝泽的技术博客平台 - React + TypeScript 全栈",
+  "engines": {
+    "node": ">=20.18.0"
+  },
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,magenta \"pnpm --filter @blog/api dev\" \"pnpm --filter @blog/web dev\"",
+    "dev:api": "pnpm --filter @blog/api dev",
+    "dev:web": "pnpm --filter @blog/web dev",
+    "build": "pnpm --filter @blog/web build",
+    "start": "pnpm --filter @blog/api start",
+    "migrate": "pnpm --filter @blog/api migrate",
+    "seed": "pnpm --filter @blog/api seed",
+    "typecheck": "pnpm -r typecheck",
+    "clean": "rm -rf node_modules apps/*/node_modules apps/*/dist"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "typescript": "^5.6.3"
+  }
+}
