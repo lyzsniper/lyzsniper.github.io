@@ -214,13 +214,13 @@ export default function Home() {
           </div>
 
           <h1 className="reveal text-display-xl text-[var(--fg-primary)] mb-6">
-            我设计能在生产环境跑起来的智能体系统。
+            我是刘酝泽，AI Agent 架构师。
           </h1>
 
-          <p className="reveal text-body-lg text-[var(--fg-secondary)] max-w-xl mb-8">
-            在 RAG、Agent 协议、LLM 推理与企业级后端架构的交界处，
-            <br />
-            把 Demo 变成可被运维的工程。
+          <p className="reveal text-body-lg text-[var(--fg-secondary)] max-w-2xl mb-8">
+            致力于探索大模型与垂直行业的深度融合。
+            依托扎实的后端架构与多智能体编排机制，跨越底层技术与复杂业务的鸿沟，
+            将 AI 重塑产品的无限可能，转化为真实的商业价值。
           </p>
 
           <div className="reveal flex flex-wrap gap-2 mb-10">
