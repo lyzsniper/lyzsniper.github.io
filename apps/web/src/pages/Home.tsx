@@ -334,45 +334,45 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== PROJECTS — zig-zag bento ===== */}
+      {/* ===== CAPABILITIES ===== */}
       <section className="container-page py-16 md:py-24" style={{ borderTop: '1px solid var(--border-subtle)' }}>
         <div className="reveal mb-12">
           <div className="eyebrow mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-            代表项目
+            能力域
           </div>
           <h2 className="text-display-lg text-[var(--fg-primary)] max-w-xl">
-            从医疗 AI 到企业 Agent 平台。
+            按问题类型组织，不按时间堆叠。
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-          {projects.map((p, idx) => (
-            <article
-              key={p.title}
-              className={`reveal surface-card-interactive p-6 flex flex-col ${
-                idx === 0 || idx === 3 ? 'md:col-span-3' : 'md:col-span-3'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-3 text-xs text-[var(--fg-tertiary)]">
-                <span className="font-mono">{p.period}</span>
-                <span className="pill !h-5 !text-[10px] pill-accent">{p.role}</span>
+        <div className="max-w-3xl space-y-16">
+          {capabilities.map((c) => (
+            <article key={c.no} className="reveal">
+              <div className="flex items-baseline gap-6 mb-3">
+                <span className="text-caption font-mono text-[var(--fg-quaternary)] shrink-0">
+                  {c.no}
+                </span>
+                <h3 className="text-display-sm text-[var(--fg-primary)]">
+                  {c.title}
+                </h3>
               </div>
-              <h3 className="text-lg font-semibold text-[var(--fg-primary)] mb-2">{p.title}</h3>
-              <p className="text-body-sm text-[var(--fg-secondary)] leading-relaxed mb-4 flex-1">
-                {p.desc}
+              <p className="text-body text-[var(--fg-secondary)] leading-relaxed mb-4 pl-[calc(0.75rem+1.5rem)]">
+                {c.stance}
               </p>
-              <div className="flex items-center gap-2 mb-4 text-xs">
-                <Sparkles size={12} className="text-[var(--accent)]" />
-                <span className="font-medium text-[var(--fg-primary)]">{p.impact}</span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {p.tech.map((t) => (
-                  <span key={t} className="pill !h-5 !text-[11px]">
-                    {t}
-                  </span>
-                ))}
-              </div>
+              {c.evidence.length > 0 && (
+                <ul className="space-y-2 pl-[calc(0.75rem+1.5rem)]">
+                  {c.evidence.map((e) => (
+                    <li
+                      key={e}
+                      className="text-body-sm text-[var(--fg-tertiary)] leading-relaxed flex gap-3"
+                    >
+                      <span className="text-[var(--accent)] shrink-0">·</span>
+                      <span>{e}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </article>
           ))}
         </div>
