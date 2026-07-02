@@ -125,47 +125,55 @@ const skillCategories: SkillCategory[] = [
   },
 ]
 
-interface Project {
-  period: string
+interface Capability {
+  no: string
   title: string
-  role: string
-  desc: string
-  impact: string
-  tech: string[]
+  stance: string
+  evidence: string[]
 }
 
-const projects: Project[] = [
+const capabilities: Capability[] = [
   {
-    period: '2024.03 — 2025.06',
-    title: '企业智能研发助手',
-    role: 'AI Agent 工程师',
-    desc: '面向企业应用的 AI 智能助手，融合 RAG、Agent、MCP 技术实现对域内服务的深度理解。主导设计 MCP 构建基于 Function Calling 的动态工具调用与多智能体执行体系。',
-    impact: '覆盖 6 个业务域，研发提效 47%',
-    tech: ['Spring AI', 'MCP', 'ElasticSearch', 'Tugraph', 'Haystack'],
+    no: '01',
+    title: 'RAG & 企业知识工程',
+    stance: '让知识库不再只回答"是什么"，而是回答"在我们的业务里怎么做"。',
+    evidence: [
+      '设计过支持万级文档、6 个业务域、毫秒级召回的检索管线',
+      '把 LlamaIndex / Haystack / 自研 Router 拼成可灰度的链路',
+    ],
   },
   {
-    period: '2024.03 — 2024.07',
-    title: 'Serverless 场景管控平台',
-    role: 'AI Agent 工程师',
-    desc: '引入 LLM 代码语义比对能力，结合 RAG 构建架构规范知识库，精准拦截高危变更。通过 Plan-Execute-Review 智能体编排，推动交付效率提升。',
-    impact: '拦截 200+ 高危变更，交付效率 ×4',
-    tech: ['Java', 'Spring AI', 'LangChain4j', 'Semantic Diff'],
+    no: '02',
+    title: '多智能体编排',
+    stance: 'Agent 不是 Prompt 拼接，是角色、工具、记忆、终止条件的工程设计。',
+    evidence: [
+      '落地 ReAct / Plan-Execute / Multi-Agent Debate 多种范式',
+      '把外部业务封装成 MCP Tools，让 Agent 可观测、可重试',
+    ],
   },
   {
-    period: '2022.06 — 2024.03',
-    title: 'AI + 超声放射信息系统',
-    role: '后端开发工程师',
-    desc: '面向医院超声科室的智能化信息系统，结合大模型技术引入智能导诊、AI 辅助电子报告生成及历史病历对比功能。独立设计 AI 网关层，实现业务服务与 AI 推理服务的高效解耦。',
-    impact: '服务 12 家三甲医院',
-    tech: ['Milvus', 'Langchain', 'RocketMQ', 'Redis'],
+    no: '03',
+    title: 'LLM 推理与工程化',
+    stance: '关注模型能力上限，更关注推理成本、可控性和团队使用规范。',
+    evidence: [
+      'Qwen / vLLM / Claude Code 在企业环境的落地路径',
+      '主导团队 AI 编程工具引入与 Code Review 机制',
+    ],
   },
   {
-    period: '2021.03 — 2022.06',
-    title: '基础研发平台',
-    role: '后端开发工程师',
-    desc: '公司级基础研发平台建设，统一日志、监控、配置中心。推动团队工程效能提升，规范 CI/CD 流程。',
-    impact: '接入 200+ 应用',
-    tech: ['Java', 'Spring Cloud', 'Kafka', 'Docker'],
+    no: '04',
+    title: '企业级后端架构',
+    stance: '不相信"AI 项目"可以脱离传统软件工程。Spring Boot / JVM 是基本盘。',
+    evidence: [
+      '高并发网关、消息中间件、图数据库在 ToB 业务的真实承载',
+      '从单体到微服务、从代码到 CI/CD 的全周期治理',
+    ],
+  },
+  {
+    no: '05',
+    title: '跨领域落地能力',
+    stance: '在 ToB、ToB-Internal、垂直行业信息化三类场景都做过从 0 到 1。让我能快速判断"这个需求是工程问题还是产品问题"。',
+    evidence: [],
   },
 ]
 
