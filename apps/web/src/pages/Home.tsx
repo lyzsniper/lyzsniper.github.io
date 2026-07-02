@@ -197,18 +197,17 @@ export default function Home() {
         <div className="max-w-3xl">
           <div className="eyebrow mb-6 reveal">
             <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
-            AI Agent 工程师 · 全栈开发者
+            AI Agent Engineer · Backend Architect
           </div>
 
           <h1 className="reveal text-display-xl text-[var(--fg-primary)] mb-6">
-            你好，我是刘酝泽。
-            <br />
-            <span className="text-[var(--fg-tertiary)]">我构建企业级智能体系统。</span>
+            我设计能在生产环境跑起来的智能体系统。
           </h1>
 
           <p className="reveal text-body-lg text-[var(--fg-secondary)] max-w-xl mb-8">
-            5 年深耕企业级 AI 应用，从 RAG 知识工程到多智能体编排，
-            主导过医疗、企业研发、Serverless 管控等多个 0→1 项目。
+            在 RAG、Agent 协议、LLM 推理与企业级后端架构的交界处，
+            <br />
+            把 Demo 变成可被运维的工程。
           </p>
 
           <div className="reveal flex flex-wrap gap-2 mb-10">
