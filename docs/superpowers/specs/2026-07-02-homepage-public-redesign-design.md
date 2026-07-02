@@ -45,7 +45,7 @@
 [p]        在 RAG、Agent 协议、LLM 推理与企业级后端架构的交界处，
            把 Demo 变成可被运维的工程。
 
-[pills]    RAG · MCP/A2A · LangGraph · CrewAI · vLLM · Spring AI · Kubernetes
+[pills]    沿用现有 expertise 数组（RAG 知识工程 · MCP/A2A 协议 · 多智能体编排 · 企业级 LLM 应用 · Agent 架构设计）
 
 [CTA]      阅读博客 / 邮件联系
 ```
