@@ -244,18 +244,13 @@ export default function Home() {
 
           <div className="reveal space-y-5 text-body text-[var(--fg-secondary)] max-w-2xl">
             <p>
-              你好，我是<strong className="text-[var(--fg-primary)] font-semibold">刘酝泽（Jensen）</strong>，
-              一名 AI Agent 工程师与全栈开发者，目前专注于企业级智能体研发平台建设。
+              你好，我是<strong className="text-[var(--fg-primary)] font-semibold">刘酝泽（Jensen）</strong>。
+              我设计过从 RAG 检索到 Agent 编排的完整工程链路，
+              也在 ToB、平台型、垂直行业信息化三类场景里做过从 0 到 1 的项目。
             </p>
             <p>
-              5 年后端开发与 AI 工程经验，从单体应用到微服务架构，从传统 Java
-              企业级开发到 LLM 驱动的智能体系统建设。主导设计了企业内部 MCP 工具调用体系、
-              Serverless 智能管控平台、AI 辅助医疗信息系统等多个项目。
-            </p>
-            <p>
-              持续关注前沿 AI 技术：Agent 设计模式（ReAct、Plan-Execute、Multi-Agent Debate）、
-              MCP / A2A 协议、LLM 微调与推理优化。
-              热衷于把技术能力转化为实际业务价值。
+              关注 Agent 设计模式、协议标准、推理优化；
+              更关注这些技术能不能被一个团队持续维护。
             </p>
           </div>
         </div>
