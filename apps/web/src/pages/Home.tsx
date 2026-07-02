@@ -177,21 +177,30 @@ const capabilities: Capability[] = [
   },
 ]
 
-const advantages = [
+interface Principle {
+  no: string
+  quote: string
+  argument: string
+}
+
+const principles: Principle[] = [
   {
-    icon: Trophy,
-    title: '全周期最高绩效',
-    desc: '在东华医为、数字马力、泛联新安三家公司所有绩效周期内均获得 A / A++ 评级，是业务部门核心开发人员。',
+    no: '01',
+    quote: '真正难的从来不是让 Agent 跑起来，是让它在生产里不胡说、不超时、不被人绕过。',
+    argument:
+      '我把每个 Agent 项目都当成一个分布式系统来设计：工具调用要有超时和降级、上下文要有边界、失败要有可重入路径。在 6 个业务域的实践中，这套工程纪律比任何 Prompt 技巧都更可靠。',
   },
   {
-    icon: Target,
-    title: 'BU AI 专项负责人',
-    desc: '主导 AI 辅助编程工具引入与使用规范制定，推动代码生成、自动化测试用例编写等场景落地。',
+    no: '02',
+    quote: '我倾向于做"减法架构"——用 3 个组件能解决的事，绝不用 5 个。',
+    argument:
+      'LangGraph / CrewAI / Dify / Coze 我都用过，最后的判断标准始终是：能否在三个月后，团队里第二个人能看懂、能改、能上线。复杂度必须可被继承，不是炫技。',
   },
   {
-    icon: TrendingUp,
-    title: '效率与团队建设',
-    desc: '主导内部技术分享 20+ 场，建立代码 Review 机制、CI/CD 规范及技术债务治理方案。',
+    no: '03',
+    quote: '技术决策的终点不是"能不能做"，是"值不值得维护"。',
+    argument:
+      '主导过公司级研发平台接入 200+ 应用、内部技术分享 20+ 场。我相信工程师的影响力 = 你写的代码 × 别人因为你能少写的代码。',
   },
 ]
 
