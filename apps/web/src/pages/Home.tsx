@@ -6,10 +6,6 @@ import {
   Server,
   Layers,
   Wrench,
-  Sparkles,
-  Trophy,
-  Target,
-  TrendingUp,
   Mail,
   Github,
   type LucideIcon,
@@ -387,33 +383,37 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ===== ADVANTAGES ===== */}
+      {/* ===== PRINCIPLES ===== */}
       <section className="container-page py-16 md:py-24" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-        <div className="reveal mb-12">
+        <div className="reveal mb-16">
           <div className="eyebrow mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
             核心优势
           </div>
-          <h2 className="text-display-lg text-[var(--fg-primary)] max-w-xl">
-            技术 + 业务 + 团队三位一体。
+          <h2 className="text-display-lg text-[var(--fg-primary)] max-w-2xl">
+            我对工程问题的三个长期判断。
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {advantages.map((a) => {
-            const Icon = a.icon
-            return (
-              <article key={a.title} className="reveal surface-card p-6">
-                <div className="w-10 h-10 rounded-lg bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)] mb-4">
-                  <Icon size={18} strokeWidth={1.75} />
-                </div>
-                <h3 className="text-base font-semibold text-[var(--fg-primary)] mb-2">{a.title}</h3>
-                <p className="text-body-sm text-[var(--fg-secondary)] leading-relaxed">
-                  {a.desc}
-                </p>
-              </article>
-            )
-          })}
+        <div className="max-w-3xl space-y-16">
+          {principles.map((p) => (
+            <article key={p.no} className="reveal">
+              <div className="flex items-baseline gap-6 mb-5">
+                <span className="text-caption font-mono text-[var(--fg-quaternary)] shrink-0">
+                  {p.no}
+                </span>
+              </div>
+              <blockquote
+                className="text-display-md text-[var(--fg-primary)] leading-snug mb-6 pl-[calc(0.75rem+1.5rem)]"
+                style={{ letterSpacing: '-0.02em' }}
+              >
+                "{p.quote}"
+              </blockquote>
+              <p className="text-body text-[var(--fg-secondary)] leading-relaxed pl-[calc(0.75rem+1.5rem)] max-w-2xl">
+                {p.argument}
+              </p>
+            </article>
+          ))}
         </div>
       </section>
 
