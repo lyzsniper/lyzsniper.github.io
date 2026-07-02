@@ -219,8 +219,7 @@ export default function Home() {
 
           <p className="reveal text-body-lg text-[var(--fg-secondary)] max-w-2xl mb-8">
             致力于探索大模型与垂直行业的深度融合。
-            依托扎实的后端架构与多智能体编排机制，跨越底层技术与复杂业务的鸿沟，
-            将 AI 重塑产品的无限可能，转化为真实的商业价值。
+            依托后端架构与多智能体编排，让 AI 在业务里产生真实价值。
           </p>
 
           <div className="reveal flex flex-wrap gap-2 mb-10">
