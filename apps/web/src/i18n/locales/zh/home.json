@@ -83,5 +83,50 @@
     "p": "欢迎交流企业级 LLM 应用、智能体编排、全栈技术，或者任何有意思的项目想法。",
     "email": "邮件联系",
     "github": "GitHub"
+  },
+  "skillGraph": {
+    "legend": {
+      "ai": "AI / Agent",
+      "backend": "后端",
+      "frontend": "前端",
+      "devops": "DevOps",
+      "language": "语言"
+    },
+    "label": {
+      "agent": "AI Agent",
+      "rag": "RAG",
+      "mcp": "MCP",
+      "a2a": "A2A",
+      "langchain": "LangChain",
+      "langgraph": "LangGraph",
+      "crewai": "CrewAI",
+      "dify": "Dify",
+      "coze": "Coze",
+      "llamaindex": "LlamaIndex",
+      "haystack": "Haystack",
+      "qwen": "Qwen",
+      "vllm": "vLLM",
+      "milvus": "Milvus",
+      "java": "Java",
+      "spring": "Spring Boot",
+      "python": "Python",
+      "fastapi": "FastAPI",
+      "mysql": "MySQL",
+      "postgres": "PostgreSQL",
+      "redis": "Redis",
+      "es": "ElasticSearch",
+      "kafka": "Kafka",
+      "rocketmq": "RocketMQ",
+      "tugraph": "Tugraph",
+      "react": "React",
+      "ts": "TypeScript",
+      "vue": "Vue 3",
+      "vite": "Vite",
+      "tailwind": "Tailwind",
+      "docker": "Docker",
+      "k8s": "Kubernetes",
+      "jenkins": "Jenkins",
+      "prometheus": "Prometheus"
+    }
   }
 }

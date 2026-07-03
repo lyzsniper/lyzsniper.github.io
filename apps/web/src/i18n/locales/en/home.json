@@ -83,5 +83,50 @@
     "p": "Open to conversations about enterprise LLM apps, agent orchestration, full-stack engineering, or any interesting project idea.",
     "email": "Email",
     "github": "GitHub"
+  },
+  "skillGraph": {
+    "legend": {
+      "ai": "AI / Agent",
+      "backend": "Backend",
+      "frontend": "Frontend",
+      "devops": "DevOps",
+      "language": "Language"
+    },
+    "label": {
+      "agent": "AI Agent",
+      "rag": "RAG",
+      "mcp": "MCP",
+      "a2a": "A2A",
+      "langchain": "LangChain",
+      "langgraph": "LangGraph",
+      "crewai": "CrewAI",
+      "dify": "Dify",
+      "coze": "Coze",
+      "llamaindex": "LlamaIndex",
+      "haystack": "Haystack",
+      "qwen": "Qwen",
+      "vllm": "vLLM",
+      "milvus": "Milvus",
+      "java": "Java",
+      "spring": "Spring Boot",
+      "python": "Python",
+      "fastapi": "FastAPI",
+      "mysql": "MySQL",
+      "postgres": "PostgreSQL",
+      "redis": "Redis",
+      "es": "ElasticSearch",
+      "kafka": "Kafka",
+      "rocketmq": "RocketMQ",
+      "tugraph": "Tugraph",
+      "react": "React",
+      "ts": "TypeScript",
+      "vue": "Vue 3",
+      "vite": "Vite",
+      "tailwind": "Tailwind",
+      "docker": "Docker",
+      "k8s": "Kubernetes",
+      "jenkins": "Jenkins",
+      "prometheus": "Prometheus"
+    }
   }
 }
