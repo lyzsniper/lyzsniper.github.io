@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, Save, User as UserIcon } from 'lucide-react'
 import MDEditor from '@uiw/react-md-editor'
 import matter from 'gray-matter'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/auth'
 
 interface Frontmatter {
@@ -25,20 +26,7 @@ const defaultFm: Frontmatter = {
   category: '',
 }
 
-const sample = `# 在这里写正文
-
-支持 **Markdown** 全语法：
-
-- 列表
-- \`代码\`
-- 链接
-
-\`\`\`typescript
-function hello() {
-  console.log('Hello, Jensen!')
-}
-\`\`\`
-`
+const sample = `# Title\n\nWrite your content here.\n'
 
 function buildMarkdown(fm: Frontmatter, body: string): string {
   const tags = fm.tags
@@ -46,19 +34,11 @@ function buildMarkdown(fm: Frontmatter, body: string): string {
     .map((s) => s.trim())
     .filter(Boolean)
   const catLine = fm.category.trim() ? `category: ${fm.category.trim()}\n` : ''
-  return `---
-title: ${fm.title}
-slug: ${fm.slug}
-date: ${fm.date}
-${catLine}tags: [${tags.join(', ')}]
-summary: ${fm.summary}
-status: ${fm.status}
----
-
-${body}`
+  return `---\ntitle: ${fm.title}\nslug: ${fm.slug}\ndate: ${fm.date}\n${catLine}tags: [${tags.join(', ')}]\nsummary: ${fm.summary}\nstatus: ${fm.status}\n---\n\n${body}`
 }
 
 export default function Editor() {
+  const { t } = useTranslation('editor')
   const { slug } = useParams<{ slug?: string }>()
   const navigate = useNavigate()
   const [fm, setFm] = useState<Frontmatter>(defaultFm)
@@ -96,15 +76,15 @@ export default function Editor() {
         })
         setBody(parsed.content)
       })
-      .catch((e) => setMessage(`加载失败: ${e instanceof Error ? e.message : String(e)}`))
+      .catch((e) => setMessage(t('loadFailed', { msg: e instanceof Error ? e.message : String(e) })))
       .finally(() => setLoading(false))
-  }, [slug])
+  }, [slug, t])
 
   const isEdit = !!slug
 
   const onSave = async () => {
     if (!fm.title.trim() || !fm.slug.trim()) {
-      setMessage('标题和 slug 必填')
+      setMessage(t('required'))
       return
     }
     setSaving(true)
@@ -130,10 +110,10 @@ export default function Editor() {
         const text = await res.text()
         throw new Error(text || `HTTP ${res.status}`)
       }
-      setMessage(isEdit ? '已更新' : '已创建')
+      setMessage(isEdit ? t('saved') : t('created'))
       setTimeout(() => navigate(`/blog/${fm.slug}`), 600)
     } catch (e) {
-      setMessage(`保存失败: ${e instanceof Error ? e.message : String(e)}`)
+      setMessage(t('saveFailed', { msg: e instanceof Error ? e.message : String(e) }))
     } finally {
       setSaving(false)
     }
@@ -142,7 +122,7 @@ export default function Editor() {
   if (loading) {
     return (
       <div className="container-page py-20 text-center text-sm text-[var(--fg-tertiary)]">
-        加载中…
+        {t('loading')}
       </div>
     )
   }
@@ -151,9 +131,9 @@ export default function Editor() {
     <div className="container-page py-10 md:py-12">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div>
-          <div className="eyebrow mb-2">{isEdit ? '编辑文章' : '新建文章'}</div>
+          <div className="eyebrow mb-2">{isEdit ? t('editTitle') : t('newTitle')}</div>
           <h1 className="text-display-md text-[var(--fg-primary)]">
-            {isEdit ? '编辑' : '写点什么吧'}
+            {isEdit ? t('edit') : t('writeSomething')}
           </h1>
         </div>
         <div className="flex items-center gap-2">
@@ -161,10 +141,10 @@ export default function Editor() {
             <UserIcon size={12} /> {user?.username ?? 'admin'}
           </span>
           <Link to="/admin" className="btn btn-ghost btn-sm">
-            <ArrowLeft size={13} /> 返回
+            <ArrowLeft size={13} /> {t('back')}
           </Link>
           <button onClick={onSave} disabled={saving} className="btn btn-primary btn-sm">
-            <Save size={13} /> {saving ? '保存中…' : isEdit ? '更新' : '保存发布'}
+            <Save size={13} /> {saving ? t('saving') : isEdit ? t('update') : t('save')}
           </button>
         </div>
       </div>
@@ -183,24 +163,24 @@ export default function Editor() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-        <Field label="标题">
+        <Field label={t('fields.title')}>
           <input
             className="input"
             value={fm.title}
             onChange={(e) => setFm({ ...fm, title: e.target.value })}
-            placeholder="文章标题"
+            placeholder={t('fields.titlePlaceholder')}
           />
         </Field>
-        <Field label="Slug (URL)">
+        <Field label={t('fields.slug')}>
           <input
             className="input font-mono"
             value={fm.slug}
             onChange={(e) => setFm({ ...fm, slug: e.target.value })}
             disabled={isEdit}
-            placeholder="my-post-slug"
+            placeholder={t('fields.slugPlaceholder')}
           />
         </Field>
-        <Field label="日期">
+        <Field label={t('fields.date')}>
           <input
             type="date"
             className="input"
@@ -208,38 +188,38 @@ export default function Editor() {
             onChange={(e) => setFm({ ...fm, date: e.target.value })}
           />
         </Field>
-        <Field label="标签（逗号分隔）">
+        <Field label={t('fields.tags')}>
           <input
             className="input"
             value={fm.tags}
             onChange={(e) => setFm({ ...fm, tags: e.target.value })}
-            placeholder="React, TypeScript, AI"
+            placeholder={t('fields.tagsPlaceholder')}
           />
         </Field>
-        <Field label="分类（层级用 / 分隔，如 技术/AI）">
+        <Field label={t('fields.category')}>
           <input
             className="input font-mono"
             value={fm.category}
             onChange={(e) => setFm({ ...fm, category: e.target.value })}
-            placeholder="技术/AI"
+            placeholder={t('fields.categoryPlaceholder')}
           />
         </Field>
-        <Field label="摘要">
+        <Field label={t('fields.summary')}>
           <input
             className="input"
             value={fm.summary}
             onChange={(e) => setFm({ ...fm, summary: e.target.value })}
-            placeholder="一句话简介"
+            placeholder={t('fields.summaryPlaceholder')}
           />
         </Field>
-        <Field label="状态">
+        <Field label={t('fields.status')}>
           <select
             className="input"
             value={fm.status}
             onChange={(e) => setFm({ ...fm, status: e.target.value as 'draft' | 'published' })}
           >
-            <option value="published">published</option>
-            <option value="draft">draft</option>
+            <option value="published">{t('fields.statusPublished')}</option>
+            <option value="draft">{t('fields.statusDraft')}</option>
           </select>
         </Field>
       </div>

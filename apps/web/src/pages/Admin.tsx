@@ -11,6 +11,7 @@ import {
   FileText,
 } from 'lucide-react'
 import type { PostSummary } from '@/lib/api'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/auth'
 
 interface AdminPost extends PostSummary {
@@ -19,6 +20,7 @@ interface AdminPost extends PostSummary {
 }
 
 export default function Admin() {
+  const { t } = useTranslation('admin')
   const [posts, setPosts] = useState<AdminPost[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -43,18 +45,18 @@ export default function Admin() {
       })
       setPosts(all)
     } catch (e) {
-      setError(e instanceof Error ? e.message : '加载失败')
+      setError(e instanceof Error ? e.message : t('postList.loadError'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     void load()
   }, [load])
 
   const onDelete = async (slug: string) => {
-    if (!confirm(`确认删除「${slug}」？此操作不可恢复。`)) return
+    if (!confirm(t('postList.deleteConfirm', { slug }))) return
     try {
       const res = await fetch(`/api/posts/${encodeURIComponent(slug)}`, {
         method: 'DELETE',
@@ -63,13 +65,13 @@ export default function Admin() {
       if (!res.ok) throw new Error(await res.text())
       setPosts((prev) => prev.filter((p) => p.slug !== slug))
     } catch (e) {
-      alert(`删除失败: ${e instanceof Error ? e.message : String(e)}`)
+      alert(t('postList.deleteFailed', { msg: e instanceof Error ? e.message : String(e) }))
     }
   }
 
   const uploadFile = async (file: File) => {
     if (!file.name.endsWith('.md')) {
-      setUploadMsg('仅支持 .md 文件')
+      setUploadMsg(t('upload.onlyMd'))
       return
     }
     setUploading(true)
@@ -83,12 +85,12 @@ export default function Admin() {
         credentials: 'include',
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || '上传失败')
-      setUploadMsg(`已收录: ${data.slug}`)
+      if (!res.ok) throw new Error(data.error || 'upload failed')
+      setUploadMsg(t('upload.ingested', { slug: data.slug }))
       if (fileRef.current) fileRef.current.value = ''
       await load()
     } catch (err) {
-      setUploadMsg(`失败: ${err instanceof Error ? err.message : String(err)}`)
+      setUploadMsg(t('upload.failed', { msg: err instanceof Error ? err.message : String(err) }))
     } finally {
       setUploading(false)
     }
@@ -111,47 +113,45 @@ export default function Admin() {
         <div>
           <div className="eyebrow mb-2">
             <Pencil size={12} className="text-[var(--accent)]" />
-            管理后台
+            {t('title')}
           </div>
           <h1 className="text-display-lg text-[var(--fg-primary)]">
             {user?.username ?? 'Admin'}
           </h1>
           <p className="text-sm text-[var(--fg-secondary)] mt-2">
-            在这里管理文章、标签和文件。
+            {t('subtitle')}
           </p>
         </div>
         <button onClick={() => void load()} className="btn btn-secondary btn-sm">
-          <RefreshCw size={13} /> 刷新
+          <RefreshCw size={13} /> {t('refresh')}
         </button>
       </div>
 
-      {/* 统计 */}
       {!loading && posts.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
           <div className="surface-card p-4">
-            <div className="text-xs text-[var(--fg-tertiary)] mb-1">文章总数</div>
+            <div className="text-xs text-[var(--fg-tertiary)] mb-1">{t('stats.total')}</div>
             <div className="text-2xl font-semibold tabular-nums">{posts.length}</div>
           </div>
           <div className="surface-card p-4">
-            <div className="text-xs text-[var(--fg-tertiary)] mb-1">已发布</div>
+            <div className="text-xs text-[var(--fg-tertiary)] mb-1">{t('stats.published')}</div>
             <div className="text-2xl font-semibold tabular-nums text-[var(--accent)]">{published}</div>
           </div>
           <div className="surface-card p-4">
-            <div className="text-xs text-[var(--fg-tertiary)] mb-1">草稿</div>
+            <div className="text-xs text-[var(--fg-tertiary)] mb-1">{t('stats.drafts')}</div>
             <div className="text-2xl font-semibold tabular-nums">{drafts}</div>
           </div>
           <div className="surface-card p-4">
-            <div className="text-xs text-[var(--fg-tertiary)] mb-1">总浏览量</div>
+            <div className="text-xs text-[var(--fg-tertiary)] mb-1">{t('stats.views')}</div>
             <div className="text-2xl font-semibold tabular-nums">{totalViews.toLocaleString()}</div>
           </div>
         </div>
       )}
 
-      {/* 上传 */}
       <section className="surface-card p-6 mb-8">
         <div className="flex items-center gap-2 mb-4">
           <Upload size={16} strokeWidth={1.75} className="text-[var(--accent)]" />
-          <h2 className="text-base font-semibold text-[var(--fg-primary)]">上传 Markdown</h2>
+          <h2 className="text-base font-semibold text-[var(--fg-primary)]">{t('upload.title')}</h2>
         </div>
 
         <div
@@ -171,16 +171,16 @@ export default function Admin() {
           {uploading ? (
             <div className="flex flex-col items-center gap-2">
               <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm text-[var(--fg-secondary)]">上传中…</span>
+              <span className="text-sm text-[var(--fg-secondary)]">{t('upload.uploading')}</span>
             </div>
           ) : (
             <>
               <FileText size={28} className="mx-auto mb-3 text-[var(--fg-tertiary)]" strokeWidth={1.5} />
               <p className="text-sm text-[var(--fg-secondary)]">
-                拖拽 .md 文件到这里，或 <span className="text-[var(--accent)] underline">点击选择</span>
+                {t('upload.dropHint')} <span className="text-[var(--accent)] underline">{t('upload.clickSelect')}</span>
               </p>
               <p className="text-xs text-[var(--fg-tertiary)] mt-1.5">
-                上传后自动收录到 <code className="font-mono">content/published/</code> 并入库
+                {t('upload.autoIngest')}
               </p>
             </>
           )}
@@ -202,7 +202,6 @@ export default function Admin() {
         )}
       </section>
 
-      {/* 快捷操作 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-10">
         <Link
           to="/admin/editor"
@@ -211,9 +210,9 @@ export default function Admin() {
           <Pencil size={18} className="text-[var(--accent)] shrink-0 mt-0.5" strokeWidth={1.75} />
           <div>
             <h3 className="text-sm font-semibold text-[var(--fg-primary)] group-hover:text-[var(--accent)] transition-colors">
-              新建文章
+              {t('quickActions.newPost.title')}
             </h3>
-            <p className="text-xs text-[var(--fg-tertiary)] mt-1">Web 编辑器（双栏实时预览）</p>
+            <p className="text-xs text-[var(--fg-tertiary)] mt-1">{t('quickActions.newPost.desc')}</p>
           </div>
         </Link>
         <Link
@@ -223,9 +222,9 @@ export default function Admin() {
           <Inbox size={18} className="text-[var(--accent)] shrink-0 mt-0.5" strokeWidth={1.75} />
           <div>
             <h3 className="text-sm font-semibold text-[var(--fg-primary)] group-hover:text-[var(--accent)] transition-colors">
-              Inbox 文件
+              {t('quickActions.inbox.title')}
             </h3>
-            <p className="text-xs text-[var(--fg-tertiary)] mt-1">查看待收录文件</p>
+            <p className="text-xs text-[var(--fg-tertiary)] mt-1">{t('quickActions.inbox.desc')}</p>
           </div>
         </Link>
         <Link
@@ -235,21 +234,20 @@ export default function Admin() {
           <TagsIcon size={18} className="text-[var(--accent)] shrink-0 mt-0.5" strokeWidth={1.75} />
           <div>
             <h3 className="text-sm font-semibold text-[var(--fg-primary)] group-hover:text-[var(--accent)] transition-colors">
-              标签管理
+              {t('quickActions.tags.title')}
             </h3>
-            <p className="text-xs text-[var(--fg-tertiary)] mt-1">为标签添加颜色和描述</p>
+            <p className="text-xs text-[var(--fg-tertiary)] mt-1">{t('quickActions.tags.desc')}</p>
           </div>
         </Link>
       </div>
 
-      {/* 文章列表 */}
       <section>
         <div className="flex items-center gap-2 mb-4">
           <List size={16} className="text-[var(--accent)]" strokeWidth={1.75} />
-          <h2 className="text-base font-semibold text-[var(--fg-primary)]">文章列表</h2>
+          <h2 className="text-base font-semibold text-[var(--fg-primary)]">{t('postList.title')}</h2>
         </div>
 
-        {loading && <p className="text-sm text-[var(--fg-tertiary)] py-12 text-center">加载中…</p>}
+        {loading && <p className="text-sm text-[var(--fg-tertiary)] py-12 text-center">{t('postList.loading')}</p>}
         {error && (
           <div
             className="px-4 py-3 rounded-md text-sm"
@@ -265,7 +263,7 @@ export default function Admin() {
 
         {!loading && posts.length === 0 && (
           <div className="surface-card p-16 text-center">
-            <p className="text-sm text-[var(--fg-secondary)]">还没有文章</p>
+            <p className="text-sm text-[var(--fg-secondary)]">{t('postList.empty')}</p>
           </div>
         )}
 
@@ -277,7 +275,7 @@ export default function Admin() {
                 style={{
                   backgroundColor: p.status === 'published' ? 'var(--accent)' : 'var(--fg-quaternary)',
                 }}
-                title={p.status === 'published' ? '已发布' : '草稿'}
+                title={p.status === 'published' ? t('postList.published') : t('postList.draft')}
               />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -293,20 +291,20 @@ export default function Admin() {
                       p.status === 'published' ? 'pill-accent' : ''
                     }`}
                   >
-                    {p.status === 'published' ? '已发布' : '草稿'}
+                    {p.status === 'published' ? t('postList.published') : t('postList.draft')}
                   </span>
                 </div>
                 <div className="text-xs text-[var(--fg-tertiary)] mt-1 flex items-center gap-3 flex-wrap">
                   <span className="font-mono">{new Date(p.date).toLocaleDateString('zh-CN')}</span>
-                  {p.readingTime !== null && <span>阅读 {p.readingTime} 分钟</span>}
-                  <span>浏览 {p.viewCount}</span>
+                  {p.readingTime !== null && <span>{t('postList.readingTime', { count: p.readingTime })}</span>}
+                  <span>{t('postList.views', { count: p.viewCount })}</span>
                   {p.category && <span>📂 {p.category}</span>}
                 </div>
                 {p.tags.length > 0 && (
                   <div className="flex gap-1 mt-1.5 flex-wrap">
-                    {p.tags.map((t) => (
-                      <span key={t} className="pill !h-5 !text-[10px]">
-                        #{t}
+                    {p.tags.map((tag) => (
+                      <span key={tag} className="pill !h-5 !text-[10px]">
+                        #{tag}
                       </span>
                     ))}
                   </div>
@@ -317,7 +315,7 @@ export default function Admin() {
                 <Link
                   to={`/admin/editor/${encodeURIComponent(p.slug)}`}
                   className="btn btn-ghost btn-sm"
-                  aria-label="编辑"
+                  aria-label="edit"
                 >
                   <Pencil size={13} />
                 </Link>
@@ -325,7 +323,7 @@ export default function Admin() {
                   type="button"
                   onClick={() => void onDelete(p.slug)}
                   className="btn btn-ghost btn-sm hover:text-[#dc2626]"
-                  aria-label="删除"
+                  aria-label="delete"
                 >
                   <Trash2 size={13} />
                 </button>

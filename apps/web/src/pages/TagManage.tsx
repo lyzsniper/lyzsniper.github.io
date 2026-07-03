@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Search, Tags as TagsIcon, Eye } from 'lucide-react'
 import type { TagFull } from '@/lib/api'
+import { useTranslation } from 'react-i18next'
 
 const PRESET_COLORS = [
   '#4f46e5',
@@ -17,6 +18,7 @@ const PRESET_COLORS = [
 ]
 
 export default function TagManage() {
+  const { t } = useTranslation('tagmanage')
   const [tags, setTags] = useState<TagFull[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
@@ -73,11 +75,11 @@ export default function TagManage() {
         }),
       })
       if (!res.ok) throw new Error(await res.text())
-      setMessage(`${draft.name} 已保存`)
+      setMessage(t('saved', { name: draft.name }))
       cancelEdit()
       await load()
     } catch (e) {
-      setMessage(`失败: ${e instanceof Error ? e.message : String(e)}`)
+      setMessage(t('saveFailed', { msg: e instanceof Error ? e.message : String(e) }))
     }
   }
 
@@ -89,19 +91,19 @@ export default function TagManage() {
         <div>
           <div className="eyebrow mb-2">
             <TagsIcon size={12} className="text-[var(--accent)]" />
-            标签管理
+            {t('eyebrow')}
           </div>
-          <h1 className="text-display-lg text-[var(--fg-primary)]">标签</h1>
+          <h1 className="text-display-lg text-[var(--fg-primary)]">{t('title')}</h1>
           <p className="text-sm text-[var(--fg-secondary)] mt-2">
-            为标签添加描述和颜色，会在前台更醒目。
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
           <Link to="/admin" className="btn btn-ghost btn-sm">
-            <ArrowLeft size={13} /> 返回管理
+            <ArrowLeft size={13} /> {t('backToAdmin')}
           </Link>
           <Link to="/tags" className="btn btn-secondary btn-sm">
-            <Eye size={13} /> 前台查看
+            <Eye size={13} /> {t('viewFrontend')}
           </Link>
         </div>
       </div>
@@ -127,18 +129,18 @@ export default function TagManage() {
         <input
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          placeholder="搜索标签…"
+          placeholder={t('searchPlaceholder')}
           className="input !pl-9"
         />
       </div>
 
       {!loading && (
         <p className="text-xs text-[var(--fg-tertiary)] mb-4">
-          {tags.length} 个标签{filter && ` · 匹配 ${filtered.length} 个`}
+          {t('tagCount', { count: tags.length })}{filter && t('matchCount', { count: filtered.length })}
         </p>
       )}
 
-      {loading && <p className="text-sm text-[var(--fg-tertiary)] py-12 text-center">加载中…</p>}
+      {loading && <p className="text-sm text-[var(--fg-tertiary)] py-12 text-center">{t('loading')}</p>}
 
       <div className="space-y-2">
         {filtered.map((tag) => (
@@ -147,7 +149,7 @@ export default function TagManage() {
               <div className="space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <label className="block">
-                    <span className="text-xs font-medium text-[var(--fg-secondary)] mb-1.5 block">名称</span>
+                    <span className="text-xs font-medium text-[var(--fg-secondary)] mb-1.5 block">{t('fields.name')}</span>
                     <input
                       className="input"
                       value={draft.name}
@@ -155,13 +157,13 @@ export default function TagManage() {
                     />
                   </label>
                   <label className="block">
-                    <span className="text-xs font-medium text-[var(--fg-secondary)] mb-1.5 block">颜色</span>
+                    <span className="text-xs font-medium text-[var(--fg-secondary)] mb-1.5 block">{t('fields.color')}</span>
                     <div className="flex gap-2 items-center">
                       <input
                         className="input font-mono flex-1"
                         value={draft.color}
                         onChange={(e) => setDraft({ ...draft, color: e.target.value })}
-                        placeholder="#4f46e5"
+                        placeholder={t('fields.colorPlaceholder')}
                       />
                       <div
                         className="w-9 h-9 rounded-md shrink-0"
@@ -186,20 +188,20 @@ export default function TagManage() {
                   </label>
                 </div>
                 <label className="block">
-                  <span className="text-xs font-medium text-[var(--fg-secondary)] mb-1.5 block">描述（可选）</span>
+                  <span className="text-xs font-medium text-[var(--fg-secondary)] mb-1.5 block">{t('fields.description')}</span>
                   <input
                     className="input"
                     value={draft.description}
                     onChange={(e) => setDraft({ ...draft, description: e.target.value })}
-                    placeholder="一句话解释这个标签的含义"
+                    placeholder={t('fields.descriptionPlaceholder')}
                   />
                 </label>
                 <div className="flex gap-2">
                   <button onClick={() => void save(tag.slug)} className="btn btn-primary btn-sm">
-                    保存
+                    {t('save')}
                   </button>
                   <button onClick={cancelEdit} className="btn btn-secondary btn-sm">
-                    取消
+                    {t('cancel')}
                   </button>
                 </div>
               </div>
@@ -216,20 +218,20 @@ export default function TagManage() {
                   {tag.name}
                 </span>
                 <span className="text-xs text-[var(--fg-tertiary)]">
-                  {tag.count} 篇
+                  {t('postCount', { count: tag.count })}
                 </span>
                 {tag.description && (
                   <span className="text-xs text-[var(--fg-secondary)] italic">— {tag.description}</span>
                 )}
                 <div className="ml-auto flex gap-2">
                   <button onClick={() => startEdit(tag)} className="btn btn-ghost btn-sm">
-                    编辑
+                    {t('edit')}
                   </button>
                   <Link
                     to={`/tags/${encodeURIComponent(tag.slug)}`}
                     className="btn btn-ghost btn-sm"
                   >
-                    查看
+                    {t('view')}
                   </Link>
                 </div>
               </div>
@@ -241,7 +243,7 @@ export default function TagManage() {
       {!loading && filtered.length === 0 && (
         <div className="surface-card p-16 text-center">
           <p className="text-sm text-[var(--fg-secondary)]">
-            {filter ? '没有匹配的标签' : '还没有标签'}
+            {filter ? t('noMatch') : t('noTags')}
           </p>
         </div>
       )}

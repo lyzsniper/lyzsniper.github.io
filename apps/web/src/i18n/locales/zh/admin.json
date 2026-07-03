@@ -1,0 +1,47 @@
+{
+  "title": "管理后台",
+  "subtitle": "在这里管理文章、标签和文件。",
+  "refresh": "刷新",
+  "stats": {
+    "total": "文章总数",
+    "published": "已发布",
+    "drafts": "草稿",
+    "views": "总浏览量"
+  },
+  "upload": {
+    "title": "上传 Markdown",
+    "dropHint": "拖拽 .md 文件到这里，或",
+    "clickSelect": "点击选择",
+    "autoIngest": "上传后自动收录到 content/published/ 并入库",
+    "uploading": "上传中…",
+    "onlyMd": "仅支持 .md 文件",
+    "ingested": "已收录: {{slug}}",
+    "failed": "失败: {{msg}}"
+  },
+  "quickActions": {
+    "newPost": {
+      "title": "新建文章",
+      "desc": "Web 编辑器（双栏实时预览）"
+    },
+    "inbox": {
+      "title": "Inbox 文件",
+      "desc": "查看待收录文件"
+    },
+    "tags": {
+      "title": "标签管理",
+      "desc": "为标签添加颜色和描述"
+    }
+  },
+  "postList": {
+    "title": "文章列表",
+    "loading": "加载中…",
+    "loadError": "加载失败",
+    "empty": "还没有文章",
+    "published": "已发布",
+    "draft": "草稿",
+    "readingTime": "阅读 {{count}} 分钟",
+    "views": "浏览 {{count}}",
+    "deleteConfirm": "确认删除「{{slug}}」？此操作不可恢复。",
+    "deleteFailed": "删除失败: {{msg}}"
+  }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, RefreshCw, Inbox as InboxIcon, FileText } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface InboxFile {
   name: string
@@ -9,6 +10,7 @@ interface InboxFile {
 }
 
 export default function Inbox() {
+  const { t } = useTranslation('inbox')
   const [files, setFiles] = useState<InboxFile[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -29,16 +31,16 @@ export default function Inbox() {
       const data = await res.json()
       setFiles(data.files ?? [])
     } catch (e) {
-      setError(e instanceof Error ? e.message : '加载失败')
+      setError(e instanceof Error ? e.message : t('loadError'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     void load()
-    const t = setInterval(load, 5000)
-    return () => clearInterval(t)
+    const interval = setInterval(load, 5000)
+    return () => clearInterval(interval)
   }, [load])
 
   const onIngest = async (filename: string) => {
@@ -51,11 +53,11 @@ export default function Inbox() {
         body: JSON.stringify({ filename }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || '收录失败')
-      showToast('ok', `已收录: ${data.slug}`)
+      if (!res.ok) throw new Error(data.error || t('ingestFailed', { msg: 'ingest' }))
+      showToast('ok', t('ingested', { slug: data.slug }))
       await load()
     } catch (e) {
-      showToast('err', `失败: ${e instanceof Error ? e.message : String(e)}`)
+      showToast('err', t('ingestFailed', { msg: e instanceof Error ? e.message : String(e) }))
     } finally {
       setIngesting(null)
     }
@@ -67,24 +69,24 @@ export default function Inbox() {
         <div>
           <div className="eyebrow mb-2">
             <InboxIcon size={12} className="text-[var(--accent)]" />
-            Inbox
+            {t('eyebrow')}
           </div>
-          <h1 className="text-display-lg text-[var(--fg-primary)]">待收录文件</h1>
+          <h1 className="text-display-lg text-[var(--fg-primary)]">{t('title')}</h1>
           <p className="text-sm text-[var(--fg-secondary)] mt-2">
-            把 .md 文件放到 <code className="font-mono px-1.5 py-0.5 rounded bg-[var(--bg-muted)]">content/inbox/</code> 后，自动出现在这里
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
           <button onClick={() => void load()} className="btn btn-secondary btn-sm">
-            <RefreshCw size={13} /> 刷新
+            <RefreshCw size={13} /> {t('refresh')}
           </button>
           <Link to="/admin" className="btn btn-ghost btn-sm">
-            <ArrowLeft size={13} /> 返回
+            <ArrowLeft size={13} /> {t('back')}
           </Link>
         </div>
       </div>
 
-      <p className="text-xs text-[var(--fg-tertiary)] mb-8">每 5s 自动刷新</p>
+      <p className="text-xs text-[var(--fg-tertiary)] mb-8">{t('autoRefresh')}</p>
 
       {toast && (
         <div
@@ -99,7 +101,7 @@ export default function Inbox() {
         </div>
       )}
 
-      {loading && <p className="text-sm text-[var(--fg-tertiary)] py-12 text-center">加载中…</p>}
+      {loading && <p className="text-sm text-[var(--fg-tertiary)] py-12 text-center">{t('loading')}</p>}
 
       {error && (
         <div
@@ -123,9 +125,9 @@ export default function Inbox() {
           }}
         >
           <FileText size={32} className="mx-auto mb-3 text-[var(--fg-tertiary)]" strokeWidth={1.5} />
-          <p className="text-sm text-[var(--fg-secondary)]">Inbox 为空</p>
+          <p className="text-sm text-[var(--fg-secondary)]">{t('empty')}</p>
           <p className="text-xs text-[var(--fg-tertiary)] mt-1">
-            从管理后台上传 .md，或直接放到 content/inbox/
+            {t('emptyHint')}
           </p>
         </div>
       )}
@@ -152,10 +154,10 @@ export default function Inbox() {
                 {isIngesting ? (
                   <>
                     <span className="w-3 h-3 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
-                    收录中
+                    {t('ingesting')}
                   </>
                 ) : (
-                  '立即收录'
+                  t('ingest')
                 )}
               </button>
             </div>

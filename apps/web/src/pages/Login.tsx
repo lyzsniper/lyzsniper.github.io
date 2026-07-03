@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/auth'
 
 export default function Login() {
+  const { t } = useTranslation('login')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const { login, user, loading, error, clearError } = useAuthStore()
@@ -26,10 +28,10 @@ export default function Login() {
         <div className="mb-8">
           <div className="eyebrow mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-            管理员登录
+            {t('eyebrow')}
           </div>
           <h1 className="text-display-md text-[var(--fg-primary)]">
-            登录以继续
+            {t('title')}
           </h1>
         </div>
 
@@ -49,7 +51,7 @@ export default function Login() {
 
           <label className="block">
             <span className="text-xs font-medium text-[var(--fg-secondary)] mb-1.5 block">
-              用户名
+              {t('username')}
             </span>
             <input
               className="input"
@@ -57,13 +59,13 @@ export default function Login() {
               onChange={(e) => setUsername(e.target.value)}
               autoFocus
               autoComplete="username"
-              placeholder="admin"
+              placeholder={t('usernamePlaceholder')}
             />
           </label>
 
           <label className="block">
             <span className="text-xs font-medium text-[var(--fg-secondary)] mb-1.5 block">
-              密码
+              {t('password')}
             </span>
             <input
               className="input"
@@ -71,7 +73,7 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
-              placeholder="••••••"
+              placeholder={t('passwordPlaceholder')}
             />
           </label>
 
@@ -81,16 +83,16 @@ export default function Login() {
             className="btn btn-primary w-full mt-2"
           >
             {loading ? (
-              '登录中…'
+              t('submitting')
             ) : (
               <>
-                登录 <ArrowRight size={14} />
+                {t('submit')} <ArrowRight size={14} />
               </>
             )}
           </button>
 
           <p className="text-xs text-[var(--fg-tertiary)] text-center pt-1">
-            默认账号 <code className="font-mono">admin</code> /{' '}
+            {t('defaultCreds')} <code className="font-mono">admin</code> {t('and')}{' '}
             <code className="font-mono">admin123</code>
           </p>
         </form>

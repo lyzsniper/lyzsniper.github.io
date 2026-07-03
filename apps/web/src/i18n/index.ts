@@ -20,6 +20,18 @@ import zhSearch from './locales/zh/search.json'
 import enSearch from './locales/en/search.json'
 import zhTags from './locales/zh/tags.json'
 import enTags from './locales/en/tags.json'
+import zhNotfound from './locales/zh/notfound.json'
+import enNotfound from './locales/en/notfound.json'
+import zhLogin from './locales/zh/login.json'
+import enLogin from './locales/en/login.json'
+import zhAdmin from './locales/zh/admin.json'
+import enAdmin from './locales/en/admin.json'
+import zhEditor from './locales/zh/editor.json'
+import enEditor from './locales/en/editor.json'
+import zhInbox from './locales/zh/inbox.json'
+import enInbox from './locales/en/inbox.json'
+import zhTagmanage from './locales/zh/tagmanage.json'
+import enTagmanage from './locales/en/tagmanage.json'
 
 export const supportedLngs = ['zh', 'en'] as const
 export const fallbackLng = 'zh'
@@ -32,7 +44,7 @@ void i18n
     fallbackLng,
     defaultNS,
     supportedLngs: [...supportedLngs],
-    ns: ['common', 'header', 'footer', 'postcard', 'home', 'blog', 'post', 'search', 'tags'],
+    ns: ['common', 'header', 'footer', 'postcard', 'home', 'blog', 'post', 'search', 'tags', 'notfound', 'login', 'admin', 'editor', 'inbox', 'tagmanage'],
     detection: {
       order: ['path', 'localStorage', 'navigator'],
       lookupFromPathIndex: 0,
@@ -61,5 +73,17 @@ i18n.addResourceBundle('zh', 'search', zhSearch, true, true)
 i18n.addResourceBundle('en', 'search', enSearch, true, true)
 i18n.addResourceBundle('zh', 'tags', zhTags, true, true)
 i18n.addResourceBundle('en', 'tags', enTags, true, true)
+i18n.addResourceBundle('zh', 'notfound', zhNotfound, true, true)
+i18n.addResourceBundle('en', 'notfound', enNotfound, true, true)
+i18n.addResourceBundle('zh', 'login', zhLogin, true, true)
+i18n.addResourceBundle('en', 'login', enLogin, true, true)
+i18n.addResourceBundle('zh', 'admin', zhAdmin, true, true)
+i18n.addResourceBundle('en', 'admin', enAdmin, true, true)
+i18n.addResourceBundle('zh', 'editor', zhEditor, true, true)
+i18n.addResourceBundle('en', 'editor', enEditor, true, true)
+i18n.addResourceBundle('zh', 'inbox', zhInbox, true, true)
+i18n.addResourceBundle('en', 'inbox', enInbox, true, true)
+i18n.addResourceBundle('zh', 'tagmanage', zhTagmanage, true, true)
+i18n.addResourceBundle('en', 'tagmanage', enTagmanage, true, true)
 
 export default i18n
