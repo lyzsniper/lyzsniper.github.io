@@ -1,0 +1,12 @@
+{
+  "nav": {
+    "home": "首页",
+    "blog": "博客",
+    "tags": "标签",
+    "admin": "管理",
+    "adminPanel": "管理后台",
+    "login": "登录",
+    "logout": "退出登录",
+    "menu": "菜单"
+  }
+}

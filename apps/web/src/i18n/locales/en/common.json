@@ -1,5 +1,7 @@
 {
   "language": {
     "switch": "Switch language"
-  }
+  },
+  "loading": "Loading…",
+  "error": "Something went wrong"
 }
