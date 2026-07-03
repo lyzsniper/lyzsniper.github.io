@@ -26,7 +26,20 @@ const defaultFm: Frontmatter = {
   category: '',
 }
 
-const sample = `# Title\n\nWrite your content here.\n'
+const sample = `# 在这里写正文
+
+支持 **Markdown** 全语法：
+
+- 列表
+- \`代码\`
+- 链接
+
+\`\`\`typescript
+function hello() {
+  console.log('Hello, Jensen!')
+}
+\`\`\`
+`
 
 function buildMarkdown(fm: Frontmatter, body: string): string {
   const tags = fm.tags
@@ -34,7 +47,16 @@ function buildMarkdown(fm: Frontmatter, body: string): string {
     .map((s) => s.trim())
     .filter(Boolean)
   const catLine = fm.category.trim() ? `category: ${fm.category.trim()}\n` : ''
-  return `---\ntitle: ${fm.title}\nslug: ${fm.slug}\ndate: ${fm.date}\n${catLine}tags: [${tags.join(', ')}]\nsummary: ${fm.summary}\nstatus: ${fm.status}\n---\n\n${body}`
+  return `---
+title: ${fm.title}
+slug: ${fm.slug}
+date: ${fm.date}
+${catLine}tags: [${tags.join(', ')}]
+summary: ${fm.summary}
+status: ${fm.status}
+---
+
+${body}`
 }
 
 export default function Editor() {
@@ -78,13 +100,13 @@ export default function Editor() {
       })
       .catch((e) => setMessage(t('loadFailed', { msg: e instanceof Error ? e.message : String(e) })))
       .finally(() => setLoading(false))
-  }, [slug, t])
+  }, [slug])
 
   const isEdit = !!slug
 
   const onSave = async () => {
     if (!fm.title.trim() || !fm.slug.trim()) {
-      setMessage(t('required'))
+      setMessage(t('requiredFields'))
       return
     }
     setSaving(true)
@@ -133,7 +155,7 @@ export default function Editor() {
         <div>
           <div className="eyebrow mb-2">{isEdit ? t('editTitle') : t('newTitle')}</div>
           <h1 className="text-display-md text-[var(--fg-primary)]">
-            {isEdit ? t('edit') : t('writeSomething')}
+            {isEdit ? t('editHeading') : t('newHeading')}
           </h1>
         </div>
         <div className="flex items-center gap-2">
@@ -144,7 +166,7 @@ export default function Editor() {
             <ArrowLeft size={13} /> {t('back')}
           </Link>
           <button onClick={onSave} disabled={saving} className="btn btn-primary btn-sm">
-            <Save size={13} /> {saving ? t('saving') : isEdit ? t('update') : t('save')}
+            <Save size={13} /> {saving ? t('saving') : isEdit ? t('update') : t('savePublish')}
           </button>
         </div>
       </div>
@@ -168,7 +190,7 @@ export default function Editor() {
             className="input"
             value={fm.title}
             onChange={(e) => setFm({ ...fm, title: e.target.value })}
-            placeholder={t('fields.titlePlaceholder')}
+            placeholder={t('placeholders.title')}
           />
         </Field>
         <Field label={t('fields.slug')}>
@@ -177,7 +199,7 @@ export default function Editor() {
             value={fm.slug}
             onChange={(e) => setFm({ ...fm, slug: e.target.value })}
             disabled={isEdit}
-            placeholder={t('fields.slugPlaceholder')}
+            placeholder={t('placeholders.slug')}
           />
         </Field>
         <Field label={t('fields.date')}>
@@ -193,7 +215,7 @@ export default function Editor() {
             className="input"
             value={fm.tags}
             onChange={(e) => setFm({ ...fm, tags: e.target.value })}
-            placeholder={t('fields.tagsPlaceholder')}
+            placeholder={t('placeholders.tags')}
           />
         </Field>
         <Field label={t('fields.category')}>
@@ -201,7 +223,7 @@ export default function Editor() {
             className="input font-mono"
             value={fm.category}
             onChange={(e) => setFm({ ...fm, category: e.target.value })}
-            placeholder={t('fields.categoryPlaceholder')}
+            placeholder={t('placeholders.category')}
           />
         </Field>
         <Field label={t('fields.summary')}>
@@ -209,7 +231,7 @@ export default function Editor() {
             className="input"
             value={fm.summary}
             onChange={(e) => setFm({ ...fm, summary: e.target.value })}
-            placeholder={t('fields.summaryPlaceholder')}
+            placeholder={t('placeholders.summary')}
           />
         </Field>
         <Field label={t('fields.status')}>
@@ -218,8 +240,8 @@ export default function Editor() {
             value={fm.status}
             onChange={(e) => setFm({ ...fm, status: e.target.value as 'draft' | 'published' })}
           >
-            <option value="published">{t('fields.statusPublished')}</option>
-            <option value="draft">{t('fields.statusDraft')}</option>
+            <option value="published">published</option>
+            <option value="draft">draft</option>
           </select>
         </Field>
       </div>
