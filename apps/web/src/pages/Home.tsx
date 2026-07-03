@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   ArrowRight,
   Bot,
@@ -201,6 +202,8 @@ const principles: Principle[] = [
 ]
 
 export default function Home() {
+  const { t } = useTranslation(['common', 'home'])
+
   return (
     <>
       <BackgroundFX />
@@ -210,16 +213,15 @@ export default function Home() {
         <div className="max-w-3xl">
           <div className="eyebrow mb-6 reveal">
             <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
-            AI Agent Engineer · Backend Architect
+            {t('home:hero.eyebrow')}
           </div>
 
           <h1 className="reveal text-display-xl text-[var(--fg-primary)] mb-6">
-            我是刘酝泽，AI Agent 架构师。
+            {t('home:hero.h1')}
           </h1>
 
           <p className="reveal text-body-lg text-[var(--fg-secondary)] max-w-2xl mb-8">
-            致力于探索大模型与垂直行业的深度融合。
-            依托后端架构与多智能体编排，让 AI 在业务里产生真实价值。
+            {t('home:hero.subtitle')}
           </p>
 
           <div className="reveal flex flex-wrap gap-2 mb-10">
@@ -232,10 +234,10 @@ export default function Home() {
 
           <div className="reveal flex items-center gap-3 flex-wrap">
             <Link to="/blog" className="btn btn-primary">
-              阅读博客 <ArrowRight size={14} />
+              {t('home:hero.ctaBlog')} <ArrowRight size={14} />
             </Link>
             <a href="mailto:jensenlyz@163.com" className="btn btn-secondary">
-              <Mail size={14} /> 联系我
+              <Mail size={14} /> {t('home:hero.ctaContact')}
             </a>
           </div>
         </div>
@@ -247,7 +249,7 @@ export default function Home() {
           <div className="reveal">
             <div className="eyebrow mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-              关于
+              {t('home:about.eyebrow')}
             </div>
             <div className="avatar-squircle w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-[var(--accent)] to-[var(--accent-hover)] flex items-center justify-center text-white text-4xl font-semibold tracking-tight">
               JZ
@@ -256,13 +258,10 @@ export default function Home() {
 
           <div className="reveal space-y-5 text-body text-[var(--fg-secondary)] max-w-2xl">
             <p>
-              你好，我是<strong className="text-[var(--fg-primary)] font-semibold">刘酝泽（Jensen）</strong>。
-              我设计过从 RAG 检索到 Agent 编排的完整工程链路，
-              也在 ToB、平台型、垂直行业信息化三类场景里做过从 0 到 1 的项目。
+              {t('home:about.p1')}
             </p>
             <p>
-              关注 Agent 设计模式、协议标准、推理优化；
-              更关注这些技术能不能被一个团队持续维护。
+              {t('home:about.p2')}
             </p>
           </div>
         </div>
@@ -273,10 +272,10 @@ export default function Home() {
         <div className="reveal mb-12">
           <div className="eyebrow mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-            技术栈
+            {t('home:skills.eyebrow')}
           </div>
           <h2 className="text-display-lg text-[var(--fg-primary)] max-w-xl">
-            从 AI Agent 到企业级工程化。
+            {t('home:skills.h2')}
           </h2>
         </div>
 
@@ -293,14 +292,14 @@ export default function Home() {
                   border: '1px solid var(--border-subtle)',
                 }}
               >
-                <span className="text-sm text-[var(--fg-tertiary)]">加载 3D 知识图谱…</span>
+                <span className="text-sm text-[var(--fg-tertiary)]">{t('home:skills.graphLoading')}</span>
               </div>
             }
           >
             <SkillGraph3D />
           </Suspense>
           <p className="mt-3 text-xs text-[var(--fg-tertiary)] text-center">
-            节点大小表示使用深度 · 颜色区分领域 · 线条表示实际关联
+            {t('home:skills.graphNote')}
           </p>
         </div>
 
@@ -343,10 +342,10 @@ export default function Home() {
         <div className="reveal mb-12">
           <div className="eyebrow mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-            能力域
+            {t('home:capabilities.eyebrow')}
           </div>
           <h2 className="text-display-lg text-[var(--fg-primary)] max-w-xl">
-            按问题类型组织，不按时间堆叠。
+            {t('home:capabilities.h2')}
           </h2>
         </div>
 
@@ -358,21 +357,21 @@ export default function Home() {
                   {c.no}
                 </span>
                 <h3 className="text-display-sm text-[var(--fg-primary)]">
-                  {c.title}
+                  {t(`home:capabilities.items.${c.no}.title`)}
                 </h3>
               </div>
               <p className="text-body text-[var(--fg-secondary)] leading-relaxed mb-4 pl-[calc(0.75rem+1.5rem)]">
-                {c.stance}
+                {t(`home:capabilities.items.${c.no}.stance`)}
               </p>
               {c.evidence.length > 0 && (
                 <ul className="space-y-2 pl-[calc(0.75rem+1.5rem)]">
-                  {c.evidence.map((e) => (
+                  {c.evidence.map((_, idx) => (
                     <li
-                      key={e}
+                      key={idx}
                       className="text-body-sm text-[var(--fg-tertiary)] leading-relaxed flex gap-3"
                     >
                       <span className="text-[var(--accent)] shrink-0">·</span>
-                      <span>{e}</span>
+                      <span>{t(`home:capabilities.items.${c.no}.evidence.${idx}`)}</span>
                     </li>
                   ))}
                 </ul>
@@ -387,10 +386,10 @@ export default function Home() {
         <div className="reveal mb-16">
           <div className="eyebrow mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-            核心优势
+            {t('home:principles.eyebrow')}
           </div>
           <h2 className="text-display-lg text-[var(--fg-primary)] max-w-2xl">
-            我对工程问题的三个长期判断。
+            {t('home:principles.h2')}
           </h2>
         </div>
 
@@ -406,10 +405,10 @@ export default function Home() {
                 className="text-display-md text-[var(--fg-primary)] leading-snug mb-6 pl-[calc(0.75rem+1.5rem)]"
                 style={{ letterSpacing: '-0.02em' }}
               >
-                "{p.quote}"
+                "{t(`home:principles.items.${p.no}.quote`)}"
               </blockquote>
               <p className="text-body text-[var(--fg-secondary)] leading-relaxed pl-[calc(0.75rem+1.5rem)] max-w-2xl">
-                {p.argument}
+                {t(`home:principles.items.${p.no}.argument`)}
               </p>
             </article>
           ))}
@@ -424,16 +423,15 @@ export default function Home() {
         >
           <div className="max-w-lg">
             <h2 className="text-display-md text-[var(--fg-primary)] mb-3">
-              聊聊 AI Agent 架构
+              {t('home:cta.h2')}
             </h2>
             <p className="text-body text-[var(--fg-secondary)] leading-relaxed">
-              欢迎交流企业级 LLM 应用、智能体编排、全栈技术，
-              或者任何有意思的项目想法。
+              {t('home:cta.p')}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 shrink-0">
             <a href="mailto:jensenlyz@163.com" className="btn btn-primary">
-              <Mail size={14} /> 邮件联系
+              <Mail size={14} /> {t('home:cta.email')}
             </a>
             <a
               href="https://github.com/lyzsniper"
@@ -441,7 +439,7 @@ export default function Home() {
               rel="noopener noreferrer"
               className="btn btn-secondary"
             >
-              <Github size={14} /> GitHub
+              <Github size={14} /> {t('home:cta.github')}
             </a>
           </div>
         </div>

@@ -1,15 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { Search, PackageOpen, X, FileText } from 'lucide-react'
 import { api, batchDownload, type PostListResponse, type PostSummary, type CategoryInfo } from '@/lib/api'
 import PostCard from '@/components/PostCard'
 
 export default function Blog() {
+  const { t } = useTranslation(['common', 'blog'])
   const [params, setParams] = useSearchParams()
   const [data, setData] = useState<PostListResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [downloading, setDownloading] = useState(false)
   const [categories, setCategories] = useState<CategoryInfo[]>([])
+  const [searchInput, setSearchInput] = useState('')
 
   const page = Number(params.get('page') ?? 1)
   const tag = params.get('tag') ?? undefined
@@ -17,10 +21,11 @@ export default function Blog() {
   const q = params.get('q') ?? undefined
 
   useEffect(() => {
-    api
-      .getCategories()
-      .then((r) => setCategories(r.categories))
-      .catch(() => setCategories([]))
+    setSearchInput(q ?? '')
+  }, [q])
+
+  useEffect(() => {
+    api.getCategories().then((r) => setCategories(r.categories)).catch(() => setCategories([]))
   }, [])
 
   useEffect(() => {
@@ -68,171 +73,165 @@ export default function Blog() {
 
   const clearFilter = () => {
     setParams(new URLSearchParams())
+    setSearchInput('')
   }
 
-  // 构建分类树（按顶级分组）
-  const topCategories = categories.filter((c) => c.depth === 1)
+  const onSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    const next = new URLSearchParams(params)
+    if (searchInput.trim()) next.set('q', searchInput.trim())
+    else next.delete('q')
+    next.delete('page')
+    setParams(next)
+  }
+
+  const topCategories = useMemo(() => categories.filter((c) => c.depth === 1), [categories])
   const childrenOf = (parent: string) =>
-    categories.filter(
-      (c) => c.depth > 1 && c.name.startsWith(parent + '/'),
-    )
+    categories.filter((c) => c.depth > 1 && c.name.startsWith(parent + '/'))
+
+  const totalPosts = data?.total ?? 0
+  const hasFilter = !!(category || tag || q)
 
   return (
-    <div className="pt-24 px-6 max-w-4xl mx-auto pb-20">
-      <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
-        <h1 className="font-orbitron text-4xl font-bold neon-text-blue">技术博客</h1>
+    <div className="container-page py-12 md:py-16">
+      <div className="flex items-end justify-between flex-wrap gap-4 mb-8">
+        <div>
+          <div className="eyebrow mb-2">
+            <FileText size={12} className="text-[var(--accent)]" />
+            {t('blog:title')}
+          </div>
+          <h1 className="text-display-lg text-[var(--fg-primary)]">{t('blog:subtitle')}</h1>
+          {totalPosts > 0 && (
+            <p className="text-sm text-[var(--fg-tertiary)] mt-2">
+              共 {totalPosts} 篇
+            </p>
+          )}
+        </div>
         {data && data.posts.length > 0 && (
-          <div className="flex items-center gap-3 text-sm">
-            <button
-              type="button"
-              onClick={selectAll}
-              className="px-3 py-1 rounded border border-neon-blue/40 hover:border-neon-blue"
-            >
+          <div className="flex items-center gap-2">
+            <button onClick={selectAll} className="btn btn-secondary btn-sm">
               {selected.size === data.posts.length ? '取消全选' : '全选'}
             </button>
             <button
-              type="button"
-              onClick={onBatchDownload}
+              onClick={() => void onBatchDownload()}
               disabled={selected.size === 0 || downloading}
-              className="px-3 py-1 rounded border border-neon-pink/50 neon-text-pink hover:bg-neon-pink/10 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="btn btn-secondary btn-sm"
             >
-              {downloading ? '下载中...' : `📦 打包下载 (${selected.size})`}
+              <PackageOpen size={13} />
+              {downloading ? '打包中…' : `下载 (${selected.size})`}
             </button>
           </div>
         )}
       </div>
 
-      {/* 分类侧边栏 */}
+      {/* 搜索 */}
+      <form onSubmit={onSearch} className="mb-6">
+        <div className="relative">
+          <Search
+            size={14}
+            strokeWidth={1.75}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--fg-tertiary)] pointer-events-none"
+          />
+          <input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={t('blog:searchPlaceholder')}
+            className="input !pl-9"
+          />
+        </div>
+      </form>
+
+      {/* 分类树 */}
       {topCategories.length > 0 && (
-        <div className="mb-6 p-4 rounded-lg border border-neon-blue/20 bg-card-bg">
-          <div className="flex items-start gap-4 flex-wrap">
-            <div className="text-sm text-text-secondary shrink-0">📂 分类：</div>
-            <div className="flex flex-wrap gap-2 flex-1">
-              {topCategories.map((cat) => {
-                const children = childrenOf(cat.name)
-                const active =
-                  category === cat.name ||
-                  (category?.startsWith(cat.name + '/') ?? false)
-                return (
-                  <div
-                    key={cat.name}
-                    className="flex items-center gap-1 flex-wrap"
+        <div className="mb-6 flex items-start gap-3 flex-wrap">
+          <span className="text-xs text-[var(--fg-tertiary)] pt-1.5 shrink-0">分类</span>
+          <div className="flex flex-wrap gap-1.5">
+            {topCategories.map((cat) => {
+              const children = childrenOf(cat.name)
+              const active = category === cat.name || (category?.startsWith(cat.name + '/') ?? false)
+              return (
+                <div key={cat.name} className="flex items-center gap-1.5 flex-wrap">
+                  <Link
+                    to={active ? '/blog' : `/blog?category=${encodeURIComponent(cat.name)}`}
+                    className={`pill ${active ? 'pill-accent' : ''}`}
                   >
-                    <Link
-                      to={
-                        active
-                          ? '/blog'
-                          : `/blog?category=${encodeURIComponent(cat.name)}`
-                      }
-                      className={`text-xs px-2 py-1 rounded border ${
-                        active
-                          ? 'border-neon-blue neon-text-blue bg-neon-blue/10'
-                          : 'border-neon-blue/30 text-text-secondary hover:border-neon-blue'
-                      }`}
-                    >
-                      {cat.name}{' '}
-                      <span className="text-text-secondary">({cat.count})</span>
-                    </Link>
-                    {active &&
-                      children.map((c) => (
-                        <Link
-                          key={c.name}
-                          to={`/blog?category=${encodeURIComponent(c.name)}`}
-                          className={`text-xs px-2 py-1 rounded border ${
-                            category === c.name
-                              ? 'border-neon-purple neon-text-purple bg-neon-purple/10'
-                              : 'border-neon-purple/30 text-text-secondary hover:border-neon-purple'
-                          }`}
-                        >
-                          {c.name.split('/').pop()} ({c.count})
-                        </Link>
-                      ))}
-                  </div>
-                )
-              })}
-            </div>
+                    {cat.name.split('/').pop()} <span className="opacity-60">{cat.count}</span>
+                  </Link>
+                  {active &&
+                    children.map((c) => (
+                      <Link
+                        key={c.name}
+                        to={`/blog?category=${encodeURIComponent(c.name)}`}
+                        className={`pill ${category === c.name ? 'pill-accent' : ''}`}
+                      >
+                        {c.name.split('/').pop()} <span className="opacity-60">{c.count}</span>
+                      </Link>
+                    ))}
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
 
-      {(tag || category || q) && (
+      {/* 过滤标签 */}
+      {hasFilter && (
         <div className="mb-6 flex items-center gap-2 text-sm flex-wrap">
-          <span className="text-text-secondary">当前过滤：</span>
-          {category && (
-            <span className="px-2 py-0.5 rounded border border-neon-blue/40">
-              分类: {category}
-            </span>
-          )}
-          {tag && (
-            <span className="px-2 py-0.5 rounded border border-neon-purple/40">
-              标签: {tag}
-            </span>
-          )}
-          {q && (
-            <span className="px-2 py-0.5 rounded border border-neon-blue/40">
-              搜索: {q}
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={clearFilter}
-            className="ml-2 text-text-secondary hover:neon-text-blue"
-          >
-            ✕ 清除
+          <span className="text-xs text-[var(--fg-tertiary)]">筛选</span>
+          {category && <span className="pill pill-accent">{category}</span>}
+          {tag && <span className="pill pill-accent">#{tag}</span>}
+          {q && <span className="pill pill-accent">"{q}"</span>}
+          <button onClick={clearFilter} className="btn btn-ghost btn-sm !h-6 !px-2 !text-xs">
+            <X size={12} /> 清除
           </button>
         </div>
       )}
 
       {error && (
-        <div className="p-4 rounded border border-red-500/30 bg-red-500/10 text-red-300 mb-6">
-          ⚠️ {error}
+        <div
+          className="mb-6 px-4 py-3 rounded-md text-sm"
+          style={{
+            backgroundColor: 'rgba(220, 38, 38, 0.08)',
+            color: '#dc2626',
+            border: '1px solid rgba(220, 38, 38, 0.16)',
+          }}
+        >
+          {error}
         </div>
       )}
 
+      {/* 文章列表 */}
       {data && data.posts.length === 0 && (
-        <p className="text-text-secondary text-center py-12">
-          {category || tag || q ? '没有匹配的文章' : '还没有博客文章'}
-        </p>
+        <div className="surface-card p-16 text-center">
+          <p className="text-sm text-[var(--fg-secondary)]">
+            {hasFilter ? t('blog:emptySearch') : t('blog:noPosts')}
+          </p>
+        </div>
       )}
 
-      {data && (
-        <div className="space-y-6">
+      {data && data.posts.length > 0 && (
+        <div className="space-y-3">
           {data.posts.map((post: PostSummary) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              selectable
-              selected={selected.has(post.slug)}
-              onToggleSelect={toggleSelect}
-            />
+            <PostCard key={post.id} post={post} selectable selected={selected.has(post.slug)} onToggleSelect={toggleSelect} />
           ))}
         </div>
       )}
 
+      {/* 分页 */}
       {data && data.totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-8 flex-wrap">
+        <div className="flex justify-center gap-1.5 mt-10 flex-wrap">
           {Array.from({ length: data.totalPages }).map((_, i) => (
             <button
               key={i}
               type="button"
               onClick={() => setPage(i + 1)}
-              className={`px-3 py-1 rounded border ${
-                page === i + 1
-                  ? 'border-neon-blue neon-text-blue'
-                  : 'border-neon-blue/30 text-text-secondary'
-              }`}
+              className={`btn btn-sm ${page === i + 1 ? 'btn-primary' : 'btn-secondary'}`}
             >
               {i + 1}
             </button>
           ))}
         </div>
       )}
-
-      <div className="mt-8 text-center">
-        <Link to="/" className="text-text-secondary hover:neon-text-blue">
-          ← 返回首页
-        </Link>
-      </div>
     </div>
   )
 }
