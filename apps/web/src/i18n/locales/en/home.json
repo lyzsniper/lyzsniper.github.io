@@ -85,6 +85,7 @@
     "github": "GitHub"
   },
   "skillGraph": {
+    "hint": "Drag to rotate · Scroll to zoom · Right-click to pan · Hover node to highlight connections",
     "legend": {
       "ai": "AI / Agent",
       "backend": "Backend",

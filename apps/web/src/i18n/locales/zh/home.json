@@ -85,6 +85,7 @@
     "github": "GitHub"
   },
   "skillGraph": {
+    "hint": "拖拽旋转 · 滚轮缩放 · 右键平移 · Hover 节点高亮关联",
     "legend": {
       "ai": "AI / Agent",
       "backend": "后端",

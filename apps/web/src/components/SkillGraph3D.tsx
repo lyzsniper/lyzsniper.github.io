@@ -326,7 +326,7 @@ export default function SkillGraph3D() {
 
       {/* 提示 */}
       <div className="absolute bottom-3 left-4 text-[10px] text-white/40 pointer-events-none">
-        拖拽旋转 · 滚轮缩放 · 右键平移 · Hover 节点高亮关联
+        {t('skillGraph.hint')}
       </div>
     </div>
   )
