@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/auth'
 import ThemeToggle from '@/components/ThemeToggle'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { useLanguageSwitch } from '@/i18n/useLanguageFromUrl'
 
 const navItems = [
   { to: '/', labelKey: 'header:nav.home' },
@@ -14,6 +15,7 @@ const navItems = [
 
 export default function Header() {
   const { t } = useTranslation(['common', 'header'])
+  const { prefixPath } = useLanguageSwitch()
   const [open, setOpen] = useState(false)
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
@@ -47,7 +49,7 @@ export default function Header() {
           {navItems.map((item) => (
             <NavLink
               key={item.to}
-              to={item.to}
+              to={prefixPath(item.to)}
               end={item.to === '/'}
               className={({ isActive }) =>
                 `h-8 px-3 inline-flex items-center rounded-md text-sm font-medium transition ${
@@ -62,7 +64,7 @@ export default function Header() {
           ))}
           {user && (
             <NavLink
-              to="/admin"
+              to={prefixPath('/admin')}
               className={({ isActive }) =>
                 `h-8 px-3 inline-flex items-center rounded-md text-sm font-medium transition ${
                   isActive
@@ -93,7 +95,7 @@ export default function Header() {
             </div>
           ) : (
             <Link
-              to="/login"
+              to={prefixPath('/login')}
               className="btn btn-secondary btn-sm hidden md:inline-flex ml-1"
             >
               {t('header:nav.login')}
@@ -119,7 +121,7 @@ export default function Header() {
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
-                to={item.to}
+                to={prefixPath(item.to)}
                 end={item.to === '/'}
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
@@ -136,7 +138,7 @@ export default function Header() {
             {user ? (
               <>
                 <NavLink
-                  to="/admin"
+                  to={prefixPath('/admin')}
                   onClick={() => setOpen(false)}
                   className="h-10 px-3 inline-flex items-center rounded-md text-sm font-medium text-[var(--fg-secondary)]"
                 >
@@ -154,7 +156,7 @@ export default function Header() {
               </>
             ) : (
               <NavLink
-                to="/login"
+                to={prefixPath('/login')}
                 onClick={() => setOpen(false)}
                 className="h-10 px-3 inline-flex items-center rounded-md text-sm font-medium text-[var(--fg-secondary)]"
               >

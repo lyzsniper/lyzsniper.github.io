@@ -9,6 +9,15 @@ export function useLanguageSwitch() {
   const isEnglish = location.pathname.startsWith('/en')
   const currentLng: 'zh' | 'en' = isEnglish ? 'en' : 'zh'
 
+  /** 返回当前语言对应的 URL 前缀（中文为空串，英文为 /en） */
+  const langPrefix = isEnglish ? '/en' : ''
+
+  /** 给任意路径加当前语言前缀 */
+  const prefixPath = (path: string) => {
+    if (path === '/') return isEnglish ? '/en' : '/'
+    return `${langPrefix}${path}`
+  }
+
   const switchLanguage = (target: 'zh' | 'en') => {
     if (target === currentLng) return
     let newPath: string
@@ -23,5 +32,5 @@ export function useLanguageSwitch() {
     navigate(newPath)
   }
 
-  return { currentLng, switchLanguage }
+  return { currentLng, switchLanguage, langPrefix, prefixPath }
 }
