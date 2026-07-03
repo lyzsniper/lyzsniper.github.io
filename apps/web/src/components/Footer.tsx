@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Github, Mail, Phone, MapPin } from 'lucide-react'
+import { Github, Mail, MapPin } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export default function Footer() {
