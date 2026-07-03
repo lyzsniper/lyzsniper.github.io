@@ -14,6 +14,12 @@ import zhHome from './locales/zh/home.json'
 import enHome from './locales/en/home.json'
 import zhBlog from './locales/zh/blog.json'
 import enBlog from './locales/en/blog.json'
+import zhPost from './locales/zh/post.json'
+import enPost from './locales/en/post.json'
+import zhSearch from './locales/zh/search.json'
+import enSearch from './locales/en/search.json'
+import zhTags from './locales/zh/tags.json'
+import enTags from './locales/en/tags.json'
 
 export const supportedLngs = ['zh', 'en'] as const
 export const fallbackLng = 'zh'
@@ -26,7 +32,7 @@ void i18n
     fallbackLng,
     defaultNS,
     supportedLngs: [...supportedLngs],
-    ns: ['common', 'header', 'footer', 'postcard', 'home', 'blog'],
+    ns: ['common', 'header', 'footer', 'postcard', 'home', 'blog', 'post', 'search', 'tags'],
     detection: {
       order: ['path', 'localStorage', 'navigator'],
       lookupFromPathIndex: 0,
@@ -49,5 +55,11 @@ i18n.addResourceBundle('zh', 'home', zhHome, true, true)
 i18n.addResourceBundle('en', 'home', enHome, true, true)
 i18n.addResourceBundle('zh', 'blog', zhBlog, true, true)
 i18n.addResourceBundle('en', 'blog', enBlog, true, true)
+i18n.addResourceBundle('zh', 'post', zhPost, true, true)
+i18n.addResourceBundle('en', 'post', enPost, true, true)
+i18n.addResourceBundle('zh', 'search', zhSearch, true, true)
+i18n.addResourceBundle('en', 'search', enSearch, true, true)
+i18n.addResourceBundle('zh', 'tags', zhTags, true, true)
+i18n.addResourceBundle('en', 'tags', enTags, true, true)
 
 export default i18n

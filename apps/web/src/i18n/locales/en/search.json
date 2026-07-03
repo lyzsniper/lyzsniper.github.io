@@ -1,0 +1,8 @@
+{
+  "title": "Search",
+  "placeholder": "Enter keywords…",
+  "results_one": "{{count}} result found",
+  "results_other": "{{count}} results found",
+  "noResults": "No matching posts",
+  "searching": "Searching…"
+}

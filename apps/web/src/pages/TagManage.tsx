@@ -1,23 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
+import { ArrowLeft, Search, Tags as TagsIcon, Eye } from 'lucide-react'
 import type { TagFull } from '@/lib/api'
 
 const PRESET_COLORS = [
-  '#00f5ff', // neon blue
-  '#b829dd', // neon purple
-  '#ff2d95', // neon pink
-  '#39ff14', // neon green
-  '#f59e0b', // amber
-  '#ef4444', // red
-  '#3b82f6', // blue
-  '#10b981', // emerald
-  '#8b5cf6', // violet
-  '#f97316', // orange
+  '#4f46e5',
+  '#7c3aed',
+  '#db2777',
+  '#059669',
+  '#d97706',
+  '#dc2626',
+  '#2563eb',
+  '#10b981',
+  '#8b5cf6',
+  '#f97316',
 ]
 
 export default function TagManage() {
   const [tags, setTags] = useState<TagFull[]>([])
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState('')
   const [editing, setEditing] = useState<string | null>(null)
   const [draft, setDraft] = useState<{ name: string; color: string; description: string }>({
     name: '',
@@ -26,21 +28,22 @@ export default function TagManage() {
   })
   const [message, setMessage] = useState<string | null>(null)
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true)
     try {
-      const r = await fetch('/api/tags/all').then((r) => r.json())
+      const res = await fetch('/api/tags/all')
+      const r = await res.json()
       setTags(r.tags ?? [])
     } catch {
       setTags([])
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     void load()
-  }, [])
+  }, [load])
 
   const startEdit = (tag: TagFull) => {
     setEditing(tag.slug)
@@ -62,6 +65,7 @@ export default function TagManage() {
       const res = await fetch(`/api/tags/${encodeURIComponent(slug)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           name: draft.name,
           color: draft.color || null,
@@ -69,78 +73,102 @@ export default function TagManage() {
         }),
       })
       if (!res.ok) throw new Error(await res.text())
-      setMessage(`✅ ${draft.name} 已保存`)
+      setMessage(`${draft.name} 已保存`)
       cancelEdit()
       await load()
     } catch (e) {
-      setMessage(`❌ ${e instanceof Error ? e.message : String(e)}`)
+      setMessage(`失败: ${e instanceof Error ? e.message : String(e)}`)
     }
   }
 
+  const filtered = tags.filter((t) => !filter || t.name.toLowerCase().includes(filter.toLowerCase()))
+
   return (
-    <div className="pt-24 px-6 max-w-4xl mx-auto pb-20">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-orbitron text-3xl font-bold neon-text-purple">
-          🏷️ 标签管理
-        </h1>
+    <div className="container-page py-12 md:py-16">
+      <div className="flex items-end justify-between flex-wrap gap-4 mb-2">
+        <div>
+          <div className="eyebrow mb-2">
+            <TagsIcon size={12} className="text-[var(--accent)]" />
+            标签管理
+          </div>
+          <h1 className="text-display-lg text-[var(--fg-primary)]">标签</h1>
+          <p className="text-sm text-[var(--fg-secondary)] mt-2">
+            为标签添加描述和颜色，会在前台更醒目。
+          </p>
+        </div>
         <div className="flex gap-2">
-          <Link
-            to="/admin"
-            className="text-sm px-3 py-1 rounded border border-neon-blue/30 text-text-secondary hover:neon-text-blue"
-          >
-            ← 返回管理
+          <Link to="/admin" className="btn btn-ghost btn-sm">
+            <ArrowLeft size={13} /> 返回管理
           </Link>
-          <Link
-            to="/tags"
-            className="text-sm px-3 py-1 rounded border border-neon-purple/30 text-text-secondary hover:neon-text-purple"
-          >
-            前台查看
+          <Link to="/tags" className="btn btn-secondary btn-sm">
+            <Eye size={13} /> 前台查看
           </Link>
         </div>
       </div>
 
       {message && (
-        <div className="mb-4 p-3 rounded border border-neon-blue/30 bg-neon-blue/5 text-sm">
+        <div
+          className="mt-6 mb-2 px-3 py-2 rounded-md text-sm"
+          style={{
+            backgroundColor: 'var(--bg-muted)',
+            border: '1px solid var(--border-subtle)',
+          }}
+        >
           {message}
         </div>
       )}
 
-      <p className="text-text-secondary text-sm mb-6">
-        💡 为标签添加 <strong>描述</strong> 和 <strong>颜色</strong>，会在前台更醒目。
-        颜色用 hex（如 <code>#00f5ff</code>），可点击下面预设色快速选择。
-      </p>
+      <div className="relative my-6">
+        <Search
+          size={14}
+          strokeWidth={1.75}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--fg-tertiary)] pointer-events-none"
+        />
+        <input
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          placeholder="搜索标签…"
+          className="input !pl-9"
+        />
+      </div>
 
-      {loading && <p className="text-text-secondary">加载中...</p>}
+      {!loading && (
+        <p className="text-xs text-[var(--fg-tertiary)] mb-4">
+          {tags.length} 个标签{filter && ` · 匹配 ${filtered.length} 个`}
+        </p>
+      )}
+
+      {loading && <p className="text-sm text-[var(--fg-tertiary)] py-12 text-center">加载中…</p>}
 
       <div className="space-y-2">
-        {tags.map((tag) => (
-          <div
-            key={tag.id}
-            className="p-4 rounded border border-neon-purple/20 bg-card-bg"
-          >
+        {filtered.map((tag) => (
+          <div key={tag.id} className="surface-card p-4">
             {editing === tag.slug ? (
               <div className="space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <label className="block">
-                    <span className="text-xs text-text-secondary">名称</span>
+                    <span className="text-xs font-medium text-[var(--fg-secondary)] mb-1.5 block">名称</span>
                     <input
+                      className="input"
                       value={draft.name}
                       onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                      className="w-full mt-1 px-3 py-1.5 rounded bg-dark-bg border border-neon-blue/30 focus:border-neon-blue outline-none"
                     />
                   </label>
                   <label className="block">
-                    <span className="text-xs text-text-secondary">颜色</span>
-                    <div className="mt-1 flex gap-2 items-center">
+                    <span className="text-xs font-medium text-[var(--fg-secondary)] mb-1.5 block">颜色</span>
+                    <div className="flex gap-2 items-center">
                       <input
+                        className="input font-mono flex-1"
                         value={draft.color}
                         onChange={(e) => setDraft({ ...draft, color: e.target.value })}
-                        className="flex-1 px-3 py-1.5 rounded bg-dark-bg border border-neon-blue/30 focus:border-neon-blue outline-none font-mono text-sm"
-                        placeholder="#00f5ff"
+                        placeholder="#4f46e5"
                       />
                       <div
-                        className="w-8 h-8 rounded border border-neon-blue/30"
-                        style={{ background: draft.color || 'transparent' }}
+                        className="w-9 h-9 rounded-md shrink-0"
+                        style={{
+                          background: draft.color || 'transparent',
+                          border: '1px solid var(--border-default)',
+                        }}
                       />
                     </div>
                     <div className="flex gap-1 mt-1.5 flex-wrap">
@@ -149,8 +177,8 @@ export default function TagManage() {
                           key={c}
                           type="button"
                           onClick={() => setDraft({ ...draft, color: c })}
-                          className="w-5 h-5 rounded border border-white/20 hover:scale-110 transition"
-                          style={{ background: c }}
+                          className="w-5 h-5 rounded hover:scale-110 transition-transform"
+                          style={{ background: c, border: '1px solid rgba(255,255,255,0.1)' }}
                           title={c}
                         />
                       ))}
@@ -158,29 +186,19 @@ export default function TagManage() {
                   </label>
                 </div>
                 <label className="block">
-                  <span className="text-xs text-text-secondary">描述（可选）</span>
+                  <span className="text-xs font-medium text-[var(--fg-secondary)] mb-1.5 block">描述（可选）</span>
                   <input
+                    className="input"
                     value={draft.description}
-                    onChange={(e) =>
-                      setDraft({ ...draft, description: e.target.value })
-                    }
-                    className="w-full mt-1 px-3 py-1.5 rounded bg-dark-bg border border-neon-blue/30 focus:border-neon-blue outline-none"
+                    onChange={(e) => setDraft({ ...draft, description: e.target.value })}
                     placeholder="一句话解释这个标签的含义"
                   />
                 </label>
                 <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => void save(tag.slug)}
-                    className="px-3 py-1.5 rounded border border-neon-blue neon-text-blue hover:bg-neon-blue/10 text-sm"
-                  >
+                  <button onClick={() => void save(tag.slug)} className="btn btn-primary btn-sm">
                     保存
                   </button>
-                  <button
-                    type="button"
-                    onClick={cancelEdit}
-                    className="px-3 py-1.5 rounded border border-neon-blue/30 text-text-secondary text-sm"
-                  >
+                  <button onClick={cancelEdit} className="btn btn-secondary btn-sm">
                     取消
                   </button>
                 </div>
@@ -188,36 +206,28 @@ export default function TagManage() {
             ) : (
               <div className="flex items-center gap-3 flex-wrap">
                 <span
-                  className="px-3 py-1 rounded text-sm font-bold"
+                  className="px-3 h-7 inline-flex items-center rounded-md text-sm font-medium"
                   style={{
-                    background: tag.color
-                      ? `${tag.color}22`
-                      : 'rgba(184, 41, 221, 0.1)',
-                    color: tag.color ?? 'var(--neon-purple)',
-                    border: `1px solid ${tag.color ?? 'var(--neon-purple)'}55`,
+                    backgroundColor: tag.color ? `${tag.color}15` : 'var(--bg-muted)',
+                    color: tag.color ?? 'var(--fg-primary)',
+                    border: `1px solid ${tag.color ?? 'var(--border-subtle)'}`,
                   }}
                 >
                   {tag.name}
                 </span>
-                <span className="text-text-secondary text-sm">
-                  {tag.count} 篇文章
+                <span className="text-xs text-[var(--fg-tertiary)]">
+                  {tag.count} 篇
                 </span>
                 {tag.description && (
-                  <span className="text-text-secondary text-sm italic">
-                    — {tag.description}
-                  </span>
+                  <span className="text-xs text-[var(--fg-secondary)] italic">— {tag.description}</span>
                 )}
                 <div className="ml-auto flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => startEdit(tag)}
-                    className="text-xs px-2 py-1 rounded border border-neon-blue/40 hover:border-neon-blue"
-                  >
-                    ✏️ 编辑
+                  <button onClick={() => startEdit(tag)} className="btn btn-ghost btn-sm">
+                    编辑
                   </button>
                   <Link
                     to={`/tags/${encodeURIComponent(tag.slug)}`}
-                    className="text-xs px-2 py-1 rounded border border-neon-purple/30 text-text-secondary hover:neon-text-purple"
+                    className="btn btn-ghost btn-sm"
                   >
                     查看
                   </Link>
@@ -228,8 +238,12 @@ export default function TagManage() {
         ))}
       </div>
 
-      {tags.length === 0 && !loading && (
-        <p className="text-text-secondary text-center py-8">还没有标签</p>
+      {!loading && filtered.length === 0 && (
+        <div className="surface-card p-16 text-center">
+          <p className="text-sm text-[var(--fg-secondary)]">
+            {filter ? '没有匹配的标签' : '还没有标签'}
+          </p>
+        </div>
       )}
     </div>
   )

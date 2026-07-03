@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { ArrowLeft, Save, User as UserIcon } from 'lucide-react'
 import MDEditor from '@uiw/react-md-editor'
 import matter from 'gray-matter'
+import { useAuthStore } from '@/store/auth'
 
 interface Frontmatter {
   title: string
@@ -64,12 +66,13 @@ export default function Editor() {
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const user = useAuthStore((s) => s.user)
 
   useEffect(() => {
     if (!slug) return
     setLoading(true)
     setMessage(null)
-    fetch(`/api/posts/${encodeURIComponent(slug)}`)
+    fetch(`/api/posts/${encodeURIComponent(slug)}`, { credentials: 'include' })
       .then(async (r) => {
         if (!r.ok) throw new Error(await r.text())
         return r.json()
@@ -93,7 +96,7 @@ export default function Editor() {
         })
         setBody(parsed.content)
       })
-      .catch((e) => setMessage(`❌ 加载失败: ${e instanceof Error ? e.message : String(e)}`))
+      .catch((e) => setMessage(`加载失败: ${e instanceof Error ? e.message : String(e)}`))
       .finally(() => setLoading(false))
   }, [slug])
 
@@ -101,28 +104,24 @@ export default function Editor() {
 
   const onSave = async () => {
     if (!fm.title.trim() || !fm.slug.trim()) {
-      setMessage('❌ 标题和 slug 必填')
+      setMessage('标题和 slug 必填')
       return
     }
     setSaving(true)
     setMessage(null)
     try {
-      const url = isEdit
-        ? `/api/posts/${encodeURIComponent(slug!)}`
-        : '/api/posts'
+      const url = isEdit ? `/api/posts/${encodeURIComponent(slug!)}` : '/api/posts'
       const method = isEdit ? 'PUT' : 'POST'
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           slug: fm.slug,
           title: fm.title,
           summary: fm.summary || undefined,
           contentMd: buildMarkdown(fm, body),
-          tags: fm.tags
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean),
+          tags: fm.tags.split(',').map((s) => s.trim()).filter(Boolean),
           status: fm.status,
           category: fm.category.trim() || undefined,
         }),
@@ -131,106 +130,113 @@ export default function Editor() {
         const text = await res.text()
         throw new Error(text || `HTTP ${res.status}`)
       }
-      setMessage(`✅ ${isEdit ? '更新' : '创建'}成功`)
-      setTimeout(() => navigate(`/blog/${fm.slug}`), 800)
+      setMessage(isEdit ? '已更新' : '已创建')
+      setTimeout(() => navigate(`/blog/${fm.slug}`), 600)
     } catch (e) {
-      setMessage(`❌ 保存失败: ${e instanceof Error ? e.message : String(e)}`)
+      setMessage(`保存失败: ${e instanceof Error ? e.message : String(e)}`)
     } finally {
       setSaving(false)
     }
   }
 
   if (loading) {
-    return <div className="pt-24 px-6 text-center text-text-secondary">加载中...</div>
+    return (
+      <div className="container-page py-20 text-center text-sm text-[var(--fg-tertiary)]">
+        加载中…
+      </div>
+    )
   }
 
   return (
-    <div className="pt-24 px-6 max-w-6xl mx-auto pb-20">
+    <div className="container-page py-10 md:py-12">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-        <h1 className="font-orbitron text-3xl font-bold neon-text-blue">
-          {isEdit ? '编辑文章' : '新建文章'}
-        </h1>
-        <div className="flex gap-2">
-          <Link
-            to="/admin"
-            className="px-4 py-2 rounded border border-neon-blue/30 text-text-secondary hover:neon-text-blue text-sm"
-          >
-            ← 返回
+        <div>
+          <div className="eyebrow mb-2">{isEdit ? '编辑文章' : '新建文章'}</div>
+          <h1 className="text-display-md text-[var(--fg-primary)]">
+            {isEdit ? '编辑' : '写点什么吧'}
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="hidden sm:flex items-center gap-1.5 text-xs text-[var(--fg-tertiary)]">
+            <UserIcon size={12} /> {user?.username ?? 'admin'}
+          </span>
+          <Link to="/admin" className="btn btn-ghost btn-sm">
+            <ArrowLeft size={13} /> 返回
           </Link>
-          <button
-            type="button"
-            onClick={onSave}
-            disabled={saving}
-            className="px-4 py-2 rounded border border-neon-blue neon-text-blue hover:bg-neon-blue/10 disabled:opacity-50 text-sm"
-          >
-            {saving ? '保存中...' : isEdit ? '💾 更新' : '💾 保存发布'}
+          <button onClick={onSave} disabled={saving} className="btn btn-primary btn-sm">
+            <Save size={13} /> {saving ? '保存中…' : isEdit ? '更新' : '保存发布'}
           </button>
         </div>
       </div>
 
       {message && (
-        <div className="mb-4 p-3 rounded border border-neon-blue/30 bg-neon-blue/5 text-sm">
+        <div
+          className="mb-4 px-3 py-2 rounded-md text-sm"
+          style={{
+            backgroundColor: 'var(--bg-muted)',
+            border: '1px solid var(--border-subtle)',
+            color: 'var(--fg-secondary)',
+          }}
+        >
           {message}
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
         <Field label="标题">
           <input
+            className="input"
             value={fm.title}
             onChange={(e) => setFm({ ...fm, title: e.target.value })}
-            className="w-full px-3 py-2 rounded bg-card-bg border border-neon-blue/30 focus:border-neon-blue outline-none"
             placeholder="文章标题"
           />
         </Field>
         <Field label="Slug (URL)">
           <input
+            className="input font-mono"
             value={fm.slug}
             onChange={(e) => setFm({ ...fm, slug: e.target.value })}
             disabled={isEdit}
-            className="w-full px-3 py-2 rounded bg-card-bg border border-neon-blue/30 focus:border-neon-blue outline-none font-mono text-sm disabled:opacity-50"
             placeholder="my-post-slug"
           />
         </Field>
         <Field label="日期">
           <input
             type="date"
+            className="input"
             value={fm.date}
             onChange={(e) => setFm({ ...fm, date: e.target.value })}
-            className="w-full px-3 py-2 rounded bg-card-bg border border-neon-blue/30 focus:border-neon-blue outline-none"
           />
         </Field>
-        <Field label="标签 (逗号分隔)">
+        <Field label="标签（逗号分隔）">
           <input
+            className="input"
             value={fm.tags}
             onChange={(e) => setFm({ ...fm, tags: e.target.value })}
-            className="w-full px-3 py-2 rounded bg-card-bg border border-neon-blue/30 focus:border-neon-blue outline-none"
             placeholder="React, TypeScript, AI"
           />
         </Field>
         <Field label="分类（层级用 / 分隔，如 技术/AI）">
           <input
+            className="input font-mono"
             value={fm.category}
             onChange={(e) => setFm({ ...fm, category: e.target.value })}
-            className="w-full px-3 py-2 rounded bg-card-bg border border-neon-blue/30 focus:border-neon-blue outline-none font-mono text-sm"
-            placeholder="技术/AI/Agent"
+            placeholder="技术/AI"
           />
         </Field>
         <Field label="摘要">
           <input
+            className="input"
             value={fm.summary}
             onChange={(e) => setFm({ ...fm, summary: e.target.value })}
-            className="w-full px-3 py-2 rounded bg-card-bg border border-neon-blue/30 focus:border-neon-blue outline-none"
             placeholder="一句话简介"
           />
         </Field>
         <Field label="状态">
           <select
+            className="input"
             value={fm.status}
-            onChange={(e) =>
-              setFm({ ...fm, status: e.target.value as 'draft' | 'published' })
-            }
-            className="w-full px-3 py-2 rounded bg-card-bg border border-neon-blue/30 focus:border-neon-blue outline-none"
+            onChange={(e) => setFm({ ...fm, status: e.target.value as 'draft' | 'published' })}
           >
             <option value="published">published</option>
             <option value="draft">draft</option>
@@ -238,7 +244,11 @@ export default function Editor() {
         </Field>
       </div>
 
-      <div data-color-mode="dark">
+      <div
+        className="rounded-lg overflow-hidden"
+        style={{ border: '1px solid var(--border-default)' }}
+        data-color-mode="auto"
+      >
         <MDEditor value={body} onChange={(v) => setBody(v ?? '')} height={500} />
       </div>
     </div>
@@ -248,7 +258,7 @@ export default function Editor() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-xs text-text-secondary mb-1 block">{label}</span>
+      <span className="text-xs font-medium text-[var(--fg-secondary)] mb-1.5 block">{label}</span>
       {children}
     </label>
   )

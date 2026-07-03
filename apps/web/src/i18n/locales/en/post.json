@@ -1,0 +1,13 @@
+{
+  "loading": "Loading…",
+  "notFound": "This post doesn't exist or has been removed.",
+  "backToList": "Back to blog",
+  "publishedOn": "Published on {{date}}",
+  "tagsLabel": "Tags",
+  "editPost": "Edit post",
+  "readingTime": "{{minutes}} min read",
+  "downloadMd": "Download .md",
+  "exportPdf": "Export PDF",
+  "backToTop": "Back to top",
+  "toc": "Table of Contents"
+}

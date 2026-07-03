@@ -1,17 +1,16 @@
 import { Link } from 'react-router-dom'
+import { Home } from 'lucide-react'
 
 export default function NotFound() {
   return (
-    <div className="pt-24 px-6 max-w-md mx-auto text-center pb-20">
-      <h1 className="font-orbitron text-7xl font-black neon-text-purple mb-4">
-        404
-      </h1>
-      <p className="text-text-secondary mb-8">页面不存在</p>
-      <Link
-        to="/"
-        className="px-6 py-2 rounded border border-neon-blue neon-text-blue hover:bg-neon-blue/10"
-      >
-        回到首页
+    <div className="container-page py-24 md:py-32 text-center">
+      <div className="text-display-xl text-[var(--fg-tertiary)] mb-4 font-mono">404</div>
+      <h1 className="text-display-md text-[var(--fg-primary)] mb-3">页面不存在</h1>
+      <p className="text-body text-[var(--fg-secondary)] mb-8 max-w-md mx-auto">
+        你访问的页面可能已被移动、删除，或者从未存在过。
+      </p>
+      <Link to="/" className="btn btn-primary">
+        <Home size={14} /> 回到首页
       </Link>
     </div>
   )
