@@ -16,6 +16,7 @@ export default function Inbox() {
   const [error, setError] = useState<string | null>(null)
   const [ingesting, setIngesting] = useState<string | null>(null)
   const [toast, setToast] = useState<{ type: 'ok' | 'err'; msg: string } | null>(null)
+  const [tagDrafts, setTagDrafts] = useState<Record<string, string>>({})
 
   const showToast = (type: 'ok' | 'err', msg: string) => {
     setToast({ type, msg })
@@ -46,15 +47,21 @@ export default function Inbox() {
   const onIngest = async (filename: string) => {
     setIngesting(filename)
     try {
+      const tags = tagDrafts[filename]?.split(',').map((s) => s.trim()).filter(Boolean) ?? []
       const res = await fetch('/api/inbox/ingest', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ filename }),
+        body: JSON.stringify({ filename, tags: tags.length > 0 ? tags : undefined }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || t('ingestFailed', { msg: 'ingest' }))
       showToast('ok', t('ingested', { slug: data.slug }))
+      setTagDrafts((prev) => {
+        const next = { ...prev }
+        delete next[filename]
+        return next
+      })
       await load()
     } catch (e) {
       showToast('err', t('ingestFailed', { msg: e instanceof Error ? e.message : String(e) }))
@@ -136,30 +143,42 @@ export default function Inbox() {
         {files.map((f) => {
           const isIngesting = ingesting === f.name
           return (
-            <div key={f.name} className="surface-card p-4 flex items-center gap-4">
-              <FileText size={18} className="text-[var(--fg-tertiary)] shrink-0" strokeWidth={1.5} />
-              <div className="flex-1 min-w-0">
-                <div className="font-mono text-sm text-[var(--fg-primary)] truncate">{f.name}</div>
-                <div className="text-xs text-[var(--fg-tertiary)] mt-0.5 flex items-center gap-3">
-                  <span>{(f.size / 1024).toFixed(1)} KB</span>
-                  <span>{new Date(f.modified).toLocaleString('zh-CN')}</span>
+            <div key={f.name} className="surface-card p-4 space-y-3">
+              <div className="flex items-center gap-4">
+                <FileText size={18} className="text-[var(--fg-tertiary)] shrink-0" strokeWidth={1.5} />
+                <div className="flex-1 min-w-0">
+                  <div className="font-mono text-sm text-[var(--fg-primary)] truncate">{f.name}</div>
+                  <div className="text-xs text-[var(--fg-tertiary)] mt-0.5 flex items-center gap-3">
+                    <span>{(f.size / 1024).toFixed(1)} KB</span>
+                    <span>{new Date(f.modified).toLocaleString('zh-CN')}</span>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => void onIngest(f.name)}
+                  disabled={isIngesting}
+                  className="btn btn-secondary btn-sm shrink-0"
+                >
+                  {isIngesting ? (
+                    <>
+                      <span className="w-3 h-3 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
+                      {t('ingesting')}
+                    </>
+                  ) : (
+                    t('ingest')
+                  )}
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => void onIngest(f.name)}
-                disabled={isIngesting}
-                className="btn btn-secondary btn-sm shrink-0"
-              >
-                {isIngesting ? (
-                  <>
-                    <span className="w-3 h-3 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
-                    {t('ingesting')}
-                  </>
-                ) : (
-                  t('ingest')
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[var(--fg-tertiary)] shrink-0">{t('tagsLabel')}</span>
+                <input
+                  type="text"
+                  value={tagDrafts[f.name] ?? ''}
+                  onChange={(e) => setTagDrafts((prev) => ({ ...prev, [f.name]: e.target.value }))}
+                  placeholder={t('tagsPlaceholder')}
+                  className="input !h-8 !text-xs flex-1"
+                />
+              </div>
             </div>
           )
         })}

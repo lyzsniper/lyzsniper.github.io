@@ -16,6 +16,7 @@ export interface PostSummary {
 export interface PostDetail extends PostSummary {
   contentMd: string
   contentHtml: string
+  sourcePath?: string | null
   toc: TocItem[]
   publishedAt: string
   updatedAt: string

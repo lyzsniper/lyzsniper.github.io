@@ -13,7 +13,7 @@ export default function Tags() {
   const [loadingPosts, setLoadingPosts] = useState(false)
 
   useEffect(() => {
-    api.getTags().then((r) => setTags(r.tags)).catch(() => setTags([]))
+    api.getAllTags().then((r) => setTags(r.tags)).catch(() => setTags([]))
   }, [])
 
   useEffect(() => {

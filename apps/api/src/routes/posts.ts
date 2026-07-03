@@ -85,6 +85,7 @@ export async function postRoutes(app: FastifyInstance): Promise<void> {
         summary: row.summary,
         contentMd: row.content_md,
         contentHtml: row.content_html,
+        sourcePath: row.source_path,
         tags: row.tag_names ? row.tag_names.split(',') : [],
         category: row.category,
         publishedAt: row.publish_at ?? row.created_at,
@@ -93,6 +94,22 @@ export async function postRoutes(app: FastifyInstance): Promise<void> {
         coverImage: row.cover_image,
         toc: extractToc(row.content_md),
       }
+    },
+  )
+
+  // GET /api/posts/:slug/raw — 返回原始 markdown（含 frontmatter）
+  app.get<{ Params: { slug: string } }>(
+    '/:slug/raw',
+    async (req, reply) => {
+      const row = postRepo.findBySlug(req.params.slug)
+      if (!row) return reply.code(404).send({ error: 'post not found' })
+      if (!row.source_path || !fs.existsSync(row.source_path)) {
+        // 没有源文件，返回 content_md
+        reply.header('Content-Type', 'text/markdown; charset=utf-8')
+        return reply.send(row.content_md)
+      }
+      reply.header('Content-Type', 'text/markdown; charset=utf-8')
+      return reply.send(fs.readFileSync(row.source_path, 'utf-8'))
     },
   )
 
