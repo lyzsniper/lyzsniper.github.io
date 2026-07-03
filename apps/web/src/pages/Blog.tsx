@@ -34,7 +34,7 @@ export default function Blog() {
     api
       .listPosts({ page, tag, category, q })
       .then(setData)
-      .catch((e) => setError(e instanceof Error ? e.message : '加载失败'))
+      .catch((e) => setError(e instanceof Error ? e.message : t('blog:loadFailed')))
   }, [page, tag, category, q])
 
   const setPage = (p: number) => {
@@ -65,7 +65,7 @@ export default function Blog() {
     try {
       await batchDownload(Array.from(selected))
     } catch (e) {
-      alert(e instanceof Error ? e.message : '下载失败')
+      alert(e instanceof Error ? e.message : t('blog:downloadFailed'))
     } finally {
       setDownloading(false)
     }
@@ -103,14 +103,14 @@ export default function Blog() {
           <h1 className="text-display-lg text-[var(--fg-primary)]">{t('blog:subtitle')}</h1>
           {totalPosts > 0 && (
             <p className="text-sm text-[var(--fg-tertiary)] mt-2">
-              共 {totalPosts} 篇
+              {t('blog:totalPosts', { count: totalPosts })}
             </p>
           )}
         </div>
         {data && data.posts.length > 0 && (
           <div className="flex items-center gap-2">
             <button onClick={selectAll} className="btn btn-secondary btn-sm">
-              {selected.size === data.posts.length ? '取消全选' : '全选'}
+              {selected.size === data.posts.length ? t('blog:deselectAll') : t('blog:selectAll')}
             </button>
             <button
               onClick={() => void onBatchDownload()}
@@ -118,7 +118,7 @@ export default function Blog() {
               className="btn btn-secondary btn-sm"
             >
               <PackageOpen size={13} />
-              {downloading ? '打包中…' : `下载 (${selected.size})`}
+              {downloading ? t('blog:packing') : t('blog.download', { count: selected.size })}
             </button>
           </div>
         )}
@@ -144,7 +144,7 @@ export default function Blog() {
       {/* 分类树 */}
       {topCategories.length > 0 && (
         <div className="mb-6 flex items-start gap-3 flex-wrap">
-          <span className="text-xs text-[var(--fg-tertiary)] pt-1.5 shrink-0">分类</span>
+          <span className="text-xs text-[var(--fg-tertiary)] pt-1.5 shrink-0">{t('blog:category')}</span>
           <div className="flex flex-wrap gap-1.5">
             {topCategories.map((cat) => {
               const children = childrenOf(cat.name)
@@ -177,12 +177,12 @@ export default function Blog() {
       {/* 过滤标签 */}
       {hasFilter && (
         <div className="mb-6 flex items-center gap-2 text-sm flex-wrap">
-          <span className="text-xs text-[var(--fg-tertiary)]">筛选</span>
+          <span className="text-xs text-[var(--fg-tertiary)]">{t('blog:filter')}</span>
           {category && <span className="pill pill-accent">{category}</span>}
           {tag && <span className="pill pill-accent">#{tag}</span>}
           {q && <span className="pill pill-accent">"{q}"</span>}
           <button onClick={clearFilter} className="btn btn-ghost btn-sm !h-6 !px-2 !text-xs">
-            <X size={12} /> 清除
+            <X size={12} /> {t('blog:clear')}
           </button>
         </div>
       )}
