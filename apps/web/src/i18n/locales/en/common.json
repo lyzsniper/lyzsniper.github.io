@@ -3,5 +3,14 @@
     "switch": "Switch language"
   },
   "loading": "Loading…",
-  "error": "Something went wrong"
+  "error": "Something went wrong",
+  "select": "Select",
+  "skipToContent": "Skip to main content",
+  "theme": {
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode"
+  },
+  "auth": {
+    "verifying": "Verifying login state…"
+  }
 }
