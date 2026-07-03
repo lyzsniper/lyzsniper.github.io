@@ -19,11 +19,14 @@ interface LayoutNode extends GraphNode {
  * 数值越大越靠前（朝相机方向）
  */
 const CATEGORY_Z_BIAS: Record<GraphNode['category'], number> = {
-  ai: 5,        // AI 在最前
-  language: 3,  // 语言其次
-  backend: 0,   // 后端居中
-  frontend: -2, // 前端略后
-  devops: -5,   // DevOps 在最后
+  ai: 6,        // AI Agent 核心（最前）
+  rag: 5,       // RAG 与知识工程
+  llm: 4,       // LLM 推理与训练
+  backend: 1,   // 后端工程
+  data: 0,      // 数据与中间件
+  frontend: -1, // 前端工程
+  devops: -4,   // DevOps 与云原生
+  security: -6, // 安全与质量（最后）
 }
 
 function computeLayout(): LayoutNode[] {
@@ -107,11 +110,14 @@ function computeLayout(): LayoutNode[] {
 }
 
 const CATEGORY_COLOR: Record<GraphNode['category'], string> = {
-  ai: '#4f46e5',
-  backend: '#10b981',
-  frontend: '#f59e0b',
-  devops: '#ec4899',
-  language: '#06b6d4',
+  ai: '#4f46e5',      // indigo — Agent 核心
+  rag: '#7c3aed',     // violet — RAG 知识工程
+  llm: '#8b5cf6',     // purple — LLM 推理
+  backend: '#10b981', // emerald — 后端
+  data: '#06b6d4',    // cyan — 数据
+  frontend: '#f59e0b', // amber — 前端
+  devops: '#ec4899',  // pink — DevOps
+  security: '#ef4444', // red — 安全
 }
 
 function NodeMesh({
@@ -316,12 +322,15 @@ export default function SkillGraph3D() {
       </div>
 
       {/* 图例 */}
-      <div className="absolute top-3 right-4 flex flex-col gap-1.5 text-[10px] font-mono text-white/70 pointer-events-none">
+      <div className="absolute top-3 right-4 flex flex-col gap-1 text-[10px] font-mono text-white/70 pointer-events-none">
         <LegendDot color={CATEGORY_COLOR.ai} label={t('skillGraph.legend.ai')} />
+        <LegendDot color={CATEGORY_COLOR.rag} label={t('skillGraph.legend.rag')} />
+        <LegendDot color={CATEGORY_COLOR.llm} label={t('skillGraph.legend.llm')} />
         <LegendDot color={CATEGORY_COLOR.backend} label={t('skillGraph.legend.backend')} />
+        <LegendDot color={CATEGORY_COLOR.data} label={t('skillGraph.legend.data')} />
         <LegendDot color={CATEGORY_COLOR.frontend} label={t('skillGraph.legend.frontend')} />
         <LegendDot color={CATEGORY_COLOR.devops} label={t('skillGraph.legend.devops')} />
-        <LegendDot color={CATEGORY_COLOR.language} label={t('skillGraph.legend.language')} />
+        <LegendDot color={CATEGORY_COLOR.security} label={t('skillGraph.legend.security')} />
       </div>
 
       {/* 提示 */}
