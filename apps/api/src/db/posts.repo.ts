@@ -1,4 +1,4 @@
-import type Database from 'better-sqlite3'
+import type { DatabaseSync } from 'node:sqlite'
 import { getDb } from './sqlite.js'
 import type {
   PostRow,
@@ -12,8 +12,8 @@ import type {
 export class PostRepo {
   // 懒加载 DB — 模块顶层实例化时不会触发 getDb()
   // 确保 initDb() 在第一次实际查询前已执行
-  private _db: Database.Database | undefined
-  private get db(): Database.Database {
+  private _db: DatabaseSync | undefined
+  private get db(): DatabaseSync {
     if (!this._db) this._db = getDb()
     return this._db
   }
@@ -23,7 +23,7 @@ export class PostRepo {
     const offset = (page - 1) * pageSize
 
     const where: string[] = ['p.status = ?']
-    const params: unknown[] = [status]
+    const params: (string | number)[] = [status]
 
     if (tag) {
       where.push(
@@ -46,7 +46,7 @@ export class PostRepo {
 
     const whereSql = where.join(' AND ')
 
-    const rows = this.db
+    const rows = (this.db
       .prepare(
         `SELECT p.id, p.slug, p.title, p.summary, p.cover_image, p.reading_time, p.created_at, p.category,
                 GROUP_CONCAT(t.name) AS tag_names
@@ -58,11 +58,11 @@ export class PostRepo {
          ORDER BY p.created_at DESC
          LIMIT ? OFFSET ?`,
       )
-      .all(...params, pageSize, offset) as PostSummaryRow[]
+      .all(...params, pageSize, offset) as unknown) as PostSummaryRow[]
 
-    const { total } = this.db
+    const { total } = (this.db
       .prepare(`SELECT COUNT(*) AS total FROM posts p WHERE ${whereSql}`)
-      .get(...params) as { total: number }
+      .get(...params) as unknown) as { total: number }
 
     return { rows, total }
   }
@@ -97,26 +97,22 @@ export class PostRepo {
   }
 
   findBySlug(slug: string): PostDetailRow | null {
-    return (
-      (this.db
-        .prepare(
-          `SELECT p.*, GROUP_CONCAT(t.name) AS tag_names
-           FROM posts p
-           LEFT JOIN post_tags pt ON pt.post_id = p.id
-           LEFT JOIN tags t ON t.id = pt.tag_id
-           WHERE p.slug = ?
-           GROUP BY p.id`,
-        )
-        .get(slug) as PostDetailRow | undefined) ?? null
-    )
+    return ((this.db
+      .prepare(
+        `SELECT p.*, GROUP_CONCAT(t.name) AS tag_names
+         FROM posts p
+         LEFT JOIN post_tags pt ON pt.post_id = p.id
+         LEFT JOIN tags t ON t.id = pt.tag_id
+         WHERE p.slug = ?
+         GROUP BY p.id`,
+      )
+      .get(slug) as unknown) as PostDetailRow | undefined) ?? null
   }
 
   findById(id: number): PostRow | null {
-    return (
-      (this.db.prepare('SELECT * FROM posts WHERE id = ?').get(id) as
-        | PostRow
-        | undefined) ?? null
-    )
+    return ((this.db.prepare('SELECT * FROM posts WHERE id = ?').get(id) as unknown) as
+      | PostRow
+      | undefined) ?? null
   }
 
   create(input: CreatePostInput): PostRow {
@@ -136,7 +132,7 @@ export class PostRepo {
         reading_time: input.reading_time ?? null,
         cover_image: input.cover_image ?? null,
         category: input.category ?? null,
-      })
+      } as Record<string, string | number | null>) as unknown as { lastInsertRowid: number | bigint }
     return this.findById(Number(info.lastInsertRowid))!
   }
 
@@ -155,12 +151,12 @@ export class PostRepo {
       .prepare(
         `UPDATE posts SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE slug = @slug`,
       )
-      .run(params)
+      .run(params as Record<string, string | number | null>)
     return this.findBySlug(slug)
   }
 
   delete(slug: string): boolean {
-    const info = this.db.prepare('DELETE FROM posts WHERE slug = ?').run(slug)
+    const info = this.db.prepare('DELETE FROM posts WHERE slug = ?').run(slug) as { changes: number }
     return info.changes > 0
   }
 

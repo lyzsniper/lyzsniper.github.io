@@ -1,9 +1,11 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
+import cookie from '@fastify/cookie'
 import multipart from '@fastify/multipart'
 import { config } from './config.js'
 import { initDb, closeDb } from './db/sqlite.js'
 import { healthRoutes } from './routes/healthz.js'
+import { authRoutes, requireAdmin } from './routes/auth.js'
 import { postRoutes } from './routes/posts.js'
 import { tagRoutes } from './routes/tags.js'
 import { searchRoutes } from './routes/search.js'
@@ -29,6 +31,11 @@ async function buildServer() {
     credentials: true,
   })
 
+  // Cookie
+  await app.register(cookie, {
+    secret: process.env.COOKIE_SECRET ?? 'dev-cookie-secret-change-me',
+  })
+
   // Multipart (file upload)
   await app.register(multipart, {
     limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
@@ -39,6 +46,7 @@ async function buildServer() {
 
   // 注册路由
   await app.register(healthRoutes, { prefix: '/api' })
+  await app.register(authRoutes, { prefix: '/api/auth' })
   await app.register(postRoutes, { prefix: '/api/posts' })
   await app.register(tagRoutes, { prefix: '/api/tags' })
   await app.register(searchRoutes, { prefix: '/api/search' })
@@ -47,6 +55,18 @@ async function buildServer() {
   await app.register(inboxRoutes, { prefix: '/api/inbox' })
   await app.register(categoryRoutes, { prefix: '/api/categories' })
   await app.register(feedRoutes, { prefix: '/api' })
+
+  // 给所有需要鉴权的 admin 路由加 onRequest 钩子
+  // 匹配写到 /api/posts, /api/tags, /api/files, /api/inbox 的请求
+  const writeMethods = new Set(['POST', 'PUT', 'DELETE', 'PATCH'])
+  const adminPrefixes = ['/api/posts', '/api/tags', '/api/files', '/api/inbox']
+  app.addHook('onRequest', async (req, reply) => {
+    if (!writeMethods.has(req.method)) return
+    const url = req.url.split('?')[0]
+    const isAdminRoute = adminPrefixes.some((p) => url === p || url.startsWith(p + '/'))
+    if (!isAdminRoute) return
+    await requireAdmin(req, reply)
+  })
 
   // 启动后台服务
   startSearchIndex()

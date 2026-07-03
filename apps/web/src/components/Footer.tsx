@@ -63,10 +63,10 @@ export default function Footer() {
                   jensenlyz@163.com
                 </a>
               </li>
-              <li className="flex items-center gap-2 text-[var(--fg-secondary)]">
+              {/* <li className="flex items-center gap-2 text-[var(--fg-secondary)]">
                 <Phone size={13} strokeWidth={1.75} className="text-[var(--fg-tertiary)]" />
                 <span>{t('footer:contact.phone')}</span>
-              </li>
+              </li> */}
               <li className="flex items-center gap-2 text-[var(--fg-secondary)]">
                 <MapPin size={13} strokeWidth={1.75} className="text-[var(--fg-tertiary)]" />
                 <span>{t('footer:contact.location')}</span>

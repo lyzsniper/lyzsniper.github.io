@@ -19,6 +19,13 @@ content/inbox/*
 !content/drafts/.gitkeep
 !content/published/.gitkeep
 
+# vite.config.ts 编译产物
+apps/web/vite.config.js
+apps/web/vite.config.d.ts
+
+# 测试数据库
+data/test.db
+
 *.log
 npm-debug.log*
 pnpm-debug.log*

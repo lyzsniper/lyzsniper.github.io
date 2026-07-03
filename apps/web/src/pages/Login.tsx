@@ -91,10 +91,10 @@ export default function Login() {
             )}
           </button>
 
-          <p className="text-xs text-[var(--fg-tertiary)] text-center pt-1">
+          {/* <p className="text-xs text-[var(--fg-tertiary)] text-center pt-1">
             {t('defaultCreds')} <code className="font-mono">admin</code> {t('and')}{' '}
             <code className="font-mono">admin123</code>
-          </p>
+          </p> */}
         </form>
       </div>
     </div>

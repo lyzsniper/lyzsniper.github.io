@@ -1,9 +1,9 @@
-import type Database from 'better-sqlite3'
+import type { DatabaseSync } from 'node:sqlite'
 import { getDb } from './sqlite.js'
 
 export class TagRepo {
-  private _db: Database.Database | undefined
-  private get db(): Database.Database {
+  private _db: DatabaseSync | undefined
+  private get db(): DatabaseSync {
     if (!this._db) this._db = getDb()
     return this._db
   }
@@ -40,7 +40,7 @@ export class TagRepo {
     meta: { name?: string; color?: string | null; description?: string | null },
   ): { name: string; slug: string; color: string | null; description: string | null } | null {
     const fields: string[] = []
-    const params: Record<string, unknown> = { slug }
+    const params: Record<string, string | null> = { slug }
     if (meta.name !== undefined) {
       fields.push('name = @name')
       params.name = meta.name
@@ -56,7 +56,7 @@ export class TagRepo {
     if (fields.length === 0) return null
     this.db
       .prepare(`UPDATE tags SET ${fields.join(', ')} WHERE slug = @slug`)
-      .run(params)
+      .run(params as Record<string, string | number | null>)
     return this.db
       .prepare('SELECT name, slug, color, description FROM tags WHERE slug = ?')
       .get(slug) as { name: string; slug: string; color: string | null; description: string | null } | null
@@ -78,18 +78,13 @@ export class TagRepo {
     const stmt = this.db.prepare(
       'INSERT OR IGNORE INTO post_tags (post_id, tag_id) VALUES (?, ?)',
     )
-    const tx = this.db.transaction((ids: number[]) => {
-      for (const id of ids) stmt.run(postId, id)
-    })
-    tx(tagIds)
+    for (const id of tagIds) stmt.run(postId, id)
   }
 
   replaceForPost(postId: number, tagIds: number[]): void {
-    const tx = this.db.transaction(() => {
-      this.db.prepare('DELETE FROM post_tags WHERE post_id = ?').run(postId)
-      this.attach(postId, tagIds)
-    })
-    tx()
+    // node:sqlite (Node 24) 没有 transaction() 方法，直接顺序执行
+    this.db.prepare('DELETE FROM post_tags WHERE post_id = ?').run(postId)
+    this.attach(postId, tagIds)
   }
 
   private toSlug(name: string): string {

@@ -1,4 +1,4 @@
-import type Database from 'better-sqlite3'
+import type { DatabaseSync } from 'node:sqlite'
 import { getDb } from './sqlite.js'
 
 export interface IngestLogInput {
@@ -15,8 +15,8 @@ export interface IngestLogRow extends IngestLogInput {
 }
 
 export class IngestLogRepo {
-  private _db: Database.Database | undefined
-  private get db(): Database.Database {
+  private _db: DatabaseSync | undefined
+  private get db(): DatabaseSync {
     if (!this._db) this._db = getDb()
     return this._db
   }
@@ -36,8 +36,8 @@ export class IngestLogRepo {
   }
 
   recent(limit = 50): IngestLogRow[] {
-    return this.db
+    return (this.db
       .prepare(`SELECT * FROM ingest_log ORDER BY created_at DESC LIMIT ?`)
-      .all(limit) as IngestLogRow[]
+      .all(limit) as unknown) as IngestLogRow[]
   }
 }

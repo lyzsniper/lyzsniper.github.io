@@ -16,11 +16,11 @@ import BackgroundFX from '@/components/BackgroundFX'
 const SkillGraph3D = lazy(() => import('@/components/SkillGraph3D'))
 
 const expertise = [
-  'RAG 知识工程',
-  'MCP / A2A 协议',
-  '多智能体编排',
-  '企业级 LLM 应用',
-  'Agent 架构设计',
+  'RAG / Knowledge Engineering',
+  'MCP / A2A',
+  'Multi-Agent',
+  'LLM',
+  'Agent Memory',
 ]
 
 interface Skill {
