@@ -24,98 +24,98 @@ const expertise = [
 ]
 
 interface Skill {
-  title: string
-  desc: string
+  titleKey: string
+  descKey: string
   tags: string[]
 }
 
 interface SkillCategory {
   icon: LucideIcon
-  name: string
+  nameKey: string
   items: Skill[]
 }
 
 const skillCategories: SkillCategory[] = [
   {
     icon: Bot,
-    name: 'AI 工程',
+    nameKey: 'home:skills.categories.ai',
     items: [
       {
-        title: 'RAG 与知识检索',
-        desc: '构建企业级知识检索流水线，覆盖 RAG、MCP、Skills、A2A 等协议与 LlamaIndex、Haystack 等框架',
+        titleKey: 'home:skills.items.rag.title',
+        descKey: 'home:skills.items.rag.desc',
         tags: ['RAG', 'MCP', 'A2A', 'LlamaIndex', 'Haystack'],
       },
       {
-        title: '多 Agent 编排',
-        desc: '熟悉 ReAct、Plan-Execute、Multi-Agent Debate 等设计模式，落地协作型智能体',
+        titleKey: 'home:skills.items.multiAgent.title',
+        descKey: 'home:skills.items.multiAgent.desc',
         tags: ['ReAct', 'Plan-Execute', 'Multi-Agent'],
       },
       {
-        title: 'Agent 研发框架',
-        desc: 'CrewAI、LangGraph、LangChain、Dify、Coze 等框架与编排平台的工程实践',
+        titleKey: 'home:skills.items.agentFrameworks.title',
+        descKey: 'home:skills.items.agentFrameworks.desc',
         tags: ['CrewAI', 'LangGraph', 'Dify', 'Coze'],
       },
       {
-        title: 'LLM 微调与推理',
-        desc: '主导团队 AI 编程规范制定，落地 Claude Code、Cursor、Qwen、vLLM 等工具链',
+        titleKey: 'home:skills.items.llm.title',
+        descKey: 'home:skills.items.llm.desc',
         tags: ['Qwen', 'vLLM', 'Claude Code'],
       },
     ],
   },
   {
     icon: Server,
-    name: '后端工程',
+    nameKey: 'home:skills.categories.backend',
     items: [
       {
-        title: 'Java 企业级开发',
-        desc: 'Spring Boot / Cloud 全家桶，深入 JVM 调优与高并发设计，支撑业务稳定运行',
+        titleKey: 'home:skills.items.java.title',
+        descKey: 'home:skills.items.java.desc',
         tags: ['Java', 'Spring Boot', 'Spring Cloud', 'JVM'],
       },
       {
-        title: 'Python AI 服务',
-        desc: 'FastAPI / Flask 构建 AI 服务，结合 LangChain 编排 LLM 调用',
+        titleKey: 'home:skills.items.python.title',
+        descKey: 'home:skills.items.python.desc',
         tags: ['Python', 'FastAPI', 'LangChain'],
       },
       {
-        title: '数据库与缓存',
-        desc: 'MySQL、PostgreSQL 关系存储，Redis、ElasticSearch、Milvus 检索与缓存',
+        titleKey: 'home:skills.items.database.title',
+        descKey: 'home:skills.items.database.desc',
         tags: ['MySQL', 'PostgreSQL', 'Redis', 'ES', 'Milvus'],
       },
       {
-        title: '消息与中间件',
-        desc: 'Kafka、RocketMQ 高吞吐消息系统，Tugraph 图数据库在业务场景的应用',
+        titleKey: 'home:skills.items.messaging.title',
+        descKey: 'home:skills.items.messaging.desc',
         tags: ['Kafka', 'RocketMQ', 'Tugraph'],
       },
     ],
   },
   {
     icon: Layers,
-    name: '前端工程',
+    nameKey: 'home:skills.categories.frontend',
     items: [
       {
-        title: 'React 生态',
-        desc: 'React 18 + TypeScript + Vite + Tailwind，深度使用 Hooks 与状态管理',
+        titleKey: 'home:skills.items.react.title',
+        descKey: 'home:skills.items.react.desc',
         tags: ['React', 'TypeScript', 'Vite', 'Tailwind'],
       },
       {
-        title: 'Vue 企业级',
-        desc: 'Vue 3 + Pinia + Vite，建设企业级中后台系统',
+        titleKey: 'home:skills.items.vue.title',
+        descKey: 'home:skills.items.vue.desc',
         tags: ['Vue 3', 'Pinia', 'Element Plus'],
       },
     ],
   },
   {
     icon: Wrench,
-    name: 'DevOps 与工具',
+    nameKey: 'home:skills.categories.devops',
     items: [
       {
-        title: '容器化与编排',
-        desc: 'Docker 镜像构建，K8s 应用部署与日常运维',
+        titleKey: 'home:skills.items.docker.title',
+        descKey: 'home:skills.items.docker.desc',
         tags: ['Docker', 'Kubernetes'],
       },
       {
-        title: 'CI/CD 与监控',
-        desc: 'Jenkins、GitLab CI 流水线，Prometheus + Grafana 监控体系',
+        titleKey: 'home:skills.items.cicd.title',
+        descKey: 'home:skills.items.cicd.desc',
         tags: ['Jenkins', 'Prometheus', 'Grafana'],
       },
     ],
@@ -312,14 +312,14 @@ export default function Home() {
                   <div className="w-9 h-9 rounded-lg bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)]">
                     <Icon size={18} strokeWidth={1.75} />
                   </div>
-                  <h3 className="text-display-sm text-[var(--fg-primary)]">{cat.name}</h3>
+                  <h3 className="text-display-sm text-[var(--fg-primary)]">{t(cat.nameKey)}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {cat.items.map((item) => (
-                    <article key={item.title} className="surface-card-interactive p-5">
-                      <h4 className="text-base font-semibold text-[var(--fg-primary)] mb-2">{item.title}</h4>
+                    <article key={item.titleKey} className="surface-card-interactive p-5">
+                      <h4 className="text-base font-semibold text-[var(--fg-primary)] mb-2">{t(item.titleKey)}</h4>
                       <p className="text-body-sm text-[var(--fg-secondary)] leading-relaxed mb-4">
-                        {item.desc}
+                        {t(item.descKey)}
                       </p>
                       <div className="flex flex-wrap gap-1.5">
                         {item.tags.map((t) => (

@@ -15,7 +15,63 @@
     "eyebrow": "Tech Stack",
     "h2": "From AI Agents to enterprise-grade engineering.",
     "graphNote": "Node size = usage depth · color = domain · edges = real relationships",
-    "graphLoading": "Loading 3D knowledge graph…"
+    "graphLoading": "Loading 3D knowledge graph…",
+    "categories": {
+      "ai": "AI Engineering",
+      "backend": "Backend Engineering",
+      "frontend": "Frontend Engineering",
+      "devops": "DevOps & Tools"
+    },
+    "items": {
+      "rag": {
+        "title": "RAG & Knowledge Retrieval",
+        "desc": "Enterprise-grade retrieval pipelines covering RAG, MCP, Skills, A2A protocols with LlamaIndex, Haystack, and more"
+      },
+      "multiAgent": {
+        "title": "Multi-Agent Orchestration",
+        "desc": "Hands-on with ReAct, Plan-Execute, Multi-Agent Debate patterns — shipping collaborative agents"
+      },
+      "agentFrameworks": {
+        "title": "Agent Development Frameworks",
+        "desc": "CrewAI, LangGraph, LangChain, Dify, Coze — framework and platform engineering practice"
+      },
+      "llm": {
+        "title": "LLM Fine-tuning & Inference",
+        "desc": "Drove team AI coding standards; shipped Claude Code, Cursor, Qwen, vLLM toolchains"
+      },
+      "java": {
+        "title": "Java Enterprise Development",
+        "desc": "Spring Boot / Cloud ecosystem, deep JVM tuning and high-concurrency design for stable business operations"
+      },
+      "python": {
+        "title": "Python AI Services",
+        "desc": "FastAPI / Flask for AI services, orchestrating LLM calls with LangChain"
+      },
+      "database": {
+        "title": "Database & Cache",
+        "desc": "MySQL, PostgreSQL relational storage; Redis, ElasticSearch, Milvus retrieval and caching"
+      },
+      "messaging": {
+        "title": "Messaging & Middleware",
+        "desc": "Kafka, RocketMQ high-throughput messaging; Tugraph graph database in business scenarios"
+      },
+      "react": {
+        "title": "React Ecosystem",
+        "desc": "React 18 + TypeScript + Vite + Tailwind, deep Hooks and state management"
+      },
+      "vue": {
+        "title": "Vue Enterprise",
+        "desc": "Vue 3 + Pinia + Vite for enterprise-grade internal systems"
+      },
+      "docker": {
+        "title": "Containerization & Orchestration",
+        "desc": "Docker image builds, K8s deployment and daily operations"
+      },
+      "cicd": {
+        "title": "CI/CD & Monitoring",
+        "desc": "Jenkins, GitLab CI pipelines, Prometheus + Grafana monitoring stack"
+      }
+    }
   },
   "capabilities": {
     "eyebrow": "Capability Domains",
