@@ -1,4 +1,5 @@
-import { Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import Blog from './pages/Blog'
@@ -10,8 +11,18 @@ import Editor from './pages/Editor'
 import Inbox from './pages/Inbox'
 import TagManage from './pages/TagManage'
 import NotFound from './pages/NotFound'
+import { useTranslation } from 'react-i18next'
 
 export default function App() {
+  const { i18n } = useTranslation()
+  const location = useLocation()
+  useEffect(() => {
+    const lng = location.pathname.startsWith('/en') ? 'en' : 'zh'
+    if (i18n.language !== lng) {
+      void i18n.changeLanguage(lng)
+    }
+  }, [location.pathname, i18n])
+
   return (
     <Routes>
       <Route element={<Layout />}>
