@@ -1,0 +1,30 @@
+{
+  "eyebrow": "Tag management",
+  "title": "Tags",
+  "subtitle": "Add descriptions and colors to tags to make them stand out on the frontend.",
+  "backToAdmin": "Back to admin",
+  "viewFrontend": "View on frontend",
+  "saved": "{{name}} saved",
+  "saveFailed": "Failed: {{msg}}",
+  "searchPlaceholder": "Search tags…",
+  "tagCount_one": "{{count}} tag",
+  "tagCount_other": "{{count}} tags",
+  "matchCount_one": "· {{count}} match",
+  "matchCount_other": "· {{count}} matches",
+  "loading": "Loading…",
+  "noMatch": "No matching tags",
+  "noTags": "No tags yet",
+  "fields": {
+    "name": "Name",
+    "color": "Color",
+    "colorPlaceholder": "#4f46e5",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "One-line explanation of this tag"
+  },
+  "postCount_one": "{{count}} post",
+  "postCount_other": "{{count}} posts",
+  "save": "Save",
+  "cancel": "Cancel",
+  "edit": "Edit",
+  "view": "View"
+}

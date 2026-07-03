@@ -1,0 +1,10 @@
+{
+  "title": "Tags",
+  "subtitle": "Browse all posts by topic",
+  "allTags": "All tags",
+  "postsWithTag": "Posts tagged \"{{tag}}\"",
+  "count_one": "{{count}} tag",
+  "count_other": "{{count}} tags",
+  "noTags": "No tags yet",
+  "postsCount": "{{count}} posts"
+}

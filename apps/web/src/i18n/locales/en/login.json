@@ -1,0 +1,12 @@
+{
+  "eyebrow": "Admin Login",
+  "title": "Sign in to continue",
+  "username": "Username",
+  "usernamePlaceholder": "admin",
+  "password": "Password",
+  "passwordPlaceholder": "••••••",
+  "submit": "Sign in",
+  "submitting": "Signing in…",
+  "defaultCreds": "Default credentials",
+  "and": "/"
+}

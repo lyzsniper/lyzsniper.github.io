@@ -1,0 +1,12 @@
+{
+  "eyebrow": "管理员登录",
+  "title": "登录以继续",
+  "username": "用户名",
+  "usernamePlaceholder": "admin",
+  "password": "密码",
+  "passwordPlaceholder": "••••••",
+  "submit": "登录",
+  "submitting": "登录中…",
+  "defaultCreds": "默认账号",
+  "and": "/"
+}

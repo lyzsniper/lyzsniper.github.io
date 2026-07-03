@@ -1,0 +1,21 @@
+{
+  "title": "Blog",
+  "subtitle": "Notes on AI Agents, enterprise RAG, and agent engineering",
+  "noPosts": "No posts published yet.",
+  "loading": "Loading…",
+  "loadMore": "Load more",
+  "noMore": "No more posts",
+  "searchPlaceholder": "Search posts…",
+  "emptySearch": "No posts matched your search",
+  "loadFailed": "Failed to load",
+  "downloadFailed": "Download failed",
+  "totalPosts_one": "{{count}} post",
+  "totalPosts_other": "{{count}} posts",
+  "selectAll": "Select all",
+  "deselectAll": "Deselect all",
+  "packing": "Packing…",
+  "download": "Download ({{count}})",
+  "category": "Category",
+  "filter": "Filter",
+  "clear": "Clear"
+}

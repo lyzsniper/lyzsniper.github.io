@@ -1,0 +1,8 @@
+{
+  "title": "搜索",
+  "placeholder": "输入关键词…",
+  "results_one": "找到 {{count}} 篇相关文章",
+  "results_other": "找到 {{count}} 篇相关文章",
+  "noResults": "没有匹配的文章",
+  "searching": "搜索中…"
+}

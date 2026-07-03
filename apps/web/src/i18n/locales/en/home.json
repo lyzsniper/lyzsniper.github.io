@@ -1,0 +1,266 @@
+{
+  "hero": {
+    "eyebrow": "AI Agent Engineer · Backend Architect",
+    "h1": "I'm Jensen, an AI Agent Architect.",
+    "subtitle": "Exploring the deep integration of LLMs with vertical industries. Grounded in backend architecture and multi-agent orchestration, turning AI capability into real business value.",
+    "ctaBlog": "Read blog",
+    "ctaContact": "Contact me"
+  },
+  "about": {
+    "eyebrow": "About",
+    "p1": "I'm Jensen (刘酝泽). I've designed full-stack pipelines from RAG retrieval to Agent orchestration, and led 0-to-1 projects across ToB products, internal platforms, and vertical-industry systems.",
+    "p2": "I follow Agent design patterns, protocol standards, and inference optimization — and I care more about whether a team can sustain these technologies than about any single piece of cleverness."
+  },
+  "skills": {
+    "eyebrow": "Tech Stack",
+    "h2": "From AI Agents to enterprise-grade engineering.",
+    "graphNote": "Node size = usage depth · color = domain · edges = real relationships",
+    "graphLoading": "Loading 3D knowledge graph…",
+    "categories": {
+      "ai": "AI Engineering",
+      "backend": "Backend Engineering",
+      "frontend": "Frontend Engineering",
+      "devops": "DevOps & Tools"
+    },
+    "items": {
+      "rag": {
+        "title": "RAG & Knowledge Retrieval",
+        "desc": "Enterprise-grade retrieval pipelines covering RAG, MCP, Skills, A2A protocols with LlamaIndex, Haystack, and more"
+      },
+      "multiAgent": {
+        "title": "Multi-Agent Orchestration",
+        "desc": "Hands-on with ReAct, Plan-Execute, Multi-Agent Debate patterns — shipping collaborative agents"
+      },
+      "agentFrameworks": {
+        "title": "Agent Development Frameworks",
+        "desc": "CrewAI, LangGraph, LangChain, Dify, Coze — framework and platform engineering practice"
+      },
+      "llm": {
+        "title": "LLM Fine-tuning & Inference",
+        "desc": "Drove team AI coding standards; shipped Claude Code, Cursor, Qwen, vLLM toolchains"
+      },
+      "java": {
+        "title": "Java Enterprise Development",
+        "desc": "Spring Boot / Cloud ecosystem, deep JVM tuning and high-concurrency design for stable business operations"
+      },
+      "python": {
+        "title": "Python AI Services",
+        "desc": "FastAPI / Flask for AI services, orchestrating LLM calls with LangChain"
+      },
+      "database": {
+        "title": "Database & Cache",
+        "desc": "MySQL, PostgreSQL relational storage; Redis, ElasticSearch, Milvus retrieval and caching"
+      },
+      "messaging": {
+        "title": "Messaging & Middleware",
+        "desc": "Kafka, RocketMQ high-throughput messaging; Tugraph graph database in business scenarios"
+      },
+      "react": {
+        "title": "React Ecosystem",
+        "desc": "React 18 + TypeScript + Vite + Tailwind, deep Hooks and state management"
+      },
+      "vue": {
+        "title": "Vue Enterprise",
+        "desc": "Vue 3 + Pinia + Vite for enterprise-grade internal systems"
+      },
+      "docker": {
+        "title": "Containerization & Orchestration",
+        "desc": "Docker image builds, K8s deployment and daily operations"
+      },
+      "cicd": {
+        "title": "CI/CD & Monitoring",
+        "desc": "Jenkins, GitLab CI pipelines, Prometheus + Grafana monitoring stack"
+      }
+    }
+  },
+  "capabilities": {
+    "eyebrow": "Capability Domains",
+    "h2": "Organized by problem type, not chronology.",
+    "items": {
+      "01": {
+        "title": "RAG & Enterprise Knowledge",
+        "stance": "A knowledge base shouldn't only answer \"what\" — it should answer \"how, in our business\".",
+        "evidence": [
+          "Designed retrieval pipelines at ten-thousand-document scale, spanning 6 business domains with millisecond-level recall",
+          "Composed LlamaIndex / Haystack / in-house Router into a grey-able chain"
+        ]
+      },
+      "02": {
+        "title": "Multi-Agent Orchestration",
+        "stance": "An Agent is not a prompt stitched together — it's an engineering design of roles, tools, memory, and termination conditions.",
+        "evidence": [
+          "Shipped ReAct, Plan-Execute, and Multi-Agent Debate patterns in production",
+          "Wrapped business services as MCP Tools so Agents stay observable and retryable"
+        ]
+      },
+      "03": {
+        "title": "LLM Inference & Engineering",
+        "stance": "I care about the upper bound of model capability, but more about inference cost, controllability, and team-wide usage discipline.",
+        "evidence": [
+          "Brought Qwen / vLLM / Claude Code into the enterprise environment",
+          "Drove team-wide adoption of AI coding tools and the Code Review mechanism"
+        ]
+      },
+      "04": {
+        "title": "Enterprise Backend Architecture",
+        "stance": "I don't believe \"AI projects\" can be detached from traditional software engineering. Spring Boot / JVM are the bedrock.",
+        "evidence": [
+          "High-throughput gateways, message middleware, and graph databases carrying real ToB load",
+          "End-to-end governance from monolith to microservices, code to CI/CD"
+        ]
+      },
+      "05": {
+        "title": "Cross-Domain Delivery",
+        "stance": "I've led 0-to-1 builds in three classes of settings: ToB products, internal platforms, and vertical-industry systems. That range lets me tell quickly whether a request is an engineering problem or a product problem.",
+        "evidence": []
+      }
+    }
+  },
+  "principles": {
+    "eyebrow": "Core Principles",
+    "h2": "Three long-held convictions on engineering.",
+    "items": {
+      "01": {
+        "quote": "The hard part is never getting an Agent to run — it's keeping it from hallucinating, timing out, or being bypassed once it's in production.",
+        "argument": "I treat every Agent project as a distributed system: tool calls need timeouts and degradation, context needs boundaries, failures need re-entrant paths. Across 6 business domains, this engineering discipline has been more reliable than any prompt trick."
+      },
+      "02": {
+        "quote": "I lean toward subtraction architecture — never use 5 components when 3 will do.",
+        "argument": "I've used LangGraph, CrewAI, Dify, and Coze. The test is always the same: three months from now, can a second person on the team read it, change it, and ship it? Complexity must be inheritable, not showy."
+      },
+      "03": {
+        "quote": "The endpoint of a technical decision is not \"can we build it\" — it's \"is it worth maintaining\".",
+        "argument": "I've led a company-wide dev platform serving 200+ apps and given 20+ internal tech talks. My belief: an engineer's leverage = the code you write × the code others don't have to write because of you."
+      }
+    }
+  },
+  "cta": {
+    "h2": "Let's talk AI Agent architecture",
+    "p": "Open to conversations about enterprise LLM apps, agent orchestration, full-stack engineering, or any interesting project idea.",
+    "email": "Email",
+    "github": "GitHub"
+  },
+  "skillGraph": {
+    "hint": "Drag to rotate · Scroll to zoom · Right-click to pan · Hover node to highlight connections",
+    "legend": {
+      "ai": "AI Agent",
+      "rag": "RAG / Knowledge",
+      "llm": "LLM Inference",
+      "backend": "Backend",
+      "data": "Data",
+      "frontend": "Frontend",
+      "devops": "DevOps",
+      "security": "Security"
+    },
+    "label": {
+      "agent": "AI Agent",
+      "mcp": "MCP",
+      "a2a": "A2A",
+      "langgraph": "LangGraph",
+      "crewai": "CrewAI",
+      "dify": "Dify",
+      "coze": "Coze",
+      "adk": "ADK",
+      "openai-sdk": "OpenAI SDK",
+      "react-pattern": "ReAct",
+      "plan-execute": "Plan-Execute",
+      "multi-agent": "Multi-Agent",
+      "function-calling": "Function Calling",
+      "skills-protocol": "Skills Protocol",
+      "rag": "RAG",
+      "llamaindex": "LlamaIndex",
+      "haystack": "Haystack",
+      "embedding": "Embedding",
+      "reranker": "Reranker",
+      "milvus": "Milvus",
+      "qdrant": "Qdrant",
+      "elasticsearch": "ElasticSearch",
+      "knowledge-graph": "Knowledge Graph",
+      "qwen": "Qwen",
+      "deepseek": "DeepSeek",
+      "claude": "Claude",
+      "gpt": "GPT",
+      "vllm": "vLLM",
+      "tensorrt-llm": "TensorRT-LLM",
+      "awq": "AWQ",
+      "gptq": "GPTQ",
+      "lora": "LoRA",
+      "pytorch": "PyTorch",
+      "deepspeed": "DeepSpeed",
+      "stable-diffusion": "Stable Diffusion",
+      "whisper": "Whisper",
+      "java": "Java",
+      "spring-boot": "Spring Boot",
+      "spring-cloud": "Spring Cloud",
+      "jvm": "JVM",
+      "python": "Python",
+      "fastapi": "FastAPI",
+      "flask": "Flask",
+      "langchain": "LangChain",
+      "langchain4j": "LangChain4j",
+      "graphql": "GraphQL",
+      "grpc": "gRPC",
+      "websocket": "WebSocket",
+      "sse": "SSE",
+      "microservices": "Microservices",
+      "service-mesh": "Service Mesh",
+      "mysql": "MySQL",
+      "postgresql": "PostgreSQL",
+      "tidb": "TiDB",
+      "redis": "Redis",
+      "mongodb": "MongoDB",
+      "kafka": "Kafka",
+      "rocketmq": "RocketMQ",
+      "pulsar": "Pulsar",
+      "nacos": "Nacos",
+      "clickhouse": "ClickHouse",
+      "flink": "Flink",
+      "airflow": "Airflow",
+      "dbt": "dbt",
+      "react": "React",
+      "nextjs": "Next.js",
+      "vue": "Vue 3",
+      "nuxtjs": "Nuxt.js",
+      "typescript": "TypeScript",
+      "vite": "Vite",
+      "tailwind": "Tailwind",
+      "sass": "Sass",
+      "threejs": "Three.js",
+      "d3": "D3.js",
+      "webgl": "WebGL",
+      "zustand": "Zustand",
+      "pinia": "Pinia",
+      "redux": "Redux",
+      "docker": "Docker",
+      "kubernetes": "Kubernetes",
+      "helm": "Helm",
+      "istio": "Istio",
+      "jenkins": "Jenkins",
+      "gitlab-ci": "GitLab CI",
+      "argocd": "ArgoCD",
+      "prometheus": "Prometheus",
+      "grafana": "Grafana",
+      "skywalking": "Skywalking",
+      "terraform": "Terraform",
+      "ansible": "Ansible",
+      "aws": "AWS",
+      "aliyun": "Alibaba Cloud",
+      "cdn": "CDN",
+      "serverless": "Serverless",
+      "linux": "Linux",
+      "nginx": "Nginx",
+      "pm2": "PM2",
+      "oauth2": "OAuth2",
+      "jwt": "JWT",
+      "rbac": "RBAC",
+      "vault": "Vault",
+      "waf": "WAF",
+      "jest": "Jest",
+      "cypress": "Cypress",
+      "playwright": "Playwright",
+      "junit": "JUnit",
+      "pytest": "Pytest",
+      "k6": "k6"
+    }
+  }
+}

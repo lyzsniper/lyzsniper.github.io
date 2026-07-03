@@ -1,0 +1,47 @@
+{
+  "title": "Admin",
+  "subtitle": "Manage posts, tags, and files here.",
+  "refresh": "Refresh",
+  "stats": {
+    "total": "Total posts",
+    "published": "Published",
+    "drafts": "Drafts",
+    "views": "Total views"
+  },
+  "upload": {
+    "title": "Upload Markdown",
+    "dropHint": "Drag a .md file here, or",
+    "clickSelect": "click to select",
+    "autoIngest": "Auto-ingested to content/published/ and indexed after upload",
+    "uploading": "Uploading…",
+    "onlyMd": "Only .md files are supported",
+    "ingested": "Ingested: {{slug}}",
+    "failed": "Failed: {{msg}}"
+  },
+  "quickActions": {
+    "newPost": {
+      "title": "New post",
+      "desc": "Web editor with live split preview"
+    },
+    "inbox": {
+      "title": "Inbox files",
+      "desc": "View files pending ingestion"
+    },
+    "tags": {
+      "title": "Tag management",
+      "desc": "Add color and description to tags"
+    }
+  },
+  "postList": {
+    "title": "Post list",
+    "loading": "Loading…",
+    "loadError": "Failed to load",
+    "empty": "No posts yet",
+    "published": "Published",
+    "draft": "Draft",
+    "readingTime": "{{count}} min read",
+    "views": "{{count}} views",
+    "deleteConfirm": "Delete \"{{slug}}\"? This cannot be undone.",
+    "deleteFailed": "Delete failed: {{msg}}"
+  }
+}
