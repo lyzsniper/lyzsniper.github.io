@@ -7,9 +7,9 @@ import ThemeToggle from '@/components/ThemeToggle'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 const navItems = [
-  { to: '/', labelKey: 'nav.home' },
-  { to: '/blog', labelKey: 'nav.blog' },
-  { to: '/tags', labelKey: 'nav.tags' },
+  { to: '/', labelKey: 'header:nav.home' },
+  { to: '/blog', labelKey: 'header:nav.blog' },
+  { to: '/tags', labelKey: 'header:nav.tags' },
 ]
 
 export default function Header() {
@@ -71,7 +71,7 @@ export default function Header() {
                 }`
               }
             >
-              {t('nav.admin')}
+              {t('header:nav.admin')}
             </NavLink>
           )}
         </div>
@@ -85,8 +85,8 @@ export default function Header() {
               <button
                 onClick={() => void onLogout()}
                 className="btn btn-ghost btn-sm !w-9 !px-0"
-                title={t('nav.logout')}
-                aria-label={t('nav.logout')}
+                title={t('header:nav.logout')}
+                aria-label={t('header:nav.logout')}
               >
                 <LogOut size={14} strokeWidth={1.75} />
               </button>
@@ -96,13 +96,13 @@ export default function Header() {
               to="/login"
               className="btn btn-secondary btn-sm hidden md:inline-flex ml-1"
             >
-              {t('nav.login')}
+              {t('header:nav.login')}
             </Link>
           )}
           <button
             className="md:hidden btn btn-ghost btn-sm !w-9 !px-0"
             onClick={() => setOpen(!open)}
-            aria-label={t('nav.menu')}
+            aria-label={t('header:nav.menu')}
           >
             {open ? <X size={16} /> : <Menu size={16} />}
           </button>
@@ -140,7 +140,7 @@ export default function Header() {
                   onClick={() => setOpen(false)}
                   className="h-10 px-3 inline-flex items-center rounded-md text-sm font-medium text-[var(--fg-secondary)]"
                 >
-                  {t('nav.adminPanel')}
+                  {t('header:nav.adminPanel')}
                 </NavLink>
                 <button
                   onClick={() => {
@@ -149,7 +149,7 @@ export default function Header() {
                   }}
                   className="h-10 px-3 inline-flex items-center rounded-md text-sm font-medium text-[var(--fg-secondary)]"
                 >
-                  {t('nav.logout')}
+                  {t('header:nav.logout')}
                 </button>
               </>
             ) : (
@@ -158,7 +158,7 @@ export default function Header() {
                 onClick={() => setOpen(false)}
                 className="h-10 px-3 inline-flex items-center rounded-md text-sm font-medium text-[var(--fg-secondary)]"
               >
-                {t('nav.login')}
+                {t('header:nav.login')}
               </NavLink>
             )}
           </div>

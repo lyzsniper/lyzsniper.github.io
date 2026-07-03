@@ -82,8 +82,58 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="*" element={<NotFound />} />
       </Route>
+      {/* English routes — same components, /en prefix */}
+      <Route element={<Layout />}>
+        <Route path="/en" element={<Home />} />
+        <Route path="/en/blog" element={<Blog />} />
+        <Route path="/en/blog/:slug" element={<Post />} />
+        <Route path="/en/tags" element={<Tags />} />
+        <Route path="/en/tags/:tag" element={<Tags />} />
+        <Route path="/en/search" element={<Search />} />
+        <Route path="/en/login" element={<Login />} />
+        <Route
+          path="/en/admin"
+          element={
+            <ProtectedRoute>
+              <Admin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/en/admin/editor"
+          element={
+            <ProtectedRoute>
+              <Editor />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/en/admin/editor/:slug"
+          element={
+            <ProtectedRoute>
+              <Editor />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/en/admin/inbox"
+          element={
+            <ProtectedRoute>
+              <Inbox />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/en/admin/tags"
+          element={
+            <ProtectedRoute>
+              <TagManage />
+            </ProtectedRoute>
+          }
+        />
+      </Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   )
 }
