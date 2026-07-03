@@ -307,7 +307,7 @@ export default function Home() {
           {skillCategories.map((cat) => {
             const Icon = cat.icon
             return (
-              <div key={cat.name} className="reveal">
+              <div key={cat.nameKey} className="reveal">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-9 h-9 rounded-lg bg-[var(--accent-soft)] flex items-center justify-center text-[var(--accent)]">
                     <Icon size={18} strokeWidth={1.75} />
