@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import matter from 'gray-matter'
 import { config } from '../config.js'
 import { logger } from '../lib/logger.js'
 import { ingestMarkdownFile } from '../services/ingest.js'

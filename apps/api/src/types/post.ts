@@ -46,6 +46,7 @@ export interface CreatePostInput {
   title: string
   summary?: string | null
   content_md: string
+  content_html?: string | null
   source_path?: string | null
   status?: PostRow['status']
   publish_at?: string | null
@@ -58,6 +59,7 @@ export interface UpdatePostInput {
   title?: string
   summary?: string | null
   content_md?: string
+  content_html?: string | null
   source_path?: string | null
   status?: PostRow['status']
   publish_at?: string | null
