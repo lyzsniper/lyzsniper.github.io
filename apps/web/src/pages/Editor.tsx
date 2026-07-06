@@ -80,27 +80,52 @@ export default function Editor() {
         return r.json()
       })
       .then((post) => {
-        const parsed = matter(post.contentMd ?? '')
-        const data = parsed.data as Record<string, unknown>
-        const tags = Array.isArray(data.tags)
-          ? (data.tags as string[]).join(', ')
-          : typeof data.tags === 'string'
-            ? data.tags
-            : ''
-        setFm({
-          title: (data.title as string) ?? post.title ?? '',
-          slug: (data.slug as string) ?? post.slug ?? '',
-          date: (data.date as string)?.slice(0, 10) ?? defaultFm.date,
-          tags,
-          summary: (data.summary as string) ?? post.summary ?? '',
-          status: ((data.status as 'draft' | 'published') ?? post.status ?? 'published'),
-          category: (data.category as string) ?? post.category ?? '',
-        })
-        setBody(parsed.content)
+        // contentMd 可能只存了正文（不含 frontmatter），需要从源文件读取完整 markdown
+        let raw = post.contentMd ?? ''
+        const parsed = matter(raw)
+        // 如果解析不出 frontmatter（收录时只存了正文），尝试从源文件读取
+        const hasFrontmatter = Object.keys(parsed.data).length > 0
+        if (!hasFrontmatter && raw.trim() === parsed.content.trim()) {
+          // contentMd 没有 frontmatter，尝试读取源文件
+          if (post.sourcePath) {
+            fetch(`/api/posts/${encodeURIComponent(slug)}/raw`, { credentials: 'include' })
+              .then(async (r) => {
+                if (r.ok) {
+                  const rawContent = await r.text()
+                  const rawParsed = matter(rawContent)
+                  setBodyFromParsed(rawParsed, post)
+                } else {
+                  setBodyFromParsed(parsed, post)
+                }
+              })
+              .catch(() => setBodyFromParsed(parsed, post))
+            return
+          }
+        }
+        setBodyFromParsed(parsed, post)
       })
       .catch((e) => setMessage(t('loadFailed', { msg: e instanceof Error ? e.message : String(e) })))
       .finally(() => setLoading(false))
   }, [slug])
+
+  function setBodyFromParsed(parsed: { data: Record<string, unknown>; content: string }, post: { title?: string; slug?: string; summary?: string; status?: string; category?: string }) {
+    const data = parsed.data
+    const tags = Array.isArray(data.tags)
+      ? (data.tags as string[]).join(', ')
+      : typeof data.tags === 'string'
+        ? data.tags
+        : ''
+    setFm({
+      title: (data.title as string) ?? post.title ?? '',
+      slug: (data.slug as string) ?? post.slug ?? '',
+      date: (data.date as string)?.slice(0, 10) ?? defaultFm.date,
+      tags,
+      summary: (data.summary as string) ?? post.summary ?? '',
+      status: ((data.status as 'draft' | 'published') ?? post.status ?? 'published'),
+      category: (data.category as string) ?? post.category ?? '',
+    })
+    setBody(parsed.content)
+  }
 
   const isEdit = !!slug
 

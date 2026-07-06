@@ -81,14 +81,15 @@ export async function ingestMarkdownFile(
   const finalRaw = matter.stringify(parsed.content, parsed.data)
   await fs.writeFile(targetPath, finalRaw, 'utf-8')
 
-  // 入库
+  // 入库（content_md 存完整 markdown，含 frontmatter，方便 Editor 加载）
   const existing = postRepo.findBySlug(slug)
   let post
   if (existing) {
     post = postRepo.update(slug, {
       title,
       summary: fm.summary ?? null,
-      content_md: parsed.content,
+      content_md: finalRaw,
+      content_html: parsed.html,
       source_path: targetPath,
       status,
       publish_at: fm.publishAt ?? null,
@@ -101,7 +102,8 @@ export async function ingestMarkdownFile(
       slug,
       title,
       summary: fm.summary ?? null,
-      content_md: parsed.content,
+      content_md: finalRaw,
+      content_html: parsed.html,
       source_path: targetPath,
       status,
       publish_at: fm.publishAt ?? null,

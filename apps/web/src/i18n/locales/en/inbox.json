@@ -12,5 +12,7 @@
   "ingest": "Ingest now",
   "ingesting": "Ingesting",
   "ingested": "Ingested: {{slug}}",
-  "ingestFailed": "Failed: {{msg}}"
+  "ingestFailed": "Failed: {{msg}}",
+  "tagsLabel": "Tags",
+  "tagsPlaceholder": "Comma-separated, e.g. React, TypeScript, AI"
 }

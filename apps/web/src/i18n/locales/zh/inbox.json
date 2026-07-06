@@ -12,5 +12,7 @@
   "ingest": "立即收录",
   "ingesting": "收录中",
   "ingested": "已收录: {{slug}}",
-  "ingestFailed": "失败: {{msg}}"
+  "ingestFailed": "失败: {{msg}}",
+  "tagsLabel": "标签",
+  "tagsPlaceholder": "逗号分隔，如 React, TypeScript, AI"
 }
