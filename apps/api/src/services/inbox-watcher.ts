@@ -5,7 +5,7 @@ import { config } from '../config.js'
 import { logger } from '../lib/logger.js'
 import { ingestMarkdownFile } from './ingest.js'
 
-let watcher: chokidar.FSWatcher | null = null
+let watcher: Awaited<ReturnType<typeof chokidar.watch>> | null = null
 
 export function startInboxWatcher(): void {
   if (watcher) return
@@ -18,7 +18,7 @@ export function startInboxWatcher(): void {
     awaitWriteFinish: { stabilityThreshold: 500, pollInterval: 100 },
   })
 
-  watcher.on('add', async (file) => {
+  watcher.on('add', async (file: string) => {
     logger.info({ file }, 'inbox: new file')
     try {
       await ingestMarkdownFile(file, { source: 'inbox' })
@@ -27,7 +27,7 @@ export function startInboxWatcher(): void {
     }
   })
 
-  watcher.on('change', async (file) => {
+  watcher.on('change', async (file: string) => {
     logger.info({ file }, 'inbox: file changed')
     try {
       await ingestMarkdownFile(file, { source: 'inbox' })
@@ -36,7 +36,7 @@ export function startInboxWatcher(): void {
     }
   })
 
-  watcher.on('error', (err) => {
+  watcher.on('error', (err: unknown) => {
     logger.error({ err }, 'inbox watcher error')
   })
 

@@ -61,7 +61,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         sameSite: 'lax',
         path: '/',
         maxAge: 60 * 60 * 24 * 7,
-        secure: process.env.NODE_ENV === 'production',
+        secure: false,
       })
       return { ok: true, user: { username: user.username, role: user.role } }
     },
