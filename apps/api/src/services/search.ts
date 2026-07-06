@@ -11,7 +11,7 @@ interface PostIndexItem {
   date: string
 }
 
-const index = new FlexSearch.Document<PostIndexItem>({
+const index = new FlexSearch.Document<PostIndexItem, string[]>({
   document: {
     id: 'id',
     index: ['title', 'summary', 'content'],
@@ -58,7 +58,7 @@ export function searchPosts(
   q: string,
   limit = 20,
 ): { id: number; slug: string; title: string; summary: string; date: string }[] {
-  const results = index.search(q, { limit, enrich: true }) as Array<{
+  const results = index.search(q, { limit, enrich: true }) as unknown as Array<{
     field: string
     result: Array<{ id: string; doc: PostIndexItem }>
   }>
