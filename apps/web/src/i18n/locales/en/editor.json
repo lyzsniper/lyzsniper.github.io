@@ -1,32 +1,37 @@
 {
   "newTitle": "New post",
   "editTitle": "Edit post",
+  "newHeading": "Create new post",
+  "editHeading": "Edit post",
   "writeSomething": "Write something",
   "edit": "Edit",
   "back": "Back",
   "save": "Save & publish",
+  "savePublish": "Save & publish",
   "update": "Update",
   "saving": "Saving…",
   "saved": "Updated",
   "created": "Created",
   "loadFailed": "Load failed: {{msg}}",
   "saveFailed": "Save failed: {{msg}}",
-  "required": "Title and slug are required",
+  "requiredFields": "Title and slug are required",
   "loading": "Loading…",
   "fields": {
     "title": "Title",
-    "titlePlaceholder": "Post title",
     "slug": "Slug (URL)",
-    "slugPlaceholder": "my-post-slug",
     "date": "Date",
     "tags": "Tags (comma-separated)",
-    "tagsPlaceholder": "React, TypeScript, AI",
     "category": "Category (use / for hierarchy, e.g. Tech/AI)",
-    "categoryPlaceholder": "Tech/AI",
     "summary": "Summary",
-    "summaryPlaceholder": "One-line description",
     "status": "Status",
     "statusPublished": "published",
     "statusDraft": "draft"
+  },
+  "placeholders": {
+    "title": "Post title",
+    "slug": "my-post-slug",
+    "tags": "React, TypeScript, AI",
+    "category": "Tech/AI",
+    "summary": "One-line description"
   }
 }

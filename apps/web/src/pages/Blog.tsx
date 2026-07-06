@@ -4,9 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { Search, PackageOpen, X, FileText } from 'lucide-react'
 import { api, batchDownload, type PostListResponse, type PostSummary, type CategoryInfo } from '@/lib/api'
 import PostCard from '@/components/PostCard'
+import { useAuthStore } from '@/store/auth'
 
 export default function Blog() {
   const { t } = useTranslation(['common', 'blog'])
+  const user = useAuthStore((s) => s.user)
+  const isAdmin = user?.role === 'admin'
   const [params, setParams] = useSearchParams()
   const [data, setData] = useState<PostListResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -107,7 +110,7 @@ export default function Blog() {
             </p>
           )}
         </div>
-        {data && data.posts.length > 0 && (
+        {isAdmin && data && data.posts.length > 0 && (
           <div className="flex items-center gap-2">
             <button onClick={selectAll} className="btn btn-secondary btn-sm">
               {selected.size === data.posts.length ? t('blog:deselectAll') : t('blog:selectAll')}

@@ -8,6 +8,7 @@ import rehypeSlug from 'rehype-slug'
 import { ArrowUp, Download, FileText, Sun, Moon } from 'lucide-react'
 import { api, type PostDetail, type TocItem } from '@/lib/api'
 import { useThemeStore } from '@/store/theme'
+import { useAuthStore } from '@/store/auth'
 
 export default function Post() {
   const { t, i18n } = useTranslation(['common', 'post'])
@@ -18,6 +19,8 @@ export default function Post() {
   const [showBackTop, setShowBackTop] = useState(false)
   const theme = useThemeStore((s) => s.theme)
   const toggleTheme = useThemeStore((s) => s.toggle)
+  const user = useAuthStore((s) => s.user)
+  const isAdmin = user?.role === 'admin'
 
   useEffect(() => {
     setError(null)
@@ -158,17 +161,21 @@ export default function Post() {
           className="mt-16 pt-6 flex flex-wrap gap-2"
           style={{ borderTop: '1px solid var(--border-subtle)' }}
         >
-          <a href={api.downloadUrl(post.slug)} className="btn btn-secondary btn-sm">
-            <Download size={13} /> {t('post:downloadMd')}
-          </a>
-          <a
-            href={api.pdfUrl(post.slug)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-secondary btn-sm"
-          >
-            <FileText size={13} /> {t('post:exportPdf')}
-          </a>
+          {isAdmin && (
+            <>
+              <a href={api.downloadUrl(post.slug)} className="btn btn-secondary btn-sm">
+                <Download size={13} /> {t('post:downloadMd')}
+              </a>
+              <a
+                href={api.pdfUrl(post.slug)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-secondary btn-sm"
+              >
+                <FileText size={13} /> {t('post:exportPdf')}
+              </a>
+            </>
+          )}
           <Link to="/blog" className="btn btn-ghost btn-sm ml-auto">
             ← {t('post:backToList')}
           </Link>

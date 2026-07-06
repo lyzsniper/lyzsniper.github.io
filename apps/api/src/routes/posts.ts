@@ -6,6 +6,7 @@ import { TagRepo } from '../db/tags.repo.js'
 import { searchPosts } from '../services/search.js'
 import { exportPdf } from '../services/pdf.js'
 import { extractToc } from '../lib/markdown.js'
+import { requireAdmin } from '../routes/auth.js'
 
 const postRepo = new PostRepo()
 const tagRepo = new TagRepo()
@@ -113,9 +114,10 @@ export async function postRoutes(app: FastifyInstance): Promise<void> {
     },
   )
 
-  // GET /api/posts/:slug/download — 下载 .md
+  // GET /api/posts/:slug/download — 下载 .md（仅管理员）
   app.get<{ Params: { slug: string } }>(
     '/:slug/download',
+    { preHandler: requireAdmin },
     async (req, reply) => {
       const row = postRepo.findBySlug(req.params.slug)
       if (!row) return reply.code(404).send({ error: 'post not found' })
@@ -131,9 +133,10 @@ export async function postRoutes(app: FastifyInstance): Promise<void> {
     },
   )
 
-  // POST /api/posts/batch-download — 批量 zip
+  // POST /api/posts/batch-download — 批量 zip（仅管理员）
   app.post<{ Body: { slugs: string[] } }>(
     '/batch-download',
+    { preHandler: requireAdmin },
     async (req, reply) => {
       const { slugs } = req.body ?? {}
       if (!Array.isArray(slugs) || slugs.length === 0) {

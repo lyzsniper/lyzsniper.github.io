@@ -1,32 +1,37 @@
 {
   "newTitle": "新建文章",
   "editTitle": "编辑文章",
+  "newHeading": "创建新文章",
+  "editHeading": "编辑文章",
   "writeSomething": "写点什么吧",
   "edit": "编辑",
   "back": "返回",
   "save": "保存发布",
+  "savePublish": "保存发布",
   "update": "更新",
   "saving": "保存中…",
   "saved": "已更新",
   "created": "已创建",
   "loadFailed": "加载失败: {{msg}}",
   "saveFailed": "保存失败: {{msg}}",
-  "required": "标题和 slug 必填",
+  "requiredFields": "标题和 slug 必填",
   "loading": "加载中…",
   "fields": {
     "title": "标题",
-    "titlePlaceholder": "文章标题",
     "slug": "Slug (URL)",
-    "slugPlaceholder": "my-post-slug",
     "date": "日期",
     "tags": "标签（逗号分隔）",
-    "tagsPlaceholder": "React, TypeScript, AI",
     "category": "分类（层级用 / 分隔，如 技术/AI）",
-    "categoryPlaceholder": "技术/AI",
     "summary": "摘要",
-    "summaryPlaceholder": "一句话简介",
     "status": "状态",
     "statusPublished": "published",
     "statusDraft": "draft"
+  },
+  "placeholders": {
+    "title": "文章标题",
+    "slug": "my-post-slug",
+    "tags": "React, TypeScript, AI",
+    "category": "技术/AI",
+    "summary": "一句话简介"
   }
 }
