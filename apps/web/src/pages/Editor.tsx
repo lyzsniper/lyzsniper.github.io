@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, Save, User as UserIcon } from 'lucide-react'
 import MDEditor from '@uiw/react-md-editor'
-import matter from 'gray-matter'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/auth'
 
@@ -24,6 +23,12 @@ const defaultFm: Frontmatter = {
   summary: '',
   status: 'published',
   category: '',
+}
+
+/** 去掉 markdown 字符串开头的 frontmatter，返回正文 */
+function stripFrontmatter(md: string): string {
+  const m = /^---\r?\n[\s\S]*?\r?\n---\r?\n?/.exec(md)
+  return m ? md.slice(m[0].length) : md
 }
 
 const sample = `# 在这里写正文
@@ -80,52 +85,22 @@ export default function Editor() {
         return r.json()
       })
       .then((post) => {
-        // contentMd 可能只存了正文（不含 frontmatter），需要从源文件读取完整 markdown
-        let raw = post.contentMd ?? ''
-        const parsed = matter(raw)
-        // 如果解析不出 frontmatter（收录时只存了正文），尝试从源文件读取
-        const hasFrontmatter = Object.keys(parsed.data).length > 0
-        if (!hasFrontmatter && raw.trim() === parsed.content.trim()) {
-          // contentMd 没有 frontmatter，尝试读取源文件
-          if (post.sourcePath) {
-            fetch(`/api/posts/${encodeURIComponent(slug)}/raw`, { credentials: 'include' })
-              .then(async (r) => {
-                if (r.ok) {
-                  const rawContent = await r.text()
-                  const rawParsed = matter(rawContent)
-                  setBodyFromParsed(rawParsed, post)
-                } else {
-                  setBodyFromParsed(parsed, post)
-                }
-              })
-              .catch(() => setBodyFromParsed(parsed, post))
-            return
-          }
-        }
-        setBodyFromParsed(parsed, post)
+        // API 直接返回结构化字段，无需在前端解析 frontmatter
+        setFm({
+          title: post.title ?? '',
+          slug: post.slug ?? '',
+          date: (post.publishedAt ?? post.date ?? '').slice(0, 10) || defaultFm.date,
+          tags: Array.isArray(post.tags) ? post.tags.join(', ') : '',
+          summary: post.summary ?? '',
+          status: (post.status as 'draft' | 'published') ?? 'published',
+          category: post.category ?? '',
+        })
+        // contentMd 可能包含 frontmatter，用正则去掉
+        setBody(stripFrontmatter(post.contentMd ?? ''))
       })
       .catch((e) => setMessage(t('loadFailed', { msg: e instanceof Error ? e.message : String(e) })))
       .finally(() => setLoading(false))
   }, [slug])
-
-  function setBodyFromParsed(parsed: { data: Record<string, unknown>; content: string }, post: { title?: string; slug?: string; summary?: string; status?: string; category?: string }) {
-    const data = parsed.data
-    const tags = Array.isArray(data.tags)
-      ? (data.tags as string[]).join(', ')
-      : typeof data.tags === 'string'
-        ? data.tags
-        : ''
-    setFm({
-      title: (data.title as string) ?? post.title ?? '',
-      slug: (data.slug as string) ?? post.slug ?? '',
-      date: (data.date as string)?.slice(0, 10) ?? defaultFm.date,
-      tags,
-      summary: (data.summary as string) ?? post.summary ?? '',
-      status: ((data.status as 'draft' | 'published') ?? post.status ?? 'published'),
-      category: (data.category as string) ?? post.category ?? '',
-    })
-    setBody(parsed.content)
-  }
 
   const isEdit = !!slug
 
