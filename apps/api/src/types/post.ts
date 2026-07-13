@@ -14,6 +14,8 @@ export interface PostRow {
   cover_image: string | null
   view_count: number
   category: string | null
+  series: string | null
+  series_order: number | null
 }
 
 export interface PostSummaryRow {
@@ -26,6 +28,8 @@ export interface PostSummaryRow {
   created_at: string
   tag_names: string | null
   category: string | null
+  series: string | null
+  series_order: number | null
 }
 
 export interface PostDetailRow extends PostRow {
@@ -53,6 +57,8 @@ export interface CreatePostInput {
   reading_time?: number | null
   cover_image?: string | null
   category?: string | null
+  series?: string | null
+  series_order?: number | null
 }
 
 export interface UpdatePostInput {
@@ -66,4 +72,6 @@ export interface UpdatePostInput {
   reading_time?: number | null
   cover_image?: string | null
   category?: string | null
+  series?: string | null
+  series_order?: number | null
 }

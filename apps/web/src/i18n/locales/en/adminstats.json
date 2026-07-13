@@ -1,0 +1,36 @@
+{
+  "eyebrow": "Statistics",
+  "title": "Statistics",
+  "subtitle": "Blog PV / UV / Top content / 404 monitoring",
+  "tabs": {
+    "overview": "Overview",
+    "posts": "Top Posts",
+    "sources": "Referrers",
+    "404s": "404s"
+  },
+  "kpi": {
+    "todayPv": "Today PV",
+    "todayUv": "UV {{n}}",
+    "last7Pv": "Last 7d PV",
+    "last7Uv": "UV {{n}}",
+    "last30Pv": "Last 30d PV",
+    "last30Uv": "UV {{n}}",
+    "totalPv": "Total PV",
+    "totalUv": "UV {{n}}",
+    "404": "404 Total"
+  },
+  "trend": {
+    "title": "PV / UV Trend",
+    "7d": "7d",
+    "30d": "30d",
+    "90d": "90d"
+  },
+  "table": {
+    "title": "Post",
+    "referrer": "Referrer",
+    "visits": "Visits",
+    "path": "Path"
+  },
+  "noData": "No data yet",
+  "no404": "No 404s"
+}

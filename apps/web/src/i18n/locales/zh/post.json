@@ -9,5 +9,15 @@
   "downloadMd": "下载 .md",
   "exportPdf": "导出 PDF",
   "backToTop": "返回顶部",
-  "toc": "目录"
+  "toc": "目录",
+  "tocToggle": "切换目录",
+  "share": "分享到",
+  "shareWeibo": "微博",
+  "shareZhihu": "知乎",
+  "copyLink": "复制链接",
+  "relatedPosts": "相关推荐",
+  "series": "系列",
+  "seriesProgress": "第 {{current}}/{{total}} 篇",
+  "prevPost": "上一篇",
+  "nextPost": "下一篇"
 }

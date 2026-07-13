@@ -1,0 +1,36 @@
+{
+  "eyebrow": "数据统计",
+  "title": "数据统计",
+  "subtitle": "博客 PV / UV / 热门内容 / 404 监控",
+  "tabs": {
+    "overview": "总览",
+    "posts": "热门文章",
+    "sources": "访问来源",
+    "404s": "404"
+  },
+  "kpi": {
+    "todayPv": "今日 PV",
+    "todayUv": "UV {{n}}",
+    "last7Pv": "近 7 日 PV",
+    "last7Uv": "UV {{n}}",
+    "last30Pv": "近 30 日 PV",
+    "last30Uv": "UV {{n}}",
+    "totalPv": "历史总 PV",
+    "totalUv": "UV {{n}}",
+    "404": "404 总数"
+  },
+  "trend": {
+    "title": "PV / UV 趋势",
+    "7d": "7 天",
+    "30d": "30 天",
+    "90d": "90 天"
+  },
+  "table": {
+    "title": "文章",
+    "referrer": "来源",
+    "visits": "访问数",
+    "path": "路径"
+  },
+  "noData": "暂无数据",
+  "no404": "暂无 404"
+}

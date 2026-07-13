@@ -30,6 +30,10 @@
     "tags": {
       "title": "Tag management",
       "desc": "Add color and description to tags"
+    },
+    "stats": {
+      "title": "Statistics",
+      "desc": "PV/UV, top posts, 404s"
     }
   },
   "postList": {

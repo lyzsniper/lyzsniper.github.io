@@ -1,15 +1,165 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, type ImgHTMLAttributes } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
+import rehypeRaw from 'rehype-raw'
 import rehypeSlug from 'rehype-slug'
-import { ArrowUp, Download, FileText, Sun, Moon } from 'lucide-react'
+import {
+  Download,
+  FileText,
+  Sun,
+  Moon,
+  ChevronUp,
+  Menu,
+  X,
+} from 'lucide-react'
 import { api, type PostDetail, type TocItem } from '@/lib/api'
+import { useHead } from '@/lib/useHead'
+import { stripFrontmatter } from '@/lib/frontmatter'
 import { useThemeStore } from '@/store/theme'
 import { useAuthStore } from '@/store/auth'
+import ShareButtons from '@/components/ShareButtons'
+import RelatedPosts from '@/components/RelatedPosts'
+import CommentSection from '@/components/CommentSection'
+import SeriesNav from '@/components/SeriesNav'
 
+/* ------------------------------------------------------------------ */
+/* 懒加载图片 <img> 替换                                                 */
+/* ------------------------------------------------------------------ */
+function LazyImage(props: ImgHTMLAttributes<HTMLImageElement>) {
+  const ref = useCallback((el: HTMLImageElement | null) => {
+    if (!el) return
+    if ('loading' in HTMLImageElement.prototype) {
+      el.loading = 'lazy'
+      el.decoding = 'async'
+    }
+  }, [])
+  return <img ref={ref} loading="lazy" decoding="async" {...props} />
+}
+
+/* ------------------------------------------------------------------ */
+/* 目录组件：观察当前激活的 section + 渲染两份（移动端浮窗 + 桌面端列）               */
+/* ------------------------------------------------------------------ */
+function useTocObserver(items: TocItem[]) {
+  const [active, setActive] = useState<string | null>(null)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActive(entry.target.id)
+        }
+      },
+      { rootMargin: '-80px 0px -80% 0px' },
+    )
+    items.forEach((item) => {
+      const el = document.getElementById(item.slug)
+      if (el) observer.observe(el)
+    })
+    return () => observer.disconnect()
+  }, [items])
+  return active
+}
+
+/** 渲染一个目录列表（DOM 结构完全一样，给移动/桌面两份副本各用） */
+function TocList({
+  items,
+  active,
+  onItemClick,
+}: {
+  items: TocItem[]
+  active: string | null
+  onItemClick?: () => void
+}) {
+  return (
+    <ul className="space-y-1.5">
+      {items.map((item) => (
+        <li
+          key={item.slug}
+          style={{ paddingLeft: `${(item.level - 1) * 12}px` }}
+        >
+          <a
+            href={`#${item.slug}`}
+            onClick={onItemClick}
+            className={`block py-0.5 text-sm transition-colors border-l-2 -ml-[1px] ${
+              active === item.slug
+                ? 'text-[var(--accent)] border-[var(--accent)] font-medium'
+                : 'text-[var(--fg-secondary)] border-transparent hover:text-[var(--fg-primary)] hover:border-[var(--border-default)]'
+            }`}
+          >
+            {item.text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/** 移动端：右上角浮动按钮 + 全屏抽屉（独立渲染，不进 grid） */
+function TocMobile({ items }: { items: TocItem[] }) {
+  const { t } = useTranslation(['common', 'post'])
+  const [open, setOpen] = useState(false)
+  const active = useTocObserver(items)
+  if (items.length === 0) return null
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="lg:hidden fixed top-20 right-4 z-40 w-9 h-9 rounded-full flex items-center justify-center"
+        style={{
+          backgroundColor: 'var(--bg-elevated)',
+          border: '1px solid var(--border-default)',
+          boxShadow: 'var(--shadow-card)',
+          color: 'var(--fg-primary)',
+        }}
+        aria-label={t('post:tocToggle') ?? 'Toggle Table of Contents'}
+      >
+        {open ? <X size={14} /> : <Menu size={14} />}
+      </button>
+
+      {open && (
+        <div className="lg:hidden fixed inset-0 z-30" onClick={() => setOpen(false)}>
+          <div className="absolute inset-0 bg-black/30" />
+          <aside
+            className="absolute right-0 top-0 bottom-0 w-64 overflow-y-auto p-6"
+            style={{ backgroundColor: 'var(--bg-default)', borderLeft: '1px solid var(--border-default)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xs font-medium text-[var(--fg-tertiary)] mb-3 uppercase tracking-wider">
+              {t('post:toc') ?? 'Table of Contents'}
+            </h2>
+            <TocList items={items} active={active} onItemClick={() => setOpen(false)} />
+          </aside>
+        </div>
+      )}
+    </>
+  )
+}
+
+/** 桌面端：放在 grid 右侧列，sticky 跟随滚动 */
+function TocDesktop({ items }: { items: TocItem[] }) {
+  const { t } = useTranslation(['common', 'post'])
+  const active = useTocObserver(items)
+  if (items.length === 0) return null
+  return (
+    <aside
+      className="hidden lg:block sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto"
+      aria-label={t('post:toc') ?? 'Table of Contents'}
+    >
+      <h2 className="text-xs font-medium text-[var(--fg-tertiary)] mb-3 uppercase tracking-wider">
+        {t('post:toc') ?? 'Table of Contents'}
+      </h2>
+      <TocList items={items} active={active} />
+    </aside>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* 主组件                                                               */
+/* ------------------------------------------------------------------ */
 export default function Post() {
   const { t, i18n } = useTranslation(['common', 'post'])
   const { slug = '' } = useParams<{ slug: string }>()
@@ -40,6 +190,51 @@ export default function Post() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [onScroll])
 
+  // 所有 hooks 必须在 early return 之前调用 —— 防止 "Rendered more hooks" 错误
+  const dateLocale = i18n.language?.startsWith('en') ? 'en-US' : 'zh-CN'
+  const date = post ? new Date(post.publishedAt).toLocaleDateString(dateLocale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }) : ''
+  const absoluteUrl = `${window.location.origin}${window.location.pathname}`
+  const isEn = i18n.language?.startsWith('en')
+  const enUrl = post ? `/en/blog/${post.slug}` : ''
+  const canonical = post ? (isEn ? enUrl : `/blog/${post.slug}`) : ''
+
+  useHead({
+    title: post?.title,
+    description: post?.summary ?? undefined,
+    type: 'article',
+    url: absoluteUrl,
+    canonical: post ? canonical : '',
+    image: post?.coverImage ?? undefined,
+    hreflang: post
+      ? [
+          { lang: 'zh', url: `/blog/${post.slug}` },
+          { lang: 'en', url: enUrl },
+        ]
+      : undefined,
+    jsonLd: post
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: post.title,
+          description: post.summary ?? undefined,
+          datePublished: post.publishedAt,
+          dateModified: post.updatedAt,
+          author: { '@type': 'Person', name: '刘酝泽', url: window.location.origin },
+          publisher: {
+            '@type': 'Person',
+            name: '刘酝泽',
+            logo: { '@type': 'ImageObject', url: `${window.location.origin}/avatar.webp` },
+          },
+          mainEntityOfPage: absoluteUrl,
+          keywords: post.tags.join(', '),
+        }
+      : undefined,
+  })
+
   if (error) {
     return (
       <div className="container-prose py-20">
@@ -68,13 +263,6 @@ export default function Post() {
     )
   }
 
-  const dateLocale = i18n.language?.startsWith('en') ? 'en-US' : 'zh-CN'
-  const date = new Date(post.publishedAt).toLocaleDateString(dateLocale, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-
   return (
     <>
       {/* 阅读进度条 */}
@@ -88,7 +276,16 @@ export default function Post() {
         />
       </div>
 
-      <article className="container-prose py-12 md:py-16">
+      {/* 移动端：目录浮窗按钮（不进 grid） */}
+      <TocMobile items={post.toc} />
+
+      {/* 桌面端：grid 双列布局，正文 9 份 + 右侧 sticky 目录 3 份 */}
+      <div
+        className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 px-6 md:px-10 py-12 md:py-16"
+        style={{ width: '100%', maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto' }}
+      >
+        <article className="min-w-0 lg:col-span-9">
+
         {/* 顶部 */}
         <div className="flex items-center justify-between mb-4">
           <Link to="/blog" className="text-sm text-[var(--fg-secondary)] hover:text-[var(--fg-primary)]">
@@ -143,51 +340,77 @@ export default function Post() {
           )}
         </header>
 
-        {/* 目录 */}
-        {post.toc.length > 0 && <TocNav items={post.toc} />}
-
         {/* 正文 */}
-        <div className="prose">
+        <div
+          className="prose"
+          style={{ maxWidth: '100%', width: '100%' }}
+        >
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeSlug, rehypeHighlight]}
+            rehypePlugins={[rehypeRaw, rehypeSlug, rehypeHighlight]}
+            components={{ img: LazyImage as never }}
           >
-            {post.contentMd}
+            {/* contentMd 可能仍带 YAML frontmatter（脏数据 / inbox 摄入未清理），
+                渲染前剥离，避免元数据原文赤裸裸显示在正文顶部 */}
+            {stripFrontmatter(post.contentMd ?? '')}
           </ReactMarkdown>
         </div>
 
-        {/* 操作区 */}
+        {/* 一键分享 + 操作区 */}
         <div
-          className="mt-16 pt-6 flex flex-wrap gap-2"
+          className="mt-12 pt-6 space-y-4"
           style={{ borderTop: '1px solid var(--border-subtle)' }}
         >
-          {isAdmin && (
-            <>
-              <a href={api.downloadUrl(post.slug)} className="btn btn-secondary btn-sm">
-                <Download size={13} /> {t('post:downloadMd')}
-              </a>
-              <a
-                href={api.pdfUrl(post.slug)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-secondary btn-sm"
-              >
-                <FileText size={13} /> {t('post:exportPdf')}
-              </a>
-            </>
-          )}
-          <Link to="/blog" className="btn btn-ghost btn-sm ml-auto">
-            ← {t('post:backToList')}
-          </Link>
+          <ShareButtons url={absoluteUrl} title={post.title} />
+          <div className="flex flex-wrap gap-2">
+            {isAdmin && (
+              <>
+                <a href={api.downloadUrl(post.slug)} className="btn btn-secondary btn-sm">
+                  <Download size={13} /> {t('post:downloadMd')}
+                </a>
+                <a
+                  href={api.pdfUrl(post.slug)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-sm"
+                >
+                  <FileText size={13} /> {t('post:exportPdf')}
+                </a>
+              </>
+            )}
+            <Link to="/blog" className="btn btn-ghost btn-sm ml-auto">
+              ← {t('post:backToList')}
+            </Link>
+          </div>
         </div>
+
+        {/* 上下篇（系列导航） */}
+        {post.series && (
+          <SeriesNav
+            currentSlug={post.slug}
+            series={post.series}
+          />
+        )}
+
+        {/* 相关推荐 */}
+        <RelatedPosts slug={post.slug} />
+
+        {/* 评论 */}
+        <CommentSection postId={post.id} />
       </article>
+
+        {/* 桌面端：右侧 sticky 目录列（3 份 = 25% 宽） */}
+        <div className="hidden lg:block lg:col-span-3">
+          <TocDesktop items={post.toc} />
+        </div>
+      </div>
 
       {/* 返回顶部 */}
       {showBackTop && (
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-8 right-8 w-10 h-10 rounded-full flex items-center justify-center z-40 transition-all"
+          className="fixed bottom-8 right-8 w-10 h-10 rounded-full flex items-center justify-center z-40"
           style={{
             backgroundColor: 'var(--bg-elevated)',
             border: '1px solid var(--border-default)',
@@ -196,60 +419,9 @@ export default function Post() {
           }}
           aria-label={t('post:backToTop')}
         >
-          <ArrowUp size={16} strokeWidth={1.75} />
+          <ChevronUp size={16} strokeWidth={1.75} />
         </button>
       )}
     </>
-  )
-}
-
-function TocNav({ items }: { items: TocItem[] }) {
-  const { t } = useTranslation(['common', 'post'])
-  const [active, setActive] = useState<string | null>(null)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) setActive(entry.target.id)
-        }
-      },
-      { rootMargin: '-80px 0px -80% 0px' },
-    )
-    items.forEach((item) => {
-      const el = document.getElementById(item.slug)
-      if (el) observer.observe(el)
-    })
-    return () => observer.disconnect()
-  }, [items])
-
-  if (items.length === 0) return null
-
-  return (
-    <nav
-      className="mb-10 rounded-lg p-4"
-      style={{
-        backgroundColor: 'var(--bg-subtle)',
-        border: '1px solid var(--border-subtle)',
-      }}
-    >
-      <div className="text-xs font-medium text-[var(--fg-tertiary)] mb-2 uppercase tracking-wider">{t('post:toc')}</div>
-      <ul className="space-y-1 text-sm">
-        {items.map((item) => (
-          <li key={item.slug} style={{ paddingLeft: `${(item.level - 1) * 12}px` }}>
-            <a
-              href={`#${item.slug}`}
-              className={`block py-0.5 transition-colors ${
-                active === item.slug
-                  ? 'text-[var(--accent)] font-medium'
-                  : 'text-[var(--fg-secondary)] hover:text-[var(--fg-primary)]'
-              }`}
-            >
-              {item.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
   )
 }

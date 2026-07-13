@@ -30,6 +30,10 @@
     "tags": {
       "title": "标签管理",
       "desc": "为标签添加颜色和描述"
+    },
+    "stats": {
+      "title": "数据统计",
+      "desc": "PV/UV、热门文章、404"
     }
   },
   "postList": {

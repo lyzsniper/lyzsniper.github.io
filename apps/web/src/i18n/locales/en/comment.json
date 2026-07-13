@@ -1,0 +1,14 @@
+{
+  "title": "Comments",
+  "empty": "No comments yet. Be the first.",
+  "write": "Leave a comment",
+  "reply": "Reply",
+  "replyingTo": "Replying to @{{name}}",
+  "replyingToShort": "Replying",
+  "submit": "Post Comment",
+  "submitting": "Submitting…",
+  "success": "Comment submitted. It will appear after review.",
+  "authorPlaceholder": "Name *",
+  "websitePlaceholder": "Website (optional)",
+  "bodyPlaceholder": "Say something… (2–5000 chars)"
+}

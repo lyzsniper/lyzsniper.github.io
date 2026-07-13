@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import { TagRepo } from '../db/tags.repo.js'
+import { TagRepo, TagConflictError } from '../db/tags.repo.js'
 
 const tagRepo = new TagRepo()
 
@@ -19,8 +19,20 @@ export async function tagRoutes(app: FastifyInstance): Promise<void> {
     Params: { slug: string }
     Body: { name?: string; color?: string | null; description?: string | null }
   }>('/:slug', async (req, reply) => {
-    const updated = tagRepo.updateMeta(req.params.slug, req.body ?? {})
-    if (!updated) return reply.code(404).send({ error: 'tag not found or no fields' })
-    return updated
+    try {
+      const updated = tagRepo.updateMeta(req.params.slug, req.body ?? {})
+      if (!updated) return reply.code(404).send({ error: 'tag not found or no fields' })
+      return updated
+    } catch (e) {
+      if (e instanceof TagConflictError) {
+        return reply.code(409).send({
+          error: 'tag_conflict',
+          field: e.field,
+          message: `已存在同${e.field === 'name' ? '名' : 'slug'}的标签：「${e.value}」`,
+          value: e.value,
+        })
+      }
+      throw e
+    }
   })
 }

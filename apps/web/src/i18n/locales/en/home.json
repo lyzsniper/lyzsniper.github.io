@@ -6,6 +6,10 @@
     "ctaBlog": "Read blog",
     "ctaContact": "Contact me"
   },
+  "seo": {
+    "title": "Jensen Liu — AI Agent Architect",
+    "description": "5 years of enterprise AI R&D · RAG · MCP · A2A · Multi-Agent — turning AI capability into real business value"
+  },
   "about": {
     "eyebrow": "About",
     "p1": "I'm Jensen (刘酝泽). I've designed full-stack pipelines from RAG retrieval to Agent orchestration, and led 0-to-1 projects across ToB products, internal platforms, and vertical-industry systems.",

@@ -2,6 +2,33 @@ import { Link } from 'react-router-dom'
 import { Github, Mail, MapPin } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+/** 小红书官方风格 logo（红底白字） */
+function XiaohongshuIcon({ size = 13 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      style={{ flexShrink: 0 }}
+    >
+      <rect x="0" y="0" width="24" height="24" rx="5" fill="#FF2442" />
+      <text
+        x="12"
+        y="15.5"
+        fontSize="9"
+        fontWeight="700"
+        fontFamily="'PingFang SC', 'Microsoft YaHei', sans-serif"
+        fill="#ffffff"
+        textAnchor="middle"
+      >
+        小红书
+      </text>
+    </svg>
+  )
+}
+
 export default function Footer() {
   const { t } = useTranslation(['common', 'footer'])
   const year = new Date().getFullYear()
@@ -31,16 +58,6 @@ export default function Footer() {
           <div>
             <h4 className="eyebrow mb-4">{t('footer:sections.nav')}</h4>
             <ul className="space-y-2.5 text-sm">
-              <li>
-                <a href="/#about" className="text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] transition">
-                  {t('footer:links.about')}
-                </a>
-              </li>
-              <li>
-                <a href="/#projects" className="text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] transition">
-                  {t('footer:links.projects')}
-                </a>
-              </li>
               <li>
                 <Link to="/blog" className="text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] transition">
                   {t('footer:links.blog')}
@@ -80,6 +97,17 @@ export default function Footer() {
                   className="hover:text-[var(--fg-primary)] transition"
                 >
                   github.com/lyzsniper
+                </a>
+              </li>
+              <li className="flex items-center gap-2 text-[var(--fg-secondary)]">
+                <XiaohongshuIcon size={13} />
+                <a
+                  href="https://www.xiaohongshu.com/user/profile/68d9def6000000002102d2e0"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[var(--fg-primary)] transition"
+                >
+                  AI前沿量子港
                 </a>
               </li>
             </ul>

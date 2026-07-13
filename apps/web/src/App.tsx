@@ -11,6 +11,7 @@ import Admin from './pages/Admin'
 import Editor from './pages/Editor'
 import Inbox from './pages/Inbox'
 import TagManage from './pages/TagManage'
+import AdminStats from './pages/AdminStats'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 import { useAuthStore } from './store/auth'
@@ -82,6 +83,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admin/stats"
+          element={
+            <ProtectedRoute>
+              <AdminStats />
+            </ProtectedRoute>
+          }
+        />
       </Route>
       {/* English routes — same components, /en prefix */}
       <Route element={<Layout />}>
@@ -129,6 +138,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <TagManage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/en/admin/stats"
+          element={
+            <ProtectedRoute>
+              <AdminStats />
             </ProtectedRoute>
           }
         />
