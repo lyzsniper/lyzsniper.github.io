@@ -4,6 +4,7 @@ import { ArrowLeft, Save, User as UserIcon } from 'lucide-react'
 import MDEditor from '@uiw/react-md-editor'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/store/auth'
+import { stripFrontmatter, getFrontmatterField } from '@/lib/frontmatter'
 
 interface Frontmatter {
   title: string
@@ -25,10 +26,19 @@ const defaultFm: Frontmatter = {
   category: '',
 }
 
-/** 去掉 markdown 字符串开头的 frontmatter，返回正文 */
-function stripFrontmatter(md: string): string {
-  const m = /^---\r?\n[\s\S]*?\r?\n---\r?\n?/.exec(md)
-  return m ? md.slice(m[0].length) : md
+/**
+ * 从 markdown 中提取 frontmatter 的 tags。
+ * 兼容 `tags: [a, b]` 和 `tags: a, b`（含字符串包裹的）。
+ */
+function parseFrontmatterTags(md: string): string[] {
+  const value = getFrontmatterField(md, 'tags')
+  if (!value) return []
+  const inner = value.startsWith('[') && value.endsWith(']') ? value.slice(1, -1) : value
+  if (!inner.trim()) return []
+  return inner
+    .split(',')
+    .map((s) => s.trim().replace(/^['"]|['"]$/g, ''))
+    .filter(Boolean)
 }
 
 const sample = `# 在这里写正文
@@ -85,12 +95,18 @@ export default function Editor() {
         return r.json()
       })
       .then((post) => {
-        // API 直接返回结构化字段，无需在前端解析 frontmatter
+        // 标签兜底：当 DB 端 post_tags 为空时（脏数据 / 之前保存清空过），
+        // 从 markdown frontmatter 解析出来回填，让编辑器至少显示历史标签
+        const apiTags = Array.isArray(post.tags) ? post.tags.filter(Boolean) : []
+        const fmTags = parseFrontmatterTags(post.contentMd ?? '')
+        const mergedTags =
+          apiTags.length > 0 ? apiTags : fmTags.length > 0 ? fmTags : []
+
         setFm({
           title: post.title ?? '',
           slug: post.slug ?? '',
           date: (post.publishedAt ?? post.date ?? '').slice(0, 10) || defaultFm.date,
-          tags: Array.isArray(post.tags) ? post.tags.join(', ') : '',
+          tags: mergedTags.join(', '),
           summary: post.summary ?? '',
           status: (post.status as 'draft' | 'published') ?? 'published',
           category: post.category ?? '',

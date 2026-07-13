@@ -9,6 +9,7 @@ import {
   Trash2,
   RefreshCw,
   FileText,
+  BarChart3,
 } from 'lucide-react'
 import type { PostSummary } from '@/lib/api'
 import { useTranslation } from 'react-i18next'
@@ -237,6 +238,18 @@ export default function Admin() {
               {t('quickActions.tags.title')}
             </h3>
             <p className="text-xs text-[var(--fg-tertiary)] mt-1">{t('quickActions.tags.desc')}</p>
+          </div>
+        </Link>
+        <Link
+          to="/admin/stats"
+          className="surface-card-interactive p-5 flex items-start gap-3 group"
+        >
+          <BarChart3 size={18} className="text-[var(--accent)] shrink-0 mt-0.5" strokeWidth={1.75} />
+          <div>
+            <h3 className="text-sm font-semibold text-[var(--fg-primary)] group-hover:text-[var(--accent)] transition-colors">
+              {t('quickActions.stats.title')}
+            </h3>
+            <p className="text-xs text-[var(--fg-tertiary)] mt-1">{t('quickActions.stats.desc')}</p>
           </div>
         </Link>
       </div>

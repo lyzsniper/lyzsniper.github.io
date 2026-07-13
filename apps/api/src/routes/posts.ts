@@ -93,8 +93,57 @@ export async function postRoutes(app: FastifyInstance): Promise<void> {
         updatedAt: row.updated_at,
         readingTime: row.reading_time,
         coverImage: row.cover_image,
+        series: row.series,
+        seriesOrder: row.series_order,
         toc: extractToc(row.content_md),
       }
+    },
+  )
+
+  // GET /api/posts/:slug/related — 相关推荐（标签 + 内容相似度）
+  app.get<{ Params: { slug: string } }>(
+    '/:slug/related',
+    async (req: FastifyRequest<{ Params: { slug: string } }>, reply: FastifyReply) => {
+      const row = postRepo.findBySlug(req.params.slug)
+      if (!row) return reply.code(404).send({ error: 'post not found' })
+
+      const tags = row.tag_names ? row.tag_names.split(',') : []
+      const limit = 5
+      const candidates = new Map<string, { slug: string; title: string; score: number }>()
+
+      // 1) 标签匹配：每个共同标签 +0.6
+      if (tags.length > 0) {
+        const tagMatches = postRepo.findByTags(tags, 20)
+        for (const m of tagMatches) {
+          if (m.slug === row.slug) continue
+          const mTags = m.tag_names ? m.tag_names.split(',') : []
+          const overlap = tags.filter((t) => mTags.includes(t)).length
+          const score = overlap * 0.6
+          candidates.set(m.slug, { slug: m.slug, title: m.title, score })
+        }
+      }
+
+      // 2) FlexSearch 相似度：标题 + 摘要 文本匹配 +0.4
+      const q = `${row.title} ${row.summary ?? ''}`.trim()
+      if (q.length > 0) {
+        const searchHits = searchPosts(q, 10)
+        for (const hit of searchHits) {
+          if (hit.slug === row.slug) continue
+          const existing = candidates.get(hit.slug)
+          if (existing) {
+            existing.score += 0.4
+          } else {
+            candidates.set(hit.slug, { slug: hit.slug, title: hit.title, score: 0.4 })
+          }
+        }
+      }
+
+      // 按 score 降序取 top N
+      const sorted = [...candidates.values()]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit)
+
+      return { related: sorted }
     },
   )
 

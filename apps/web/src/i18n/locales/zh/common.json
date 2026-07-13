@@ -5,6 +5,7 @@
   "loading": "加载中…",
   "error": "出错了",
   "select": "选择",
+  "copied": "已复制",
   "skipToContent": "跳到主要内容",
   "theme": {
     "switchToLight": "切换到白天模式",

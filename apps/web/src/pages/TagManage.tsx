@@ -74,7 +74,12 @@ export default function TagManage() {
           description: draft.description || null,
         }),
       })
-      if (!res.ok) throw new Error(await res.text())
+      if (!res.ok) {
+        // 尝试解析后端结构化错误（409 conflict 等）
+        const body = await res.json().catch(() => null)
+        const msg = body?.message ?? body?.error ?? `HTTP ${res.status}`
+        throw new Error(msg)
+      }
       setMessage(t('saved', { name: draft.name }))
       cancelEdit()
       await load()

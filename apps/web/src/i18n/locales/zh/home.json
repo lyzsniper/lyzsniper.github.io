@@ -6,6 +6,10 @@
     "ctaBlog": "阅读博客",
     "ctaContact": "联系我"
   },
+  "seo": {
+    "title": "刘酝泽 — AI Agent 架构师",
+    "description": "5 年企业级 AI 应用研发经验 · RAG · MCP · A2A · Multi-Agent — 让 AI 在业务里产生真实价值"
+  },
   "about": {
     "eyebrow": "关于",
     "p1": "你好，我是刘酝泽（Jensen）。我设计过从 RAG 检索到 Agent 编排的完整工程链路，也在 ToB、平台型、垂直行业信息化三类场景里做过从 0 到 1 的项目。",

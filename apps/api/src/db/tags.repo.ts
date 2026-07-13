@@ -1,6 +1,14 @@
 import type { DatabaseSync } from 'node:sqlite'
 import { getDb } from './sqlite.js'
 
+/** name/slug 已被另一个 tag 占用 — 由路由层转成 409 */
+export class TagConflictError extends Error {
+  constructor(public readonly field: 'name' | 'slug', public readonly value: string) {
+    super(`tag with ${field} "${value}" already exists`)
+    this.name = 'TagConflictError'
+  }
+}
+
 export class TagRepo {
   private _db: DatabaseSync | undefined
   private get db(): DatabaseSync {
@@ -54,24 +62,72 @@ export class TagRepo {
       params.description = meta.description
     }
     if (fields.length === 0) return null
-    this.db
-      .prepare(`UPDATE tags SET ${fields.join(', ')} WHERE slug = @slug`)
-      .run(params as Record<string, string | number | null>)
+
+    // 提前检查 name 唯一性，给出友好错误而不是等 SQLite 抛 UNIQUE
+    if (meta.name !== undefined) {
+      const conflict = this.db
+        .prepare('SELECT slug FROM tags WHERE name = ? AND slug != ?')
+        .get(meta.name, slug) as { slug: string } | undefined
+      if (conflict) throw new TagConflictError('name', meta.name)
+    }
+
+    try {
+      this.db
+        .prepare(`UPDATE tags SET ${fields.join(', ')} WHERE slug = @slug`)
+        .run(params as Record<string, string | number | null>)
+    } catch (e) {
+      // 兜底：万一预检查和写入之间被并发绕过，仍捕获 SQLite 原始错误
+      const msg = e instanceof Error ? e.message : String(e)
+      if (msg.includes('UNIQUE constraint failed: tags.name')) {
+        throw new TagConflictError('name', meta.name ?? '')
+      }
+      throw e
+    }
+
     return this.db
       .prepare('SELECT name, slug, color, description FROM tags WHERE slug = ?')
       .get(slug) as { name: string; slug: string; color: string | null; description: string | null } | null
   }
 
+  /**
+   * 给文章附加标签时调用：保证幂等。
+   * - name 已被另一个 tag 占用 → 直接复用那个 tag（不报错）
+   * - slug 已被另一个 tag 占用 → 直接复用那个 tag（不报错）
+   * - 都不占 → INSERT；并发竞态兜底 UNIQUE 重新查
+   */
   upsertByName(name: string): number {
-    const slug = this.toSlug(name)
-    const existing = this.db
+    const trimmed = (name ?? '').trim()
+    if (!trimmed) throw new Error('tag name cannot be empty')
+    const slug = this.toSlug(trimmed)
+
+    // 1) 按 name 查（解决 name 相同但 slug 不同的情况：直接复用）
+    const byName = this.db
+      .prepare('SELECT id FROM tags WHERE name = ?')
+      .get(trimmed) as { id: number } | undefined
+    if (byName) return byName.id
+
+    // 2) 按 slug 查（大小写、空格变体都可命中）
+    const bySlug = this.db
       .prepare('SELECT id FROM tags WHERE slug = ?')
       .get(slug) as { id: number } | undefined
-    if (existing) return existing.id
-    const info = this.db
-      .prepare('INSERT INTO tags (name, slug) VALUES (?, ?)')
-      .run(name, slug)
-    return Number(info.lastInsertRowid)
+    if (bySlug) return bySlug.id
+
+    // 3) INSERT；并发场景下别人刚插过 → 兜底重查
+    try {
+      const info = this.db
+        .prepare('INSERT INTO tags (name, slug) VALUES (?, ?)')
+        .run(trimmed, slug)
+      return Number(info.lastInsertRowid)
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      if (msg.includes('UNIQUE constraint failed')) {
+        const again = this.db
+          .prepare('SELECT id FROM tags WHERE name = ? OR slug = ?')
+          .get(trimmed, slug) as { id: number } | undefined
+        if (again) return again.id
+      }
+      throw e
+    }
   }
 
   attach(postId: number, tagIds: number[]): void {

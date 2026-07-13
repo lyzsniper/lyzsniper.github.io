@@ -12,6 +12,10 @@ import { searchRoutes } from './routes/search.js'
 import { fileRoutes } from './routes/files.js'
 import { agentRoutes } from './routes/agent.js'
 import { feedRoutes } from './routes/feed.js'
+import { commentRoutes } from './routes/comments.js'
+import { statsRoutes } from './routes/stats.js'
+import { seoRoutes } from './routes/seo.js'
+import { trackPageView } from './services/tracker.js'
 import { inboxRoutes } from './routes/inbox.js'
 import { categoryRoutes } from './routes/categories.js'
 import { startInboxWatcher, stopInboxWatcher } from './services/inbox-watcher.js'
@@ -55,11 +59,20 @@ async function buildServer() {
   await app.register(inboxRoutes, { prefix: '/api/inbox' })
   await app.register(categoryRoutes, { prefix: '/api/categories' })
   await app.register(feedRoutes, { prefix: '/api' })
+  await app.register(commentRoutes, { prefix: '/api/comments' })
+  await app.register(statsRoutes, { prefix: '/api/admin/stats' })
+  await app.register(seoRoutes, { prefix: '' })
+
+  // 追踪页面访问（onResponse hook，所有已匹配路由）
+  app.addHook('onResponse', (req, reply, done) => {
+    trackPageView(req, reply)
+    done()
+  })
 
   // 给所有需要鉴权的 admin 路由加 onRequest 钩子
   // 匹配写到 /api/posts, /api/tags, /api/files, /api/inbox 的请求
   const writeMethods = new Set(['POST', 'PUT', 'DELETE', 'PATCH'])
-  const adminPrefixes = ['/api/posts', '/api/tags', '/api/files', '/api/inbox']
+  const adminPrefixes = ['/api/posts', '/api/tags', '/api/files', '/api/inbox', '/api/admin']
   app.addHook('onRequest', async (req, reply) => {
     if (!writeMethods.has(req.method)) return
     const url = req.url.split('?')[0]

@@ -309,6 +309,17 @@
   margin: 1.5em 0;
 }
 
+/* Inline SVG (raw HTML in markdown) */
+.prose svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.75em auto;
+  border-radius: theme('borderRadius.lg');
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-muted);
+}
+
 .prose table {
   width: 100%;
   border-collapse: collapse;

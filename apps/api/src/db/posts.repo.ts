@@ -96,6 +96,25 @@ export class PostRepo {
       .sort((a, b) => a.name.localeCompare(b.name))
   }
 
+  findByTags(tags: string[], limit: number): PostSummaryRow[] {
+    if (tags.length === 0) return []
+    const placeholders = tags.map(() => '?').join(', ')
+    return (this.db
+      .prepare(
+        `SELECT p.id, p.slug, p.title, p.summary, p.cover_image, p.reading_time, p.created_at, p.category,
+                GROUP_CONCAT(t.name) AS tag_names
+         FROM posts p
+         JOIN post_tags pt ON pt.post_id = p.id
+         JOIN tags t ON t.id = pt.tag_id
+         WHERE p.status = 'published'
+           AND t.name IN (${placeholders})
+         GROUP BY p.id
+         ORDER BY p.created_at DESC
+         LIMIT ?`,
+      )
+      .all(...tags, limit) as unknown) as PostSummaryRow[]
+  }
+
   findBySlug(slug: string): PostDetailRow | null {
     return ((this.db
       .prepare(
@@ -118,8 +137,8 @@ export class PostRepo {
   create(input: CreatePostInput): PostRow {
     const info = this.db
       .prepare(
-        `INSERT INTO posts (slug, title, summary, content_md, source_path, status, publish_at, reading_time, cover_image, category)
-         VALUES (@slug, @title, @summary, @content_md, @source_path, @status, @publish_at, @reading_time, @cover_image, @category)`,
+        `INSERT INTO posts (slug, title, summary, content_md, source_path, status, publish_at, reading_time, cover_image, category, series, series_order)
+         VALUES (@slug, @title, @summary, @content_md, @source_path, @status, @publish_at, @reading_time, @cover_image, @category, @series, @series_order)`,
       )
       .run({
         slug: input.slug,
@@ -132,6 +151,8 @@ export class PostRepo {
         reading_time: input.reading_time ?? null,
         cover_image: input.cover_image ?? null,
         category: input.category ?? null,
+        series: input.series ?? null,
+        series_order: input.series_order ?? null,
       } as Record<string, string | number | null>) as unknown as { lastInsertRowid: number | bigint }
     return this.findById(Number(info.lastInsertRowid))!
   }

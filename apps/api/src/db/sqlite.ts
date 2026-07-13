@@ -72,6 +72,31 @@ export function initDb(): DatabaseSync {
       last_login DATETIME
     );
 
+    CREATE TABLE IF NOT EXISTS comments (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      post_id     INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+      parent_id   INTEGER REFERENCES comments(id) ON DELETE CASCADE,
+      author      TEXT NOT NULL,
+      email       TEXT,
+      website     TEXT,
+      body        TEXT NOT NULL,
+      ip          TEXT,
+      user_agent  TEXT,
+      status      TEXT NOT NULL DEFAULT 'approved',
+      created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS page_views (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      path        TEXT NOT NULL,
+      post_slug   TEXT,
+      ip          TEXT,
+      referrer    TEXT,
+      user_agent  TEXT,
+      status_code INTEGER,
+      created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS ingest_log (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       source     TEXT NOT NULL,
@@ -82,17 +107,32 @@ export function initDb(): DatabaseSync {
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS sessions (
+      token       TEXT PRIMARY KEY,
+      username    TEXT NOT NULL,
+      role        TEXT NOT NULL,
+      created_at  INTEGER NOT NULL,        -- unix ms，方便比较
+      expires_at  INTEGER NOT NULL         -- unix ms，懒清理
+    );
+
     CREATE INDEX IF NOT EXISTS idx_posts_status_date ON posts(status, created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_post_tags_tag ON post_tags(tag_id);
+    CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
   `)
 
   // 兼容旧库：增量加列（必须在依赖新列的索引之前）
   ensureColumn(db, 'posts', 'category', 'TEXT')
+  ensureColumn(db, 'posts', 'series', 'TEXT')
+  ensureColumn(db, 'posts', 'series_order', 'INTEGER')
   ensureColumn(db, 'tags', 'color', 'TEXT')
   ensureColumn(db, 'tags', 'description', 'TEXT')
   ensureColumn(db, 'tags', 'created_at', "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP")
 
   db.exec('CREATE INDEX IF NOT EXISTS idx_posts_category ON posts(category)')
+  db.exec('CREATE INDEX IF NOT EXISTS idx_posts_series ON posts(series)')
+  db.exec('CREATE INDEX IF NOT EXISTS idx_comments_post ON comments(post_id, created_at DESC)')
+  db.exec('CREATE INDEX IF NOT EXISTS idx_page_views_created ON page_views(created_at DESC)')
+  db.exec('CREATE INDEX IF NOT EXISTS idx_page_views_path ON page_views(path)')
 
   return db
 }

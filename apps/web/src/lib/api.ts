@@ -11,6 +11,8 @@ export interface PostSummary {
   coverImage: string | null
   readingTime: number | null
   viewCount?: number
+  series: string | null
+  seriesOrder: number | null
 }
 
 export interface PostDetail extends PostSummary {
@@ -20,6 +22,16 @@ export interface PostDetail extends PostSummary {
   toc: TocItem[]
   publishedAt: string
   updatedAt: string
+}
+
+export interface Comment {
+  id: number
+  postId: number
+  parentId: number | null
+  author: string
+  website: string | null
+  body: string
+  createdAt: string
 }
 
 export interface TocItem {
@@ -34,6 +46,45 @@ export interface PostListResponse {
   page: number
   pageSize: number
   totalPages: number
+}
+
+export interface StatsOverview {
+  totalPv: number
+  totalUv: number
+  todayPv: number
+  todayUv: number
+  last7Pv: number
+  last7Uv: number
+  last30Pv: number
+  last30Uv: number
+  notFoundTotal: number
+}
+
+export interface TrendPoint {
+  day: string
+  pv: number
+  uv: number
+}
+
+export interface PostPv {
+  slug: string
+  pv: number
+  title: string
+}
+
+export interface ReferrerStat {
+  referrer: string
+  cnt: number
+}
+
+export interface NotFoundStat {
+  path: string
+  cnt: number
+}
+
+export interface HourlyPoint {
+  hour: number
+  pv: number
 }
 
 export interface TagInfo {
@@ -111,6 +162,34 @@ export const api = {
     `${API_BASE}/posts/${encodeURIComponent(slug)}/pdf`,
 
   batchDownloadUrl: () => `${API_BASE}/posts/batch-download`,
+
+  getRelated: (slug: string, limit = 5) =>
+    request<{ related: { slug: string; title: string; score: number }[] }>(
+      `/posts/${encodeURIComponent(slug)}/related?limit=${limit}`,
+    ),
+
+  listComments: (postId: number) =>
+    request<{ comments: Comment[] }>(`/comments?postId=${postId}`),
+
+  createComment: (data: {
+    postId: number
+    parentId?: number | null
+    author: string
+    email?: string
+    website?: string
+    body: string
+  }) =>
+    request<Comment>('/comments', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  statsOverview: () => request<StatsOverview>('/admin/stats/overview'),
+  statsTrend: (days = 30) => request<{ days: number; data: TrendPoint[] }>(`/admin/stats/trend?days=${days}`),
+  statsHourly: () => request<{ data: HourlyPoint[] }>('/admin/stats/hourly'),
+  statsPosts: (limit = 20) => request<{ data: PostPv[] }>(`/admin/stats/posts?limit=${limit}`),
+  statsReferrers: (limit = 10) => request<{ data: ReferrerStat[] }>(`/admin/stats/referrers?limit=${limit}`),
+  stats404s: (limit = 20) => request<{ data: NotFoundStat[] }>(`/admin/stats/404s?limit=${limit}`),
 }
 
 export async function batchDownload(slugs: string[]): Promise<void> {

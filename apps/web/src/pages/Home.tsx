@@ -12,6 +12,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import BackgroundFX from '@/components/BackgroundFX'
+import { useHead } from '@/lib/useHead'
 
 const SkillGraph3D = lazy(() => import('@/components/SkillGraph3D'))
 
@@ -202,7 +203,32 @@ const principles: Principle[] = [
 ]
 
 export default function Home() {
-  const { t } = useTranslation(['common', 'home'])
+  const { t, i18n } = useTranslation(['common', 'home'])
+
+  const isEn = i18n.language?.startsWith('en')
+  useHead({
+    title: t('home:seo.title'),
+    description: t('home:seo.description'),
+    type: 'website',
+    canonical: isEn ? '/en' : '/',
+    hreflang: [
+      { lang: 'zh', url: '/' },
+      { lang: 'en', url: '/en' },
+    ],
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'ProfilePage',
+      name: '刘酝泽',
+      url: window.location.origin,
+      description: t('home:seo.description'),
+      mainEntity: {
+        '@type': 'Person',
+        name: '刘酝泽',
+        jobTitle: 'AI Agent 架构师',
+        url: window.location.origin,
+      },
+    },
+  })
 
   return (
     <>
@@ -251,9 +277,14 @@ export default function Home() {
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
               {t('home:about.eyebrow')}
             </div>
-            <div className="avatar-squircle w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-[var(--accent)] to-[var(--accent-hover)] flex items-center justify-center text-white text-4xl font-semibold tracking-tight">
-              JZ
-            </div>
+            <img
+              src="/量子港.png"
+              alt={t('home:about.eyebrow')}
+              loading="eager"
+              decoding="async"
+              className="w-32 h-32 md:w-40 md:h-40 object-cover ring-1 ring-[var(--border-subtle)] transition-transform duration-500 ease-out hover:scale-[1.02]"
+              style={{ boxShadow: 'var(--shadow-card)', borderRadius: '12px' }}
+            />
           </div>
 
           <div className="reveal space-y-5 text-body text-[var(--fg-secondary)] max-w-2xl">
