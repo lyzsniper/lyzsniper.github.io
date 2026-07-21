@@ -1,0 +1,23 @@
+{
+  "loading": "加载中…",
+  "notFound": "文章不存在或已被删除。",
+  "backToList": "返回博客列表",
+  "publishedOn": "发布于 {{date}}",
+  "tagsLabel": "标签",
+  "editPost": "编辑文章",
+  "readingTime": "{{minutes}} 分钟阅读",
+  "downloadMd": "下载 .md",
+  "exportPdf": "导出 PDF",
+  "backToTop": "返回顶部",
+  "toc": "目录",
+  "tocToggle": "切换目录",
+  "share": "分享到",
+  "shareWeibo": "微博",
+  "shareZhihu": "知乎",
+  "copyLink": "复制链接",
+  "relatedPosts": "相关推荐",
+  "series": "系列",
+  "seriesProgress": "第 {{current}}/{{total}} 篇",
+  "prevPost": "上一篇",
+  "nextPost": "下一篇"
+}

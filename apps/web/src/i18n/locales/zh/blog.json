@@ -1,0 +1,20 @@
+{
+  "title": "博客",
+  "subtitle": "关于 AI Agent、企业级 RAG、智能体工程化的思考与笔记",
+  "noPosts": "还没有发布的文章。",
+  "loading": "加载中…",
+  "loadMore": "加载更多",
+  "noMore": "没有更多了",
+  "searchPlaceholder": "搜索文章…",
+  "emptySearch": "没有找到匹配的文章",
+  "loadFailed": "加载失败",
+  "downloadFailed": "下载失败",
+  "totalPosts": "共 {{count}} 篇",
+  "selectAll": "全选",
+  "deselectAll": "取消全选",
+  "packing": "打包中…",
+  "download": "下载 ({{count}})",
+  "category": "分类",
+  "filter": "筛选",
+  "clear": "清除"
+}

@@ -1,0 +1,27 @@
+{
+  "eyebrow": "标签管理",
+  "title": "标签",
+  "subtitle": "为标签添加描述和颜色，会在前台更醒目。",
+  "backToAdmin": "返回管理",
+  "viewFrontend": "前台查看",
+  "saved": "{{name}} 已保存",
+  "saveFailed": "失败: {{msg}}",
+  "searchPlaceholder": "搜索标签…",
+  "tagCount": "{{count}} 个标签",
+  "matchCount": "· 匹配 {{count}} 个",
+  "loading": "加载中…",
+  "noMatch": "没有匹配的标签",
+  "noTags": "还没有标签",
+  "fields": {
+    "name": "名称",
+    "color": "颜色",
+    "colorPlaceholder": "#4f46e5",
+    "description": "描述（可选）",
+    "descriptionPlaceholder": "一句话解释这个标签的含义"
+  },
+  "postCount": "{{count}} 篇",
+  "save": "保存",
+  "cancel": "取消",
+  "edit": "编辑",
+  "view": "查看"
+}

@@ -1,0 +1,17 @@
+{
+  "language": {
+    "switch": "Switch language"
+  },
+  "loading": "Loading…",
+  "error": "Something went wrong",
+  "copied": "Copied!",
+  "select": "Select",
+  "skipToContent": "Skip to main content",
+  "theme": {
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode"
+  },
+  "auth": {
+    "verifying": "Verifying login state…"
+  }
+}

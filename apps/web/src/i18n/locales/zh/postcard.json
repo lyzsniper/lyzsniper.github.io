@@ -1,0 +1,5 @@
+{
+  "readMore": "阅读全文",
+  "minutesAgo": "{{count}} 分钟前",
+  "publishedOn": "发布于 {{date}}"
+}

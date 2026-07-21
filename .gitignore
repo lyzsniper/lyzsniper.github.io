@@ -3,27 +3,36 @@ node_modules/
 */node_modules/
 */*/node_modules/
 
+# Build output
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# vite.config.ts 编译产物
+apps/web/vite.config.js
+apps/web/vite.config.d.ts
+
 # Environment variables
 .env
 .env.local
 .env.*.local
 
-# Build output
-dist/
-build/
-*.tsbuildinfo
-
-# Generated Vite config types
-apps/web/vite.config.d.ts
-
 # SQLite databases
 data/*.db
-data/*.db-shm
+data/*.db-journal
 data/*.db-wal
+data/*.db-shm
 
 # Uploaded files
 data/uploads/*
 !data/uploads/.gitkeep
+
+# Content workspace keep files
+content/inbox/*
+!content/inbox/.gitkeep
+!content/drafts/.gitkeep
+!content/published/.gitkeep
 
 # AI tool directories
 .claude/
@@ -53,4 +62,15 @@ Desktop.ini
 *.swp
 *.swo
 *~
-docs/1d9cit2vf2ena62053ppg.mp4
+
+# Cache / coverage
+coverage/
+.nyc_output/
+.cache/
+.parcel-cache/
+.vite/
+.turbo/
+.eslintcache
+
+# Large media files in docs
+docs/*.mp4

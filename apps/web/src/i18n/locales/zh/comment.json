@@ -1,0 +1,14 @@
+{
+  "title": "评论",
+  "empty": "还没有评论，来做第一个吧。",
+  "write": "写下你的评论",
+  "reply": "回复",
+  "replyingTo": "回复 @{{name}}",
+  "replyingToShort": "回复中",
+  "submit": "提交评论",
+  "submitting": "提交中…",
+  "success": "评论已提交，审核通过后显示",
+  "authorPlaceholder": "昵称 *",
+  "websitePlaceholder": "个人网站（可选）",
+  "bodyPlaceholder": "说说你的想法…（2-5000 字）"
+}

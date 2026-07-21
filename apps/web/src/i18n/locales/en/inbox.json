@@ -1,0 +1,18 @@
+{
+  "eyebrow": "Inbox",
+  "title": "Pending files",
+  "subtitle": "Drop .md files into content/inbox/ and they'll appear here automatically",
+  "refresh": "Refresh",
+  "back": "Back",
+  "autoRefresh": "Auto-refreshes every 5s",
+  "loading": "Loading…",
+  "loadError": "Failed to load",
+  "empty": "Inbox is empty",
+  "emptyHint": "Upload .md from the admin panel, or drop it into content/inbox/",
+  "ingest": "Ingest now",
+  "ingesting": "Ingesting",
+  "ingested": "Ingested: {{slug}}",
+  "ingestFailed": "Failed: {{msg}}",
+  "tagsLabel": "Tags",
+  "tagsPlaceholder": "Comma-separated, e.g. React, TypeScript, AI"
+}

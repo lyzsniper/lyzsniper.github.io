@@ -1,0 +1,18 @@
+{
+  "eyebrow": "Inbox",
+  "title": "待收录文件",
+  "subtitle": "把 .md 文件放到 content/inbox/ 后，自动出现在这里",
+  "refresh": "刷新",
+  "back": "返回",
+  "autoRefresh": "每 5s 自动刷新",
+  "loading": "加载中…",
+  "loadError": "加载失败",
+  "empty": "Inbox 为空",
+  "emptyHint": "从管理后台上传 .md，或直接放到 content/inbox/",
+  "ingest": "立即收录",
+  "ingesting": "收录中",
+  "ingested": "已收录: {{slug}}",
+  "ingestFailed": "失败: {{msg}}",
+  "tagsLabel": "标签",
+  "tagsPlaceholder": "逗号分隔，如 React, TypeScript, AI"
+}

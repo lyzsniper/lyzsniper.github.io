@@ -1,0 +1,16 @@
+{
+  "bio": "AI Agent Engineer focused on designing and shipping enterprise multi-agent systems.",
+  "sections": {
+    "nav": "Site Navigation",
+    "contact": "Contact"
+  },
+  "links": {
+    "blog": "Blog",
+    "tags": "Tags"
+  },
+  "contact": {
+    "phone": "133 8445 9987",
+    "location": "Changsha"
+  },
+  "builtWith": "Built with React + TypeScript + Fastify"
+}

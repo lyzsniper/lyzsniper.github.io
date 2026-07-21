@@ -1,0 +1,23 @@
+{
+  "loading": "Loading…",
+  "notFound": "This post doesn't exist or has been removed.",
+  "backToList": "Back to blog",
+  "publishedOn": "Published on {{date}}",
+  "tagsLabel": "Tags",
+  "editPost": "Edit post",
+  "readingTime": "{{minutes}} min read",
+  "downloadMd": "Download .md",
+  "exportPdf": "Export PDF",
+  "backToTop": "Back to top",
+  "toc": "Table of Contents",
+  "tocToggle": "Toggle Table of Contents",
+  "share": "Share to",
+  "shareWeibo": "Weibo",
+  "shareZhihu": "Zhihu",
+  "copyLink": "Copy link",
+  "relatedPosts": "Related Posts",
+  "series": "Series",
+  "seriesProgress": "{{current}} / {{total}}",
+  "prevPost": "Previous",
+  "nextPost": "Next"
+}

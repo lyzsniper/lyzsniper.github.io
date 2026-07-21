@@ -1,0 +1,6 @@
+{
+  "readMore": "Read more",
+  "minutesAgo_one": "{{count}} minute ago",
+  "minutesAgo_other": "{{count}} minutes ago",
+  "publishedOn": "Published on {{date}}"
+}

@@ -1,0 +1,11 @@
+{
+  "title": "标签",
+  "subtitle": "按主题浏览所有文章",
+  "allTags": "全部标签",
+  "postsWithTag": "标签为 \"{{tag}}\" 的文章",
+  "count": "共 {{count}} 个标签",
+  "count_one": "共 {{count}} 个标签",
+  "count_other": "共 {{count}} 个标签",
+  "noTags": "还没有任何标签",
+  "postsCount": "{{count}} 篇"
+}

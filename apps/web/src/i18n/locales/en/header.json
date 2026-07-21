@@ -1,0 +1,12 @@
+{
+  "nav": {
+    "home": "Home",
+    "blog": "Blog",
+    "tags": "Tags",
+    "admin": "Admin",
+    "adminPanel": "Admin Panel",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "menu": "Menu"
+  }
+}
