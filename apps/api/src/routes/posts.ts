@@ -20,12 +20,14 @@ export async function postRoutes(app: FastifyInstance): Promise<void> {
       category?: string
       q?: string
       status?: string
+      featured?: string
     }
   }>('/', async (req) => {
     const page = Math.max(1, Number(req.query.page ?? 1))
     const tag = req.query.tag
     const category = req.query.category
     const q = req.query.q
+    const featured = req.query.featured === '1' || req.query.featured === 'true'
     const status =
       (req.query.status as
         | 'published'
@@ -41,6 +43,7 @@ export async function postRoutes(app: FastifyInstance): Promise<void> {
       category,
       status,
       q,
+      featured: featured || undefined,
     })
 
     // SQL 没命中且 q 存在，用 FlexSearch 补
@@ -64,6 +67,8 @@ export async function postRoutes(app: FastifyInstance): Promise<void> {
         date: r.created_at,
         coverImage: r.cover_image,
         readingTime: r.reading_time,
+        featured: r.featured === 1,
+        viewCount: r.view_count,
       })),
       total,
       page,
@@ -78,7 +83,7 @@ export async function postRoutes(app: FastifyInstance): Promise<void> {
     async (req: FastifyRequest<{ Params: { slug: string } }>, reply: FastifyReply) => {
       const row = postRepo.findBySlug(req.params.slug)
       if (!row) return reply.code(404).send({ error: 'post not found' })
-      postRepo.incrementView(row.slug)
+      // 浏览量由 /api/track 统一负责（避免在详情接口里自增造成刷新重复计数）
       return {
         id: row.id,
         slug: row.slug,
@@ -95,6 +100,7 @@ export async function postRoutes(app: FastifyInstance): Promise<void> {
         coverImage: row.cover_image,
         series: row.series,
         seriesOrder: row.series_order,
+        viewCount: row.view_count ?? 0,
         toc: extractToc(row.content_md),
       }
     },
@@ -264,17 +270,19 @@ export async function postRoutes(app: FastifyInstance): Promise<void> {
       status: string
       tags: string[]
       category: string
+      featured: boolean
     }>
   }>('/:slug', async (req, reply) => {
     const row = postRepo.findBySlug(req.params.slug)
     if (!row) return reply.code(404).send({ error: 'post not found' })
-    const { tags, category, ...rest } = req.body ?? {}
+    const { tags, category, featured, ...rest } = req.body ?? {}
     const updated = postRepo.update(req.params.slug, {
       title: rest.title,
       summary: rest.summary,
       content_md: rest.contentMd,
       status: rest.status as 'draft' | 'published' | undefined,
       category: category ?? undefined,
+      featured: featured === undefined ? undefined : featured ? 1 : 0,
     })
     if (tags && updated) {
       const tagIds = tags.map((t) => tagRepo.upsertByName(t))

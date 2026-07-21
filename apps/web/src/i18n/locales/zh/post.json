@@ -6,6 +6,8 @@
   "tagsLabel": "标签",
   "editPost": "编辑文章",
   "readingTime": "{{minutes}} 分钟阅读",
+  "viewCount": "{{count}} 次浏览",
+  "viewCount_zero": "暂无浏览",
   "downloadMd": "下载 .md",
   "exportPdf": "导出 PDF",
   "backToTop": "返回顶部",

@@ -14,6 +14,7 @@ import {
   ChevronUp,
   Menu,
   X,
+  Eye,
 } from 'lucide-react'
 import { api, type PostDetail, type TocItem } from '@/lib/api'
 import { useHead } from '@/lib/useHead'
@@ -322,6 +323,19 @@ export default function Post() {
               <>
                 <span className="w-1 h-1 rounded-full bg-[var(--fg-quaternary)]" />
                 <span>{post.category}</span>
+              </>
+            )}
+            {typeof post.viewCount === 'number' && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-[var(--fg-quaternary)]" />
+                <span
+                  className="flex items-center gap-1"
+                  title={t('post:viewCount', { count: post.viewCount })}
+                  aria-label={t('post:viewCount', { count: post.viewCount })}
+                >
+                  <Eye size={12} strokeWidth={1.75} />
+                  {t('post:viewCount', { count: post.viewCount })}
+                </span>
               </>
             )}
           </div>

@@ -46,6 +46,9 @@
     "readingTime": "阅读 {{count}} 分钟",
     "views": "浏览 {{count}}",
     "deleteConfirm": "确认删除「{{slug}}」？此操作不可恢复。",
-    "deleteFailed": "删除失败: {{msg}}"
+    "deleteFailed": "删除失败: {{msg}}",
+    "featured": "精选",
+    "feature": "设为精选",
+    "unfeature": "取消精选"
   }
 }

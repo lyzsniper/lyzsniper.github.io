@@ -19,12 +19,15 @@ export class PostRepo {
   }
 
   list(filter: PostListFilter): { rows: PostSummaryRow[]; total: number } {
-    const { page = 1, pageSize = 10, tag, category, status = 'published', q } = filter
+    const { page = 1, pageSize = 10, tag, category, status = 'published', q, featured } = filter
     const offset = (page - 1) * pageSize
 
     const where: string[] = ['p.status = ?']
     const params: (string | number)[] = [status]
 
+    if (featured) {
+      where.push('p.featured = 1')
+    }
     if (tag) {
       where.push(
         'EXISTS (SELECT 1 FROM post_tags pt JOIN tags t ON pt.tag_id = t.id WHERE pt.post_id = p.id AND t.slug = ?)',
@@ -49,6 +52,7 @@ export class PostRepo {
     const rows = (this.db
       .prepare(
         `SELECT p.id, p.slug, p.title, p.summary, p.cover_image, p.reading_time, p.created_at, p.category,
+                p.featured, p.view_count,
                 GROUP_CONCAT(t.name) AS tag_names
          FROM posts p
          LEFT JOIN post_tags pt ON pt.post_id = p.id
@@ -102,6 +106,7 @@ export class PostRepo {
     return (this.db
       .prepare(
         `SELECT p.id, p.slug, p.title, p.summary, p.cover_image, p.reading_time, p.created_at, p.category,
+                p.featured, p.view_count,
                 GROUP_CONCAT(t.name) AS tag_names
          FROM posts p
          JOIN post_tags pt ON pt.post_id = p.id
@@ -137,8 +142,8 @@ export class PostRepo {
   create(input: CreatePostInput): PostRow {
     const info = this.db
       .prepare(
-        `INSERT INTO posts (slug, title, summary, content_md, source_path, status, publish_at, reading_time, cover_image, category, series, series_order)
-         VALUES (@slug, @title, @summary, @content_md, @source_path, @status, @publish_at, @reading_time, @cover_image, @category, @series, @series_order)`,
+        `INSERT INTO posts (slug, title, summary, content_md, source_path, status, publish_at, reading_time, cover_image, category, series, series_order, featured)
+         VALUES (@slug, @title, @summary, @content_md, @source_path, @status, @publish_at, @reading_time, @cover_image, @category, @series, @series_order, @featured)`,
       )
       .run({
         slug: input.slug,
@@ -153,6 +158,7 @@ export class PostRepo {
         category: input.category ?? null,
         series: input.series ?? null,
         series_order: input.series_order ?? null,
+        featured: input.featured ?? 0,
       } as Record<string, string | number | null>) as unknown as { lastInsertRowid: number | bigint }
     return this.findById(Number(info.lastInsertRowid))!
   }

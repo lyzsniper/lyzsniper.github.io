@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import PageTracker from './components/PageTracker'
 import Home from './pages/Home'
 import Blog from './pages/Blog'
 import Post from './pages/Post'
@@ -34,7 +35,9 @@ export default function App() {
   }, [location.pathname, i18n])
 
   return (
-    <Routes>
+    <>
+      <PageTracker />
+      <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/blog" element={<Blog />} />
@@ -151,6 +154,7 @@ export default function App() {
         />
       </Route>
       <Route path="*" element={<NotFound />} />
-    </Routes>
+      </Routes>
+    </>
   )
 }

@@ -1,14 +1,16 @@
 /**
  * 统计后台 API
  *
- * GET /api/admin/stats/overview   — 总览（PV/UV/今日/近7日/近30日/404总数）
- * GET /api/admin/stats/trend      — 每日 PV/UV 时序（默认 30 天）
- * GET /api/admin/stats/pattern    — 每小时热度分布（0-23 时）
- * GET /api/admin/stats/posts      — 最受欢迎文章 Top N（与 posts view_count 联动）
- * GET /api/admin/stats/referrers   — 访问来源 Top N
- * GET /api/admin/stats/404s       — 404 路径 Top N
+ * GET  /api/admin/stats/overview   — 总览（PV/UV/今日/近7日/近30日/404总数）
+ * GET  /api/admin/stats/trend      — 每日 PV/UV 时序（默认 30 天）
+ * GET  /api/admin/stats/pattern    — 每小时热度分布（0-23 时）
+ * GET  /api/admin/stats/posts      — 最受欢迎文章 Top N（与 posts view_count 联动）
+ * GET  /api/admin/stats/referrers   — 访问来源 Top N
+ * GET  /api/admin/stats/404s       — 404 路径 Top N
+ * POST /api/track                  — 公开访问追踪（前端 SPA 路由跳转时调用，写入 page_views）
  *
- * 鉴权：全部 requireAdmin（挂载到 admin 前缀，server.ts 的 onRequest 会校验）。
+ * /api/admin/stats/* 鉴权：全部 requireAdmin（挂载到 admin 前缀，server.ts 的 onRequest 会校验）。
+ * /api/track       无鉴权：公开访问追踪接口，仅写入数据库，不返回敏感数据。
  *
  * 性能注意：所有聚合跑全表扫描。生产建议：
  *   - page_views 表按月分表或定期归档
@@ -160,10 +162,17 @@ export async function statsRoutes(app: FastifyInstance): Promise<void> {
   app.get<{ Querystring: { limit?: string } }>('/posts', async (req: FastifyRequest<{ Querystring: { limit?: string } }>) => {
     const limit = Math.min(100, Math.max(1, Number(req.query.limit ?? 10)))
     const rows = topPosts(limit)
-    // 关联文章标题
+    // 关联文章标题。page_views.post_slug 历史数据可能是 percent-encoded 的，
+    // 这里双重匹配（先按原值，再按 decode 后的值），避免 URL 编码不一致导致 title 查不到
+    const lookupTitle = db().prepare('SELECT title FROM posts WHERE slug = ?')
     const withTitles = rows.map((r) => {
-      const row = db().prepare('SELECT title FROM posts WHERE slug = ?').get(r.slug) as { title: string } | undefined
-      return { ...r, title: row?.title ?? r.slug }
+      const decoded = (() => {
+        try { return decodeURIComponent(r.slug) } catch { return r.slug }
+      })()
+      const hit =
+        (lookupTitle.get(r.slug) as { title: string } | undefined) ??
+        (lookupTitle.get(decoded) as { title: string } | undefined)
+      return { ...r, title: hit?.title ?? decoded }
     })
     return { data: withTitles }
   })

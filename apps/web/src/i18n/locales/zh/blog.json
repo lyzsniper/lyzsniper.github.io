@@ -16,5 +16,10 @@
   "download": "下载 ({{count}})",
   "category": "分类",
   "filter": "筛选",
-  "clear": "清除"
+  "clear": "清除",
+  "featured": "精选",
+  "latest": "最新文章",
+  "featuredNote": "精选已在上方展示，此处不重复",
+  "statement": "不追热点，只写验证过的东西。",
+  "readMore": "阅读全文"
 }

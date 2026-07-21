@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jensen.lyz — Living Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #0a0a0a;
+      --bg-card: #141414;
+      --bg-card-hover: #1a1a1a;
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.16);
+      --fg-primary: #fafafa;
+      --fg-secondary: #a3a3a3;
+      --fg-tertiary: #737373;
+      --accent: #4f46e5;
+      --k3-blue: #38bdf8;
+      --k3-blue-soft: rgba(56,189,248,0.12);
+      --k3-dark: #0f172a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-page);
+      color: var(--fg-primary);
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bento Grid ===== */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .col-span-2 { grid-column: span 2; }
+    .row-span-2 { grid-row: span 2; }
+    @media (max-width: 900px) {
+      .bento-grid { grid-template-columns: repeat(2, 1fr); }
+      .col-span-2 { grid-column: span 2; }
+    }
+    @media (max-width: 640px) {
+      .bento-grid { grid-template-columns: 1fr; }
+      .col-span-2 { grid-column: span 1; }
+    }
+
+    /* ===== Card ===== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: default;
+    }
+    .card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    }
+    .card.draggable { cursor: grab; }
+    .card.draggable:active { cursor: grabbing; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--fg-tertiary);
+    }
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .card:hover .card-actions { opacity: 1; }
+    .card-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--fg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .card-btn:hover {
+      background: rgba(255,255,255,0.12);
+      color: var(--fg-primary);
+    }
+
+    /* ===== Hero Widget ===== */
+    .hero-card {
+      background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+      border-color: rgba(99,102,241,0.3);
+    }
+    .hero-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.1);
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34,197,94,0.2);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(34,197,94,0.2); }
+      50% { box-shadow: 0 0 0 6px rgba(34,197,94,0.1); }
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.625rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: rgba(255,255,255,0.06);
+      color: var(--fg-secondary);
+      border: 1px solid var(--border);
+    }
+    .tag.blue {
+      background: var(--k3-blue-soft);
+      color: var(--k3-blue);
+      border-color: rgba(56,189,248,0.2);
+    }
+
+    /* ===== Post List ===== */
+    .post-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 0;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .post-item:last-child { border-bottom: none; }
+    .post-item:hover {
+      padding-left: 0.5rem;
+      color: var(--k3-blue);
+    }
+    .post-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #334155, #1e293b);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    /* ===== Stats ===== */
+    .stat-value {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--fg-tertiary);
+      margin-top: 0.375rem;
+    }
+    .progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 0.75rem;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--k3-blue);
+      border-radius: 3px;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ===== Mini Skill Bars ===== */
+    .skill-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .skill-name {
+      width: 80px;
+      font-size: 0.8125rem;
+      color: var(--fg-secondary);
+      flex-shrink: 0;
+    }
+    .skill-bar {
+      flex: 1;
+      height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .skill-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--k3-blue));
+    }
+
+    /* ===== Quick Links ===== */
+    .link-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.875rem;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--fg-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .link-btn:hover {
+      background: var(--k3-blue-soft);
+      color: var(--k3-blue);
+      border-color: rgba(56,189,248,0.3);
+    }
+
+    /* ===== Quote Widget ===== */
+    .quote-card {
+      background: var(--k3-dark);
+      border-color: rgba(56,189,248,0.15);
+    }
+    .quote-text {
+      font-size: 1.125rem;
+      line-height: 1.6;
+      color: var(--fg-primary);
+      font-weight: 500;
+    }
+    .quote-author {
+      font-size: 0.8125rem;
+      color: var(--fg-tertiary);
+      margin-top: 0.75rem;
+    }
+
+    /* ===== Music Widget ===== */
+    .music-card {
+      background: linear-gradient(135deg, #0c4a6e 0%, #0f172a 100%);
+      border-color: rgba(56,189,248,0.2);
+    }
+    .vinyl {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #1e293b, #0f172a, #1e293b);
+      border: 4px solid #334155;
+      position: relative;
+      animation: spin 8s linear infinite;
+      margin: 0 auto;
+    }
+    .vinyl::after {
+      content: '';
+      position: absolute;
+      inset: 35%;
+      border-radius: 50%;
+      background: var(--k3-blue);
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .equalizer {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 24px;
+    }
+    .eq-bar {
+      width: 4px;
+      background: var(--k3-blue);
+      border-radius: 2px;
+      animation: eq 1s ease-in-out infinite;
+    }
+    .eq-bar:nth-child(1) { animation-delay: 0s; height: 40%; }
+    .eq-bar:nth-child(2) { animation-delay: 0.2s; height: 80%; }
+    .eq-bar:nth-child(3) { animation-delay: 0.4s; height: 60%; }
+    .eq-bar:nth-child(4) { animation-delay: 0.6s; height: 90%; }
+    .eq-bar:nth-child(5) { animation-delay: 0.8s; height: 50%; }
+    @keyframes eq {
+      0%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(0.3); }
+    }
+
+    /* ===== Expanded Modal ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-hover);
+      border-radius: 28px;
+      max-width: 720px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 2rem;
+      transform: scale(0.95);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    /* ===== Resize Handle ===== */
+    .resize-handle {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      width: 20px;
+      height: 20px;
+      cursor: nwse-resize;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .card:hover .resize-handle { opacity: 0.5; }
+    .resize-handle::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-right: 2px solid var(--fg-tertiary);
+      border-bottom: 2px solid var(--fg-tertiary);
+      border-bottom-right-radius: 4px;
+    }
+
+    /* ===== Utility ===== */
+    .text-gradient {
+      background: linear-gradient(135deg, #818cf8, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header style="max-width:1280px;margin:0 auto;padding:2rem 1.5rem 1rem;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <div style="width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--k3-blue));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.875rem;">J</div>
+      <span style="font-weight:700;font-size:1.125rem;">Jensen.lyz</span>
+    </div>
+    <nav style="display:flex;gap:1.5rem;font-size:0.875rem;color:var(--fg-secondary);">
+      <a href="#" style="color:var(--fg-primary);text-decoration:none;font-weight:500;">Dashboard</a>
+      <a href="#" style="color:inherit;text-decoration:none;">Blog</a>
+      <a href="#" style="color:inherit;text-decoration:none;">About</a>
+    </nav>
+  </header>
+
+  <!-- Bento Grid -->
+  <main class="bento-grid">
+
+    <!-- Hero Widget -->
+    <div class="card hero-card col-span-2 row-span-2 draggable">
+      <div class="card-header">
+        <span class="card-title">Profile</span>
+        <div class="card-actions">
+          <button class="card-btn" onclick="expandCard(this)">↗</button>
+          <button class="card-btn">⋯</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:1.25rem;margin-top:0.5rem;">
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jensen&backgroundColor=1e1b4b" alt="Avatar" class="hero-avatar" />
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.5rem;">
+            <h1 style="font-size:1.75rem;font-weight:800;letter-spacing:-0.02em;">刘酝泽</h1>
+            <div class="status-dot" title="Online"></div>
+          </div>
+          <p style="color:var(--fg-secondary);font-size:0.9375rem;line-height:1.6;margin-bottom:1rem;">
+            AI Agent 架构师 · 专注 RAG / Multi-Agent / LLM 工程化<br>
+            让 Agent 在生产里不胡说、不超时、不被人绕过。
+          </p>
+          <div style="display:flex;flex-wrap:gap:0.5rem;">
+            <span class="tag blue">RAG</span>
+            <span class="tag blue">Multi-Agent</span>
+            <span class="tag blue">MCP</span>
+            <span class="tag">Spring Boot</span>
+            <span class="tag">React</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:2rem;display:flex;gap:0.75rem;">
+        <a href="#" class="link-btn" style="background:var(--k3-blue);color:#0a0a0a;border-color:transparent;font-weight:600;">阅读博客 →</a>
+        <a href="#" class="link-btn">联系我</a>
+      </div>
+      <div class="resize-handle"></div>
+    </div>
+
+    <!-- Latest Posts Widget -->
+    <div class="card row-span-2">
+      <div class="card-header">
+        <span class="card-title">Latest Posts</span>
+        <div class="card-actions">
+          <button class="card-btn" onclick="expandCard(this)">↗</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;">
+        <div class="post-item">
+          <div class="post-thumb">🤖</div>
+          <div>
+            <div style="font-size:0.875rem;font-weight:600;line-height:1.4;">AI Agent 研发中台未来架构设计方案</div>
+            <div style="font-size:0.75rem;color:var(--fg-tertiary);margin-top:0.25rem;">2026-06 · 12 min read</div>
+          </div>
+        </div>
+        <div class="post-item">
+          <div class="post-thumb">⚡</div>
+          <div>
+            <div style="font-size:0.875rem;font-weight:600;line-height:1.4;">万亿参数 MoE 时代：六模型稀疏注意力深度对比</div>
+            <div style="font-size:0.75rem;color:var(--fg-tertiary);margin-top:0.25rem;">2026-07 · 18 min read</div>
+          </div>
+        </div>
+        <div class="post-item">
+          <div class="post-thumb">🎯</div>
+          <div>
+            <div style="font-size:0.875rem;font-weight:600;line-height:1.4;">从对话到交付：企业级全流程开发智能体的构建与趋势</div>
+            <div style="font-size:0.75rem;color:var(--fg-tertiary);margin-top:0.25rem;">2026-06 · 15 min read</div>
+          </div>
+        </div>
+        <div class="post-item">
+          <div class="post-thumb">📊</div>
+          <div>
+            <div style="font-size:0.875rem;font-weight:600;line-height:1.4;">Qwen3 Learning Plan</div>
+            <div style="font-size:0.75rem;color:var(--fg-tertiary);margin-top:0.25rem;">2026-06 · 8 min read</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:1rem;text-align:center;">
+        <a href="#" style="font-size:0.8125rem;color:var(--k3-blue);text-decoration:none;font-weight:500;">查看全部文章 →</a>
+      </div>
+    </div>
+
+    <!-- GitHub Stats Widget -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">GitHub Pulse</span>
+        <div class="card-actions">
+          <button class="card-btn">↗</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div>
+          <div class="stat-value mono">128</div>
+          <div class="stat-label">Commits this month</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:72%"></div></div>
+        </div>
+        <div>
+          <div class="stat-value mono">4.2k</div>
+          <div class="stat-label">Total stars</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:1rem;display:flex;align-items:center;gap:0.5rem;font-size:0.75rem;color:var(--fg-tertiary);">
+        <span style="width:8px;height:8px;border-radius:50%;background:#22c55e;"></span>
+        Active today · 3 repos updated
+      </div>
+    </div>
+
+    <!-- Now Widget -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Now</span>
+        <div class="card-actions">
+          <button class="card-btn">↗</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <div style="width:40px;height:40px;border-radius:12px;background:var(--k3-blue-soft);display:flex;align-items:center;justify-content:center;font-size:1.25rem;">🔨</div>
+          <div>
+            <div style="font-size:0.875rem;font-weight:600;">Building</div>
+            <div style="font-size:0.75rem;color:var(--fg-tertiary);">Agent Workflow Platform</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <div style="width:40px;height:40px;border-radius:12px;background:rgba(34,197,94,0.12);display:flex;align-items:center;justify-content:center;font-size:1.25rem;">📚</div>
+          <div>
+            <div style="font-size:0.875rem;font-weight:600;">Reading</div>
+            <div style="font-size:0.75rem;color:var(--fg-tertiary);">Designing Data-Intensive Apps</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <div style="width:40px;height:40px;border-radius:12px;background:rgba(168,85,247,0.12);display:flex;align-items:center;justify-content:center;font-size:1.25rem;">🎧</div>
+          <div>
+            <div style="font-size:0.875rem;font-weight:600;">Focus</div>
+            <div style="font-size:0.75rem;color:var(--fg-tertiary);">Deep Work · Pomodoro 25/5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills Widget -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Top Skills</span>
+        <div class="card-actions">
+          <button class="card-btn">↗</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.875rem;">
+        <div class="skill-row">
+          <span class="skill-name">RAG</span>
+          <div class="skill-bar"><div class="skill-fill" style="width:95%"></div></div>
+          <span style="font-size:0.75rem;color:var(--fg-tertiary);width:28px;text-align:right;">95</span>
+        </div>
+        <div class="skill-row">
+          <span class="skill-name">Agent</span>
+          <div class="skill-bar"><div class="skill-fill" style="width:92%"></div></div>
+          <span style="font-size:0.75rem;color:var(--fg-tertiary);width:28px;text-align:right;">92</span>
+        </div>
+        <div class="skill-row">
+          <span class="skill-name">Java</span>
+          <div class="skill-bar"><div class="skill-fill" style="width:88%"></div></div>
+          <span style="font-size:0.75rem;color:var(--fg-tertiary);width:28px;text-align:right;">88</span>
+        </div>
+        <div class="skill-row">
+          <span class="skill-name">React</span>
+          <div class="skill-bar"><div class="skill-fill" style="width:82%"></div></div>
+          <span style="font-size:0.75rem;color:var(--fg-tertiary);width:28px;text-align:right;">82</span>
+        </div>
+        <div class="skill-row">
+          <span class="skill-name">DevOps</span>
+          <div class="skill-bar"><div class="skill-fill" style="width:75%"></div></div>
+          <span style="font-size:0.75rem;color:var(--fg-tertiary);width:28px;text-align:right;">75</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quote Widget -->
+    <div class="card quote-card col-span-2">
+      <div class="card-header">
+        <span class="card-title">Principle</span>
+        <div class="card-actions">
+          <button class="card-btn" onclick="expandCard(this)">↗</button>
+        </div>
+      </div>
+      <div class="quote-text">
+        "真正难的从来不是让 Agent 跑起来，是让它在生产里不胡说、不超时、不被人绕过。"
+      </div>
+      <div class="quote-author">— 我的工程原则 01 / 03</div>
+      <div style="display:flex;gap:0.375rem;margin-top:1rem;">
+        <span style="width:24px;height:4px;border-radius:2px;background:var(--k3-blue);"></span>
+        <span style="width:24px;height:4px;border-radius:2px;background:rgba(255,255,255,0.12);"></span>
+        <span style="width:24px;height:4px;border-radius:2px;background:rgba(255,255,255,0.12);"></span>
+      </div>
+    </div>
+
+    <!-- Music Widget -->
+    <div class="card music-card">
+      <div class="card-header">
+        <span class="card-title" style="color:rgba(255,255,255,0.6);">Now Playing</span>
+        <div class="card-actions">
+          <button class="card-btn">↗</button>
+        </div>
+      </div>
+      <div style="text-align:center;">
+        <div class="vinyl"></div>
+        <div style="margin-top:1rem;font-size:0.875rem;font-weight:600;">Valse in D Flat Major</div>
+        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:0.25rem;">Sergei Rachmaninoff · 1921</div>
+        <div style="display:flex;justify-content:center;margin-top:1rem;">
+          <div class="equalizer">
+            <div class="eq-bar"></div>
+            <div class="eq-bar"></div>
+            <div class="eq-bar"></div>
+            <div class="eq-bar"></div>
+            <div class="eq-bar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Links Widget -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Connect</span>
+        <div class="card-actions">
+          <button class="card-btn">↗</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+        <a href="#" class="link-btn">GitHub</a>
+        <a href="#" class="link-btn">Email</a>
+        <a href="#" class="link-btn">RSS</a>
+        <a href="#" class="link-btn">Twitter</a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Expanded Modal -->
+  <div class="modal-overlay" id="modal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <h2 style="font-size:1.5rem;font-weight:700;">Widget Detail</h2>
+        <button onclick="closeModal()" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--fg-secondary);cursor:pointer;font-size:1.25rem;">×</button>
+      </div>
+      <p style="color:var(--fg-secondary);line-height:1.7;">
+        这里展示卡片的完整内容。在真实实现中，可以根据卡片类型渲染不同的详情视图：
+        文章列表、完整技能图谱、GitHub 贡献日历、或音乐播放器等。
+      </p>
+      <div style="margin-top:1.5rem;padding:1rem;background:rgba(255,255,255,0.04);border-radius:16px;border:1px solid var(--border);">
+        <div class="mono" style="font-size:0.8125rem;color:var(--k3-blue);">
+          // K3-style expanded view<br>
+          // 支持拖拽、缩放、全屏展开<br>
+          const widget = new LivingDashboard({<br>
+          &nbsp;&nbsp;draggable: true,<br>
+          &nbsp;&nbsp;resizable: true,<br>
+          &nbsp;&nbsp;expandable: true<br>
+          });
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Expand card to modal
+    function expandCard(btn) {
+      const modal = document.getElementById('modal');
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(e) {
+      if (e && e.target !== document.getElementById('modal')) return;
+      document.getElementById('modal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // ESC to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // Simple drag simulation for demo
+    let draggedCard = null;
+    document.querySelectorAll('.card.draggable').forEach(card => {
+      card.addEventListener('dragstart', () => {
+        draggedCard = card;
+        card.style.opacity = '0.5';
+      });
+      card.addEventListener('dragend', () => {
+        card.style.opacity = '';
+      });
+    });
+
+    // Animate progress bars on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll('.progress-fill, .skill-fill').forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => bar.style.width = width, 100);
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+
+    document.querySelectorAll('.card').forEach(card => observer.observe(card));
+  </script>
+</body>
+</html>

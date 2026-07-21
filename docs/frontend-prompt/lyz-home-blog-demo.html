@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>刘酝泽 · 全局星座场 × 博客精选 — UI Demo v6</title>
+<style>
+  /* =========================================================
+     Design tokens — 与 apps/web/src/styles/globals.css 对齐
+     ========================================================= */
+  :root {
+    --bg-page: #ffffff;
+    --bg-elevated: #ffffff;
+    --bg-subtle: #fafafa;
+    --bg-muted: #f5f5f5;
+
+    --fg-primary: #0a0a0a;
+    --fg-secondary: #525252;
+    --fg-tertiary: #737373;
+    --fg-quaternary: #a3a3a3;
+
+    --border-subtle: rgba(0, 0, 0, 0.06);
+    --border-default: rgba(0, 0, 0, 0.10);
+    --border-strong: rgba(0, 0, 0, 0.16);
+
+    --accent: #4f46e5;
+    --accent-hover: #4338ca;
+    --accent-soft: rgba(79, 70, 229, 0.06);
+    --accent-soft-hover: rgba(79, 70, 229, 0.10);
+
+    --warm-card: #fbe1d1;
+    --warm-fg: #5d2a1a;
+
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-floating: 0 0 0 1px rgba(4,23,43,0.05), 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+
+    --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* hero 文字（亮色模式：深字浮在浅色星座场上） */
+    --hero-fg: #0a0a0a;
+    --hero-accent: #4f46e5;
+    --hero-sub-c: rgba(10, 10, 10, 0.66);
+    --hero-pill-c: rgba(10, 10, 10, 0.55);
+    --hero-pill-b: rgba(0, 0, 0, 0.16);
+    --hero-trust-c: rgba(10, 10, 10, 0.38);
+    --hero-trust-b: rgba(10, 10, 10, 0.6);
+  }
+  html.dark {
+    --bg-page: #0a0a0a;
+    --bg-elevated: #141414;
+    --bg-subtle: #0f0f0f;
+    --bg-muted: #1a1a1a;
+
+    --fg-primary: #fafafa;
+    --fg-secondary: #a3a3a3;
+    --fg-tertiary: #737373;
+    --fg-quaternary: #525252;
+
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-default: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(255, 255, 255, 0.16);
+
+    --accent: #818cf8;
+    --accent-hover: #a5b4fc;
+    --accent-soft: rgba(129, 140, 248, 0.10);
+    --accent-soft-hover: rgba(129, 140, 248, 0.16);
+
+    --warm-card: #2a1e1a;
+    --warm-fg: #f0c4ae;
+
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.30), 0 1px 2px rgba(0,0,0,0.20);
+    --shadow-floating: 0 12px 32px rgba(0,0,0,0.50), 0 4px 8px rgba(0,0,0,0.30);
+
+    /* hero 文字（暗色模式：白字浮在彩色星座场上） */
+    --hero-fg: #f5f5f7;
+    --hero-accent: #a5b4fc;
+    --hero-sub-c: rgba(245, 245, 247, 0.72);
+    --hero-pill-c: rgba(245, 245, 247, 0.6);
+    --hero-pill-b: rgba(255, 255, 255, 0.18);
+    --hero-trust-c: rgba(245, 245, 247, 0.38);
+    --hero-trust-b: rgba(245, 245, 247, 0.62);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+  body {
+    background: var(--bg-page); color: var(--fg-primary);
+    font-family: "Inter", -apple-system, "Segoe UI", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-size: 15px; line-height: 1.7;
+    font-variant-numeric: tabular-nums;
+    transition: background-color .2s ease, color .2s ease;
+  }
+  ::selection { background: var(--accent-soft-hover); }
+  a { color: inherit; text-decoration: none; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+  /* =========================================================
+     全局星座场：一张固定 Canvas 铺满整页，所有内容浮于其上
+     ========================================================= */
+  #field {
+    position: fixed; inset: 0; z-index: 0;
+    pointer-events: none;
+  }
+  main.view, footer { position: relative; z-index: 1; }
+
+  /* 卡片在星座场上需要不透明的底，保证可读性 */
+  .surface-card, .featured, .pick, .post-card, .cta-band, .avatar-ph {
+    background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+
+  /* ===== 全局滚动进度条 ===== */
+  #progress {
+    position: fixed; top: 0; left: 0; z-index: 60;
+    height: 2px; width: 0%;
+    background: linear-gradient(90deg, var(--accent), #a78bfa, #38bdf8);
+    box-shadow: 0 0 8px rgba(129, 140, 248, 0.5);
+    transition: width .12s linear;
+  }
+
+  .container-page { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  @media (min-width: 768px) { .container-page { padding: 0 40px; } }
+
+  /* ===== 通用组件类 ===== */
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.08em;
+    color: var(--fg-tertiary); text-transform: uppercase;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    height: 26px; padding: 0 12px; border-radius: 999px;
+    font-size: 12px; color: var(--fg-secondary);
+    background: var(--bg-muted); border: 1px solid var(--border-subtle);
+    transition: all .2s var(--ease-expo); cursor: pointer;
+  }
+  .pill:hover { background: var(--accent-soft); color: var(--accent); }
+  .pill-accent { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 36px; padding: 0 16px; border-radius: 999px;
+    font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent;
+    transition: background .25s var(--ease-expo), border-color .25s var(--ease-expo), box-shadow .25s var(--ease-expo);
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); box-shadow: 0 8px 20px -6px var(--accent); }
+  .btn-secondary { background: var(--bg-elevated); color: var(--fg-primary); border-color: var(--border-default); }
+  .btn-secondary:hover { border-color: var(--border-strong); background: var(--bg-muted); }
+  .btn-gradient {
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--accent), var(--accent)) padding-box,
+      linear-gradient(114deg, #c7d2fe, var(--accent) 45%, #a5b4fc) border-box;
+  }
+  .btn-gradient:hover {
+    background:
+      linear-gradient(var(--accent-hover), var(--accent-hover)) padding-box,
+      linear-gradient(114deg, #e0e7ff, var(--accent-hover) 45%, #c7d2fe) border-box;
+  }
+  .magnetic { will-change: transform; transition: transform .35s var(--ease-expo), background .25s var(--ease-expo), box-shadow .25s var(--ease-expo); }
+
+  /* ===== B3：CTA 弹性微交互（scale 独立于 transform，可与磁性位移叠加） ===== */
+  .btn { transition: scale .2s var(--ease-expo), background .25s var(--ease-expo), border-color .25s var(--ease-expo), box-shadow .25s var(--ease-expo); }
+  .btn:hover { scale: 1.03; }
+  .btn:active { scale: 0.95; }
+
+  /* ===== B2：超大数字统计带（Caldera 数据卡式海报排布） ===== */
+  .stats-band { display: flex; gap: 48px; flex-wrap: wrap; margin-top: 44px; }
+  .stat-num {
+    font-size: clamp(40px, 5vw, 64px); font-weight: 700; line-height: 1;
+    letter-spacing: -0.03em; color: var(--hero-fg);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-num .suffix { font-size: 0.42em; font-weight: 600; color: var(--hero-accent); margin-left: 2px; }
+  .stat-label { font-size: 12px; color: var(--hero-trust-c); margin-top: 8px; letter-spacing: 0.06em; }
+
+  /* ===== B1：衬线展示字（衬线管情绪，无衬线管系统） ===== */
+  .principle blockquote, .statement {
+    font-family: Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
+    font-weight: 500;
+  }
+
+  /* ===== A2：分类色点（颜色即分类法） ===== */
+  .cat-row .pill .cdot { width: 6px; height: 6px; border-radius: 50%; background: var(--cc, var(--accent)); flex: none; }
+  .cat-row .pill:hover, .cat-row .pill.pill-accent {
+    color: var(--cc, var(--accent));
+  }
+
+  .surface-card {
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px; box-shadow: var(--shadow-card);
+    transition: transform .45s var(--ease-expo), box-shadow .45s var(--ease-expo), border-color .45s;
+  }
+  .surface-card:hover { box-shadow: var(--shadow-floating); border-color: var(--border-default); }
+
+  /* ===== Linear 式光标光晕卡 ===== */
+  .glow-card { position: relative; }
+  .glow-card::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), var(--accent-soft-hover), transparent 65%);
+    opacity: 0; transition: opacity .35s ease; z-index: 0;
+  }
+  .glow-card::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+    background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), var(--accent), transparent 70%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+    opacity: 0; transition: opacity .35s ease; z-index: 1;
+  }
+  .glow-card:hover::before { opacity: 1; }
+  .glow-card:hover::after { opacity: .55; }
+  .glow-card > * { position: relative; z-index: 2; }
+
+  /* ===== 页头 ===== */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--bg-page) 82%, transparent);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .header-inner { display: flex; align-items: center; gap: 24px; height: 56px; }
+  .wordmark { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+  .wordmark span { color: var(--fg-tertiary); font-weight: 400; }
+  nav { display: flex; gap: 20px; font-size: 13px; color: var(--fg-secondary); }
+  nav a { transition: color .2s; cursor: pointer; }
+  nav a:hover, nav a.active { color: var(--fg-primary); }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .icon-btn {
+    width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center;
+    border: 1px solid var(--border-default); background: transparent; color: var(--fg-secondary);
+    cursor: pointer; font-size: 14px; transition: all .2s;
+  }
+  .icon-btn:hover { color: var(--fg-primary); border-color: var(--border-strong); }
+  .demo-switch { display: flex; border: 1px solid var(--border-default); border-radius: 999px; overflow: hidden; }
+  .demo-switch button {
+    border: 0; background: transparent; color: var(--fg-tertiary);
+    font-size: 12px; padding: 5px 12px; cursor: pointer; transition: all .2s;
+  }
+  .demo-switch button.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+
+  /* ===== 入场动效 ===== */
+  .reveal { opacity: 0; transform: translateY(20px); filter: blur(4px); }
+  .reveal.in {
+    opacity: 1; transform: none; filter: none;
+    transition: opacity .7s var(--ease-expo), transform .7s var(--ease-expo), filter .7s var(--ease-expo);
+  }
+  .reveal[data-d="1"].in { transition-delay: .12s; }
+  .reveal[data-d="2"].in { transition-delay: .24s; }
+  .reveal[data-d="3"].in { transition-delay: .36s; }
+  .reveal[data-d="4"].in { transition-delay: .48s; }
+  .reveal[data-d="5"].in { transition-delay: .6s; }
+
+  /* =========================================================
+     全屏 HERO：透明底，直接浮在全局星座场上（明暗自适应文字）
+     ========================================================= */
+  .hero-stage {
+    position: relative;
+    min-height: calc(100vh - 56px);
+    display: flex; align-items: flex-end;
+    overflow: hidden;
+  }
+  .hero-content {
+    position: relative; z-index: 2; width: 100%;
+    padding-top: 120px; padding-bottom: clamp(72px, 12vh, 128px);
+  }
+  .hero-block { max-width: 760px; }
+
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #ffb829;
+  }
+  .hero-eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: #ffb829; box-shadow: 0 0 10px rgba(255,184,41,.8); }
+
+  .hero-h1 {
+    font-size: clamp(2.9rem, 7vw, 5.6rem);
+    line-height: 1.04; letter-spacing: -0.035em; font-weight: 700;
+    color: var(--hero-fg); margin: 22px 0 22px;
+  }
+  .hero-h1 em { font-style: normal; color: var(--hero-accent); }
+  .hero-h1 .accent { display: inline-block; }
+  .hero-h1 .w {
+    display: inline-block; opacity: 0;
+    transform: translateY(24px); filter: blur(8px);
+    transition: opacity .9s var(--ease-expo), transform .9s var(--ease-expo), filter .9s var(--ease-expo);
+  }
+  .hero-stage.play .hero-h1 .w { opacity: 1; transform: none; filter: none; }
+  .hero-h1 .w:nth-of-type(1) { transition-delay: .1s; }
+  .hero-h1 .w:nth-of-type(2) { transition-delay: .2s; }
+  .hero-h1 .w:nth-of-type(3) { transition-delay: .32s; }
+  .hero-h1 .w:nth-of-type(4) { transition-delay: .44s; }
+
+  .hero-sub {
+    font-size: clamp(15px, 1.6vw, 18px); font-weight: 300;
+    color: var(--hero-sub-c); max-width: 560px; margin-bottom: 30px;
+  }
+
+  .hero-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 36px; }
+  .hero-pills .pill {
+    background: color-mix(in srgb, var(--bg-elevated) 55%, transparent);
+    backdrop-filter: blur(4px);
+    color: var(--hero-pill-c);
+    border: 1px solid var(--hero-pill-b);
+  }
+  .hero-pills .pill:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+  .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .btn-hero-ghost {
+    background: color-mix(in srgb, var(--bg-elevated) 55%, transparent);
+    backdrop-filter: blur(4px);
+    color: var(--hero-fg); border: 1px solid var(--hero-pill-b);
+  }
+  .btn-hero-ghost:hover { border-color: var(--border-strong); background: var(--accent-soft); }
+
+  .hero-trust {
+    margin-top: 26px; font-size: 12px; font-weight: 300;
+    color: var(--hero-trust-c); letter-spacing: .04em;
+  }
+  .hero-trust b { color: var(--hero-trust-b); font-weight: 500; }
+
+  .scroll-cue {
+    position: absolute; right: 40px; bottom: 28px; z-index: 2;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 11px; letter-spacing: .14em; color: var(--hero-trust-c);
+    writing-mode: vertical-rl;
+  }
+  .scroll-cue .line {
+    width: 1px; height: 44px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: cue-drop 1.8s var(--ease-expo) infinite;
+  }
+  @keyframes cue-drop {
+    0% { transform: scaleY(0); transform-origin: top; }
+    45% { transform: scaleY(1); transform-origin: top; }
+    55% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+  @media (max-width: 768px) { .scroll-cue { display: none; } }
+
+  /* =========================================================
+     hero 以下区块
+     ========================================================= */
+  .section { padding: 80px 0; }
+  .section + .section { border-top: 1px solid var(--border-subtle); }
+  .section-head { margin-bottom: 36px; }
+  .section-h2 {
+    font-size: clamp(24px, 3vw, 34px); font-weight: 700;
+    letter-spacing: -0.02em; color: var(--fg-primary); margin-top: 10px;
+    max-width: 560px;
+  }
+
+  .about-grid { display: grid; grid-template-columns: 1fr; gap: 32px; }
+  @media (min-width: 768px) { .about-grid { grid-template-columns: 200px 1fr; gap: 56px; } }
+  .avatar-ph {
+    width: 128px; height: 128px; border-radius: 12px;
+    border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card);
+    display: grid; place-items: center; color: var(--fg-quaternary); font-size: 12px;
+  }
+  .about-text { color: var(--fg-secondary); max-width: 620px; }
+  .about-text p + p { margin-top: 16px; }
+
+  .cap-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 768px) { .cap-grid { grid-template-columns: 1fr 1fr; } }
+  .cap-card { padding: 24px; border-radius: 18px; }
+  .cap-no { font-size: 12px; color: var(--fg-quaternary); font-family: ui-monospace, Menlo, monospace; }
+  .cap-title { font-size: 17px; font-weight: 650; letter-spacing: -0.01em; margin: 8px 0 8px; }
+  .cap-desc { font-size: 13.5px; color: var(--fg-secondary); line-height: 1.65; }
+  .cap-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+
+  .principle { max-width: 720px; }
+  .principle blockquote {
+    font-size: clamp(19px, 2.4vw, 26px); font-weight: 600; line-height: 1.45;
+    letter-spacing: -0.015em; color: var(--fg-primary);
+    padding-left: 20px; border-left: 3px solid var(--accent);
+    margin-bottom: 16px;
+  }
+  .principle p { color: var(--fg-secondary); font-size: 14.5px; padding-left: 23px; }
+
+  .cta-band {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 24px; padding: 40px 44px; border-radius: 24px;
+    border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card);
+  }
+  .cta-band h2 { font-size: clamp(20px, 2.4vw, 28px); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .cta-band p { color: var(--fg-secondary); font-size: 14px; max-width: 440px; }
+  .cta-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  footer { border-top: 1px solid var(--border-subtle); padding: 28px 0 40px; color: var(--fg-quaternary); font-size: 12px; }
+
+  /* =========================================================
+     博客页
+     ========================================================= */
+  .blog-head { padding: 56px 0 28px; }
+  .blog-h1 { font-size: clamp(30px, 4vw, 44px); letter-spacing: -0.02em; font-weight: 700; margin-top: 10px; }
+  .blog-count { color: var(--fg-tertiary); font-size: 13px; margin-top: 8px; }
+  .blog-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 32px; }
+  .search-box {
+    flex: 1; min-width: 220px; display: flex; align-items: center; gap: 8px;
+    height: 38px; padding: 0 14px; border-radius: 10px;
+    background: var(--bg-elevated); border: 1px solid var(--border-default);
+    color: var(--fg-quaternary); font-size: 13px;
+  }
+  .cat-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .featured {
+    position: relative; display: grid; grid-template-columns: 1fr; overflow: hidden;
+    border-radius: 24px; border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-card);
+    transition: transform .5s var(--ease-expo), box-shadow .5s var(--ease-expo);
+    cursor: pointer; margin-bottom: 16px;
+  }
+  @media (min-width: 860px) { .featured { grid-template-columns: 1.15fr 1fr; } }
+  .featured:hover { transform: translateY(-3px) scale(1.005); box-shadow: var(--shadow-floating); }
+  .featured-body { padding: 36px 36px 32px; }
+  @media (min-width: 860px) { .featured-body { padding: 44px 44px 40px; } }
+  .featured-tags { display: flex; gap: 8px; align-items: center; margin-bottom: 18px; }
+  .pill-featured { background: var(--warm-card); color: var(--warm-fg); border: none; font-weight: 600; letter-spacing: .04em; }
+  .featured-title { font-size: clamp(22px, 2.6vw, 32px); line-height: 1.25; letter-spacing: -0.015em; font-weight: 700; transition: color .25s; }
+  .featured:hover .featured-title { color: var(--accent); }
+  .featured-summary {
+    margin-top: 12px; color: var(--fg-secondary); font-size: 14px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .featured-meta { display: flex; gap: 14px; align-items: center; margin-top: 22px; font-size: 12px; color: var(--fg-tertiary); }
+  .read-more { margin-top: 24px; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--accent); }
+  .read-more .arrow { transition: transform .3s var(--ease-expo); }
+  .featured:hover .read-more .arrow { transform: translateX(4px); }
+
+  .gen-visual { position: relative; overflow: hidden; min-height: 240px; }
+  .gen-cover {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    transition: transform 1.2s var(--ease-expo);
+  }
+  .featured:hover .gen-cover, .pick:hover .gen-cover { transform: scale(1.05); }
+  .fv-caption {
+    position: absolute; left: 24px; bottom: 18px; z-index: 2;
+    font-family: ui-monospace, Menlo, monospace; font-size: 11px;
+    color: rgba(255,255,255,.8); letter-spacing: .08em;
+    text-shadow: 0 1px 8px rgba(0,0,0,.35);
+  }
+
+  .picks { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 48px; }
+  @media (min-width: 860px) { .picks { grid-template-columns: 1fr 1fr; } }
+  .pick {
+    display: flex; gap: 20px; padding: 24px; border-radius: 20px;
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-card); cursor: pointer;
+    transition: transform .45s var(--ease-expo), box-shadow .45s var(--ease-expo);
+  }
+  .pick:hover { transform: translateY(-3px); box-shadow: var(--shadow-floating); }
+  .pick .gen-visual {
+    flex: 0 0 108px; height: 108px; min-height: 0;
+    border-radius: 14px; align-self: center;
+  }
+  .pick-title { font-size: 16px; font-weight: 650; line-height: 1.4; letter-spacing: -0.01em; transition: color .25s; }
+  .pick:hover .pick-title { color: var(--accent); }
+  .pick-meta { margin-top: 8px; font-size: 12px; color: var(--fg-tertiary); display: flex; gap: 10px; }
+
+  .statement {
+    text-align: center; font-size: clamp(18px, 2.2vw, 24px);
+    font-weight: 600; letter-spacing: .02em; color: var(--fg-primary);
+    margin: 8px 0 56px;
+  }
+  .statement span { opacity: .15; }
+
+  .list-head {
+    display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px;
+    border-top: 1px solid var(--border-subtle); padding-top: 40px;
+  }
+  .list-head h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  .list-head span { font-size: 12px; color: var(--fg-quaternary); }
+  .post-list { display: flex; flex-direction: column; gap: 12px; padding-bottom: 72px; }
+  .post-card {
+    padding: 20px; border-radius: 16px;
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-card); cursor: pointer;
+    transition: transform .4s var(--ease-expo), box-shadow .4s var(--ease-expo), border-color .4s;
+  }
+  .post-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-floating); border-color: var(--border-default); }
+  .post-card h3 { font-size: 15.5px; font-weight: 600; transition: color .2s; }
+  .post-card:hover h3 { color: var(--accent); }
+  .post-card .sum {
+    margin-top: 6px; font-size: 13.5px; color: var(--fg-secondary);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .post-meta { margin-top: 12px; display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--fg-tertiary); flex-wrap: wrap; }
+  .post-meta .tags { margin-left: auto; display: flex; gap: 4px; }
+  .tag-mini {
+    display: inline-flex; align-items: center; height: 20px; padding: 0 8px;
+    border-radius: 6px; font-size: 11px; background: var(--bg-muted); color: var(--fg-secondary);
+    transition: all .2s;
+  }
+  .tag-mini:hover { background: var(--accent-soft); color: var(--accent); }
+
+  .view { display: none; }
+  .view.on { display: block; }
+
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: 100; pointer-events: none; opacity: .035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .hero-h1 .w { opacity: 1; transform: none; filter: none; transition: none; }
+    .statement span { opacity: 1; }
+    .scroll-cue .line { animation: none; }
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="field"></canvas>
+<div id="progress"></div>
+
+<header>
+  <div class="container-page header-inner">
+    <div class="wordmark">刘酝泽 <span>/ LYZSNIPER</span></div>
+    <nav>
+      <a class="active">主页</a><a>博客</a><a>标签</a><a>关于</a>
+    </nav>
+    <div class="header-right">
+      <div class="demo-switch" title="Demo 视图切换">
+        <button id="sw-home" class="on">主页预览</button>
+        <button id="sw-blog">博客预览</button>
+      </div>
+      <button class="icon-btn" id="theme-btn" title="明暗切换">◐</button>
+    </div>
+  </div>
+</header>
+
+<!-- ==================== 主页视图 ==================== -->
+<main id="view-home" class="view on">
+
+  <section class="hero-stage" id="hero-stage">
+    <div class="hero-content container-page">
+      <div class="hero-block">
+        <div class="hero-eyebrow reveal"><span class="dot"></span>AI AGENT 架构师 · 北京</div>
+        <h1 class="hero-h1" id="hero-title">
+          <span class="w">把智能体</span><span class="w">从&nbsp;Demo</span><br>
+          <span class="w">做成</span><span class="w"><em>生产系统。</em></span>
+        </h1>
+        <p class="hero-sub reveal" data-d="2">
+          专注 RAG / 知识工程、多智能体编排与 LLM 工程化落地。
+          相信 Agent 的价值不在 Prompt 技巧，而在分布式系统级的工程纪律。
+        </p>
+        <div class="hero-pills reveal" data-d="3">
+          <span class="pill">RAG / Knowledge Engineering</span>
+          <span class="pill">MCP / A2A</span>
+          <span class="pill">Multi-Agent</span>
+          <span class="pill">LLM</span>
+          <span class="pill">Agent Memory</span>
+        </div>
+        <div class="hero-ctas reveal" data-d="4">
+          <a class="btn btn-primary btn-gradient magnetic" href="#blog" onclick="switchView('blog');return false;">阅读博客 →</a>
+          <a class="btn btn-hero-ghost magnetic" href="mailto:jensenlyz@163.com">✉ 联系我</a>
+        </div>
+        <div class="stats-band reveal" data-d="5">
+          <div class="stat">
+            <div class="stat-num" data-count="10" data-suffix="+">0</div>
+            <div class="stat-label">年企业级研发</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num" data-count="3" data-suffix="年">0</div>
+            <div class="stat-label">AI Agent 工程化</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num" data-count="6" data-suffix="个">0</div>
+            <div class="stat-label">业务域生产落地</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-cue">SCROLL<span class="line"></span></div>
+  </section>
+
+  <div class="container-page">
+
+    <section class="section">
+      <div class="section-head reveal">
+        <div class="eyebrow"><span class="dot" style="width:6px;height:6px"></span>关于我</div>
+      </div>
+      <div class="about-grid">
+        <div class="avatar-ph reveal" data-d="1">量子港.png</div>
+        <div class="about-text reveal" data-d="2">
+          <p>十年企业级后端与平台研发，近三年 All in AI Agent 工程化。做过万级文档的知识库检索管线，也把多智能体编排真正推上过生产。</p>
+          <p>这个站点记录我在 AI 工程化、大模型系统与研发效能上的实践与判断——不追热点，只写验证过的东西。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head reveal">
+        <div class="eyebrow"><span class="dot" style="width:6px;height:6px"></span>能力域</div>
+        <h2 class="section-h2">按问题类型组织，不按时间堆叠。</h2>
+      </div>
+      <div class="cap-grid">
+        <article class="surface-card glow-card cap-card reveal" data-d="1">
+          <div class="cap-no">01</div>
+          <h3 class="cap-title">RAG & 企业知识工程</h3>
+          <p class="cap-desc">让知识库不只回答「是什么」，而是回答「在我们的业务里怎么做」。万级文档、6 个业务域、毫秒级召回的检索管线实践。</p>
+          <div class="cap-tags"><span class="pill">RAG</span><span class="pill">LlamaIndex</span><span class="pill">Haystack</span></div>
+        </article>
+        <article class="surface-card glow-card cap-card reveal" data-d="2">
+          <div class="cap-no">02</div>
+          <h3 class="cap-title">多智能体编排</h3>
+          <p class="cap-desc">Agent 不是 Prompt 拼接，是角色、工具、记忆、终止条件的工程设计。ReAct / Plan-Execute / Debate 多范式落地。</p>
+          <div class="cap-tags"><span class="pill">Multi-Agent</span><span class="pill">LangGraph</span><span class="pill">MCP</span></div>
+        </article>
+        <article class="surface-card glow-card cap-card reveal" data-d="3">
+          <div class="cap-no">03</div>
+          <h3 class="cap-title">LLM 推理与工程化</h3>
+          <p class="cap-desc">关注模型能力上限，更关注推理成本、可控性和团队使用规范。Qwen / vLLM / Claude Code 企业落地路径。</p>
+          <div class="cap-tags"><span class="pill">Qwen</span><span class="pill">vLLM</span><span class="pill">Claude Code</span></div>
+        </article>
+        <article class="surface-card glow-card cap-card reveal" data-d="4">
+          <div class="cap-no">04</div>
+          <h3 class="cap-title">企业级后端架构</h3>
+          <p class="cap-desc">不相信「AI 项目」可以脱离传统软件工程。高并发网关、消息中间件、图数据库在 ToB 业务的真实承载。</p>
+          <div class="cap-tags"><span class="pill">Spring Boot</span><span class="pill">Kafka</span><span class="pill">JVM</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head reveal">
+        <div class="eyebrow"><span class="dot" style="width:6px;height:6px"></span>核心判断</div>
+      </div>
+      <div class="principle reveal" data-d="1">
+        <blockquote>「真正难的从来不是让 Agent 跑起来，是让它在生产里不胡说、不超时、不被人绕过。」</blockquote>
+        <p>我把每个 Agent 项目都当成一个分布式系统来设计：工具调用要有超时和降级、上下文要有边界、失败要有可重入路径。在 6 个业务域的实践中，这套工程纪律比任何 Prompt 技巧都更可靠。</p>
+      </div>
+    </section>
+
+    <section class="section" style="padding-bottom: 96px;">
+      <div class="cta-band glow-card reveal">
+        <div>
+          <h2>聊聊 AI Agent 架构</h2>
+          <p>欢迎交流企业级 LLM 应用、智能体编排、全栈技术，或者任何有意思的项目想法。</p>
+        </div>
+        <div class="cta-actions">
+          <a class="btn btn-primary btn-gradient magnetic" href="mailto:jensenlyz@163.com">✉ 邮件联系</a>
+          <a class="btn btn-secondary magnetic" href="https://github.com/lyzsniper" target="_blank" rel="noopener">GitHub →</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+  <footer><div class="container-page">© 2026 刘酝泽 · 用 React + Fastify + SQLite 构建</div></footer>
+</main>
+
+<!-- ==================== 博客视图 ==================== -->
+<main id="view-blog" class="view">
+  <div class="container-page">
+
+    <div class="blog-head">
+      <div class="eyebrow reveal"><span class="dot"></span>博客</div>
+      <h1 class="blog-h1 reveal" data-d="1">全部文章</h1>
+      <p class="blog-count reveal" data-d="2">共 12 篇文章 · 持续更新</p>
+    </div>
+
+    <div class="blog-toolbar reveal" data-d="2">
+      <div class="search-box">⌕ &nbsp;搜索文章标题、摘要…</div>
+      <div class="cat-row">
+        <span class="pill pill-accent"><span class="cdot"></span>全部 12</span>
+        <span class="pill" style="--cc:#4f46e5"><span class="cdot"></span>大模型 4</span>
+        <span class="pill" style="--cc:#0ea5e9"><span class="cdot"></span>AI 工程 4</span>
+        <span class="pill" style="--cc:#8052ff"><span class="cdot"></span>架构 2</span>
+        <span class="pill" style="--cc:#f59e0b"><span class="cdot"></span>随笔 2</span>
+      </div>
+    </div>
+
+    <article class="featured glow-card reveal" data-d="1">
+      <div class="featured-body">
+        <div class="featured-tags">
+          <span class="pill pill-featured">★ 精选</span>
+          <span class="pill">大模型</span>
+        </div>
+        <h2 class="featured-title">万亿参数 MoE 时代：六大开源大模型稀疏注意力机制深度对比</h2>
+        <p class="featured-summary">
+          从长上下文 O(L²) 难题到工业级解决方案的全景图谱——token 级 index 检索、block 块级稀疏、哈希压缩、低秩近似，
+          六款模型六条工程路径，所有结论经 config 字段 + README + 论文三重交叉验证。
+        </p>
+        <div class="featured-meta">
+          <span class="mono">2026-07-15</span><span>⏱ 24 分钟</span><span>👁 1.2k</span>
+        </div>
+        <span class="read-more">阅读全文 <span class="arrow">→</span></span>
+      </div>
+      <div class="gen-visual">
+        <canvas class="gen-cover" data-pattern="constellation" data-hue="242" data-seed="moe-sparse-attention"></canvas>
+        <div class="fv-caption">MoE · Sparse Attention · 1M Context</div>
+      </div>
+    </article>
+
+    <div class="picks">
+      <article class="pick glow-card reveal" data-d="2">
+        <div class="gen-visual">
+          <canvas class="gen-cover" data-pattern="waves" data-hue="199" data-seed="agent-platform"></canvas>
+        </div>
+        <div>
+          <div class="featured-tags" style="margin-bottom:8px"><span class="pill pill-accent">精选</span><span class="pill">AI 工程</span></div>
+          <h3 class="pick-title">AI Agent 研发中台未来架构设计方案</h3>
+          <div class="pick-meta"><span class="mono">2026-06-20</span><span>⏱ 18 分钟</span><span>👁 856</span></div>
+        </div>
+      </article>
+      <article class="pick glow-card reveal" data-d="3">
+        <div class="gen-visual">
+          <canvas class="gen-cover" data-pattern="orbits" data-hue="262" data-seed="dialog-to-delivery"></canvas>
+        </div>
+        <div>
+          <div class="featured-tags" style="margin-bottom:8px"><span class="pill pill-accent">精选</span><span class="pill" style="--cc:#8052ff"><span class="cdot" style="width:6px;height:6px;border-radius:50%;background:var(--cc)"></span>架构</span></div>
+          <h3 class="pick-title">从对话到交付：企业级全流程开发智能体的构建与趋势</h3>
+          <div class="pick-meta"><span class="mono">2026-06-12</span><span>⏱ 15 分钟</span><span>👁 743</span></div>
+        </div>
+      </article>
+    </div>
+
+    <p class="statement" id="statement">不追热点，只写验证过的东西。</p>
+
+    <div class="list-head reveal"><h2>最新文章</h2><span>精选已在上方展示，此处不重复</span></div>
+    <div class="post-list">
+      <article class="post-card glow-card reveal">
+        <h3>Qwen3 源码学习方式计划（面向后端 AI Agent 工程师）</h3>
+        <p class="sum">不用先把模型原理学到学术深度，用工程可落地的方式建立「从请求到生成、从评测到部署」的全链路心智模型。</p>
+        <div class="post-meta">
+          <span class="mono">2026-06-08</span><span>⏱ 12 分钟</span><span>大模型</span>
+          <span class="tags"><span class="tag-mini">Qwen</span><span class="tag-mini">源码阅读</span></span>
+        </div>
+      </article>
+      <article class="post-card glow-card reveal">
+        <h3>MiniMax M3 发布：国产模型终于集齐「三件套」</h3>
+        <p class="sum">这不是挤牙膏，这是把牙膏厂炸了——M3 技术博客速读与划重点。</p>
+        <div class="post-meta">
+          <span class="mono">2026-07-10</span><span>⏱ 6 分钟</span><span>大模型</span>
+          <span class="tags"><span class="tag-mini">MiniMax</span><span class="tag-mini">资讯</span></span>
+        </div>
+      </article>
+      <article class="post-card glow-card reveal">
+        <h3>开源大模型稀疏注意力深度对比（实践篇）</h3>
+        <p class="sum">稀疏注意力在长上下文场景下的实测表现与选型建议。</p>
+        <div class="post-meta">
+          <span class="mono">2026-07-05</span><span>⏱ 14 分钟</span><span>大模型</span>
+          <span class="tags"><span class="tag-mini">Attention</span><span class="tag-mini">长上下文</span></span>
+        </div>
+      </article>
+      <article class="post-card glow-card reveal">
+        <h3>Hello World</h3>
+        <p class="sum">博客的第一篇占位文章，Hello World！</p>
+        <div class="post-meta">
+          <span class="mono">2023-09-22</span><span>⏱ 1 分钟</span><span>随笔</span>
+          <span class="tags"><span class="tag-mini">Hexo</span></span>
+        </div>
+      </article>
+    </div>
+
+  </div>
+  <footer><div class="container-page">© 2026 刘酝泽 · 用 React + Fastify + SQLite 构建</div></footer>
+</main>
+
+<script>
+/* =========================================================
+   全局星座场（唯一背景特效层，明暗双模式）
+   - 三角粒子 + 邻近连线铺满整个视口，右侧密度更高
+   - 鼠标聚光灯：260px 内提亮/放大/吸附，连线同步增亮
+   - 滚动视差：背景以 6% 速率随滚动漂移，制造纵深
+   - 亮色模式：连线/粒子用可见但克制的 alpha；暗色模式：全彩
+   ========================================================= */
+const mouse = { x: window.innerWidth * 0.62, y: window.innerHeight * 0.42 };
+const smooth = { x: mouse.x, y: mouse.y };
+let hasMouse = false;
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+window.addEventListener('mousemove', (e) => {
+  mouse.x = e.clientX; mouse.y = e.clientY; hasMouse = true;
+});
+
+const PALETTE = [
+  { c: '129,140,248', w: 0.34 },  // indigo
+  { c: '128,82,255',  w: 0.24 },  // electric iris
+  { c: '45,212,191',  w: 0.15 },  // teal
+  { c: '244,114,182', w: 0.11 },  // magenta
+  { c: '191,219,254', w: 0.08 },  // pale blue
+  { c: '255,184,41',  w: 0.08 },  // saffron
+];
+function pickColor() {
+  let r = Math.random(), acc = 0;
+  for (const p of PALETTE) { acc += p.w; if (r <= acc) return p.c; }
+  return PALETTE[0].c;
+}
+function gauss() { return (Math.random() + Math.random() + Math.random() - 1.5) / 1.5; }
+
+(function () {
+  const canvas = document.getElementById('field');
+  const ctx = canvas.getContext('2d');
+  const SPOTLIGHT_R = 260;
+  const PARALLAX = 0.06;
+  let stars = [], mesh = [], dpr = 1, scrollY = 0;
+
+  // A3：帧率自适应降级（0=全量 1=隔行连线 2=半量粒子）
+  let perfLevel = 0, dtEma = 16.7, frameCount = 0, lastTs = 0;
+
+  function build(starScale = 1) {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    const W = window.innerWidth, H = window.innerHeight;
+
+    stars = [];
+    const total = Math.floor((W < 768 ? 110 : 240) * starScale);
+    // 60% 聚在右侧 4 个团簇（hero 视觉重心），40% 全场散布
+    const clusters = [
+      { x: W * 0.68, y: H * 0.28, r: W * 0.10 },
+      { x: W * 0.84, y: H * 0.46, r: W * 0.12 },
+      { x: W * 0.62, y: H * 0.60, r: W * 0.09 },
+      { x: W * 0.80, y: H * 0.14, r: W * 0.07 },
+    ];
+    const nCluster = Math.floor(total * 0.6);
+    const perCluster = Math.floor(nCluster / clusters.length);
+    for (const cl of clusters) {
+      for (let i = 0; i < perCluster; i++) stars.push(makeStar(cl.x + gauss() * cl.r, cl.y + gauss() * cl.r * 0.9, true));
+    }
+    for (let i = stars.length; i < total; i++) {
+      stars.push(makeStar(Math.random() * W, Math.random() * H, false));
+    }
+
+    // A1：隐藏细网格（平时不可见，聚光灯扫过才浮现）
+    mesh = [];
+    const gap = 46;
+    for (let x = gap / 2; x < W; x += gap) {
+      for (let y = gap / 2; y < H; y += gap) {
+        mesh.push({ x: x + gauss() * 6, y: y + gauss() * 6, c: pickColor() });
+      }
+    }
+  }
+
+  function makeStar(x, y, inCloud) {
+    return {
+      x, y,
+      vx: (Math.random() - 0.5) * 0.1,
+      vy: (Math.random() - 0.5) * 0.1,
+      size: (inCloud ? 1.6 : 1.0) + Math.random() * 2.4,
+      rot: Math.random() * Math.PI * 2,
+      vr: (Math.random() - 0.5) * 0.01,
+      color: pickColor(),
+      alpha: (inCloud ? 0.4 : 0.25) + Math.random() * 0.4,
+      phase: Math.random() * Math.PI * 2,
+      tw: 0.4 + Math.random() * 0.8,
+      cloud: inCloud,
+    };
+  }
+
+  function drawTri(x, y, size, rot, color, alpha) {
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(rot);
+    ctx.beginPath();
+    ctx.moveTo(0, -size);
+    ctx.lineTo(size * 0.866, size * 0.5);
+    ctx.lineTo(-size * 0.866, size * 0.5);
+    ctx.closePath();
+    ctx.fillStyle = `rgba(${color},${alpha * 0.35})`;
+    ctx.fill();
+    ctx.strokeStyle = `rgba(${color},${alpha})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function draw(t) {
+    const W = canvas.width / dpr, H = canvas.height / dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const dark = document.documentElement.classList.contains('dark');
+    // 主题系数：亮色模式连线/粒子需要更高可见度
+    const starK = dark ? 1 : 0.9;
+    const linkBase = dark ? 0.14 : 0.11;
+    const linkMax = dark ? 0.55 : 0.42;
+    const offY = (scrollY * PARALLAX) % H;
+
+    // A1：聚光灯揭示隐藏细网格（先画，压在星网下面）
+    const meshA = dark ? 0.32 : 0.24;
+    for (let i = 0; i < mesh.length; i++) {
+      const m = mesh[i];
+      const my = ((m.y - offY) % H + H) % H;
+      const md = Math.hypot(m.x - smooth.x, my - smooth.y);
+      if (md < SPOTLIGHT_R * 0.92) {
+        const f = 1 - md / (SPOTLIGHT_R * 0.92);
+        const a = f * f * meshA;
+        // 与右、下邻居的细线
+        const right = mesh[i + 1];
+        if (right && right.x - m.x < 60) {
+          const ry = ((right.y - offY) % H + H) % H;
+          const rd = Math.hypot(right.x - smooth.x, ry - smooth.y);
+          if (rd < SPOTLIGHT_R * 0.92) {
+            ctx.strokeStyle = `rgba(${m.c},${a * 0.6})`;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath(); ctx.moveTo(m.x, my); ctx.lineTo(right.x, ry); ctx.stroke();
+          }
+        }
+        ctx.fillStyle = `rgba(${m.c},${a})`;
+        ctx.beginPath();
+        ctx.arc(m.x, my, 1.1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    const linkDist = Math.min(W * 0.075, 96);
+    const iStep = perfLevel >= 1 ? 2 : 1; // A3 降级：隔行连线
+    for (let i = 0; i < stars.length; i += iStep) {
+      const s = stars[i];
+      const sy1 = ((s.y - offY) % H + H) % H;
+      for (let j = i + 1; j < stars.length; j++) {
+        const o = stars[j];
+        const sy2 = ((o.y - offY) % H + H) % H;
+        const dx = s.x - o.x, dy = sy1 - sy2;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < linkDist * linkDist) {
+          const d = Math.sqrt(d2);
+          let la = (1 - d / linkDist) * linkBase;
+          const mx = (s.x + o.x) / 2 - smooth.x, my = (sy1 + sy2) / 2 - smooth.y;
+          const md = Math.hypot(mx, my);
+          if (md < SPOTLIGHT_R) la *= 1 + (1 - md / SPOTLIGHT_R) * 2.2;
+          ctx.strokeStyle = `rgba(${s.color},${Math.min(la, linkMax)})`;
+          ctx.lineWidth = 0.6;
+          ctx.beginPath(); ctx.moveTo(s.x, sy1); ctx.lineTo(o.x, sy2); ctx.stroke();
+        }
+      }
+    }
+
+    for (const s of stars) {
+      s.x += s.vx; s.y += s.vy; s.rot += s.vr;
+      if (s.x < -20) s.x = W + 20; if (s.x > W + 20) s.x = -20;
+      if (s.y < -20) s.y = H + 20; if (s.y > H + 20) s.y = -20;
+
+      const sy = ((s.y - offY) % H + H) % H;
+      const tw = 0.65 + 0.35 * Math.sin(t * s.tw + s.phase);
+      let alpha = s.alpha * tw * starK;
+      let size = s.size;
+
+      const md = Math.hypot(s.x - smooth.x, sy - smooth.y);
+      if (md < SPOTLIGHT_R) {
+        const f = 1 - md / SPOTLIGHT_R;
+        alpha = Math.min(1, alpha + f * f * (dark ? 0.75 : 0.6));
+        size += f * 1.8;
+        s.x += (smooth.x - s.x) * 0.012 * f;
+        s.y += (smooth.y + offY - s.y) * 0.012 * f;
+      }
+      drawTri(s.x, sy, size, s.rot, s.color, alpha);
+    }
+  }
+
+  build();
+  window.addEventListener('resize', () => build(perfLevel >= 2 ? 0.55 : 1));
+  window.addEventListener('scroll', () => { scrollY = window.scrollY; }, { passive: true });
+
+  if (reduced) { draw(0); return; }
+  (function loop(ts) {
+    // A3：FPS 监测（EMA），持续偏低自动降级
+    if (lastTs) {
+      const dt = ts - lastTs;
+      if (dt < 250) dtEma = dtEma * 0.95 + dt * 0.05;
+    }
+    lastTs = ts;
+    if (++frameCount % 180 === 0) {
+      const fps = 1000 / dtEma;
+      if (fps < 32 && perfLevel < 2) { perfLevel = 2; build(0.55); }
+      else if (fps < 42 && perfLevel < 1) { perfLevel = 1; }
+    }
+
+    smooth.x += (mouse.x - smooth.x) * 0.1;
+    smooth.y += (mouse.y - smooth.y) * 0.1;
+    draw(performance.now() / 1000);
+    requestAnimationFrame(loop);
+  })(0);
+})();
+
+/* =========================================================
+   生成封面引擎（星座 / 流场 / 轨道）
+   ========================================================= */
+(function () {
+  function hash(str) {
+    let h = 2166136261;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+  function mulberry32(seed) {
+    let a = seed;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function drawCover(cv) {
+    const parent = cv.parentElement;
+    const rect = parent.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = rect.width * dpr;
+    cv.height = rect.height * dpr;
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const W = rect.width, H = rect.height;
+    const hue = +cv.dataset.hue;
+    const rand = mulberry32(hash(cv.dataset.seed || 'cover'));
+
+    const g = ctx.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, `hsl(${hue} 62% 48%)`);
+    g.addColorStop(0.55, `hsl(${(hue + 28) % 360} 60% 56%)`);
+    g.addColorStop(1, `hsl(${(hue + 60) % 360} 58% 64%)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    const hl = ctx.createRadialGradient(W * 0.25, H * 0.15, 0, W * 0.25, H * 0.15, W * 0.7);
+    hl.addColorStop(0, 'rgba(255,255,255,0.28)');
+    hl.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hl;
+    ctx.fillRect(0, 0, W, H);
+
+    const pattern = cv.dataset.pattern;
+
+    if (pattern === 'constellation') {
+      const nodes = [];
+      const n = Math.floor(W / 16);
+      for (let i = 0; i < n; i++) nodes.push({ x: rand() * W, y: rand() * H, r: 1 + rand() * 2 });
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const d = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+          if (d < W * 0.16) {
+            ctx.strokeStyle = `rgba(255,255,255,${(1 - d / (W * 0.16)) * 0.4})`;
+            ctx.lineWidth = 0.7;
+            ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
+          }
+        }
+      }
+      for (const p of nodes) {
+        ctx.fillStyle = `rgba(255,255,255,${0.5 + rand() * 0.5})`;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+      }
+    } else if (pattern === 'waves') {
+      const lines = 14;
+      for (let l = 0; l < lines; l++) {
+        const yBase = (H / (lines - 1)) * l;
+        const amp = 4 + rand() * 10;
+        const freq = 1.5 + rand() * 2.5;
+        const phase = rand() * Math.PI * 2;
+        ctx.strokeStyle = `rgba(255,255,255,${0.08 + rand() * 0.25})`;
+        ctx.lineWidth = 0.8 + rand() * 0.8;
+        ctx.beginPath();
+        for (let x = 0; x <= W; x += 4) {
+          const y = yBase + Math.sin((x / W) * Math.PI * freq + phase) * amp;
+          x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      for (let i = 0; i < 20; i++) {
+        ctx.fillStyle = `rgba(255,255,255,${0.2 + rand() * 0.5})`;
+        ctx.beginPath(); ctx.arc(rand() * W, rand() * H, 0.8 + rand() * 1.2, 0, Math.PI * 2); ctx.fill();
+      }
+    } else if (pattern === 'orbits') {
+      const cx0 = W * (0.7 + rand() * 0.2), cy0 = H * (0.65 + rand() * 0.25);
+      const maxR = Math.hypot(W, H) * 0.7;
+      const rings = 12;
+      for (let i = 1; i <= rings; i++) {
+        const r = (maxR / rings) * i;
+        const start = rand() * Math.PI * 2;
+        const span = Math.PI * (0.5 + rand() * 1.2);
+        ctx.strokeStyle = `rgba(255,255,255,${0.08 + rand() * 0.22})`;
+        ctx.lineWidth = 0.8 + rand();
+        ctx.beginPath(); ctx.arc(cx0, cy0, r, start, start + span); ctx.stroke();
+        const sa = start + span * rand();
+        ctx.fillStyle = `rgba(255,255,255,${0.4 + rand() * 0.5})`;
+        ctx.beginPath(); ctx.arc(cx0 + Math.cos(sa) * r, cy0 + Math.sin(sa) * r, 1.2 + rand() * 1.4, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    const vg = ctx.createLinearGradient(0, H * 0.55, 0, H);
+    vg.addColorStop(0, 'rgba(0,0,0,0)');
+    vg.addColorStop(1, 'rgba(0,0,0,0.22)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  function drawAll() {
+    document.querySelectorAll('canvas.gen-cover').forEach(drawCover);
+  }
+
+  drawAll();
+  let rz;
+  window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(drawAll, 150); });
+  window.__redrawCovers = drawAll;
+})();
+
+/* ===== 光标光晕卡 ===== */
+document.querySelectorAll('.glow-card').forEach((card) => {
+  card.addEventListener('mousemove', (e) => {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  });
+});
+
+/* ===== 磁性按钮 ===== */
+document.querySelectorAll('.magnetic').forEach((btn) => {
+  btn.addEventListener('mousemove', (e) => {
+    if (reduced) return;
+    const r = btn.getBoundingClientRect();
+    const x = e.clientX - r.left - r.width / 2;
+    const y = e.clientY - r.top - r.height / 2;
+    btn.style.transform = `translate(${x * 0.22}px, ${y * 0.22}px)`;
+  });
+  btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+});
+
+/* ===== B2：统计数字 count-up（expo-out 缓动） ===== */
+document.querySelectorAll('.stat-num').forEach((el) => {
+  const target = parseInt(el.dataset.count, 10);
+  const suffix = el.dataset.suffix || '';
+  if (reduced) {
+    el.innerHTML = `${target}<span class="suffix">${suffix}</span>`;
+    return;
+  }
+  const DURATION = 1400, START_DELAY = 700;
+  const t0 = performance.now();
+  (function step(now) {
+    const p = Math.min(1, Math.max(0, (now - t0 - START_DELAY) / DURATION));
+    const eased = 1 - Math.pow(2, -10 * p); // easeOutExpo
+    el.innerHTML = `${Math.round(target * eased)}<span class="suffix">${suffix}</span>`;
+    if (p < 1) requestAnimationFrame(step);
+  })(t0);
+});
+
+/* ===== 滚动入场 ===== */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((en) => {
+    if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+/* hero 逐词入场 */
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  document.getElementById('hero-stage').classList.add('play');
+}));
+
+/* ===== 写作宣言：滚动逐字揭示 ===== */
+const st = document.getElementById('statement');
+st.innerHTML = st.textContent.split('').map((c) =>
+  c === ' ' ? '<span>&nbsp;</span>' : `<span>${c}</span>`).join('');
+const stSpans = st.querySelectorAll('span');
+
+function updateStatement() {
+  if (reduced) { stSpans.forEach((s) => (s.style.opacity = 1)); return; }
+  if (!document.getElementById('view-blog').classList.contains('on')) return;
+  const r = st.getBoundingClientRect();
+  const p = Math.min(1, Math.max(0,
+    (window.innerHeight * 0.88 - r.top) / (window.innerHeight * 0.55)));
+  stSpans.forEach((s, i) => {
+    const cp = Math.min(1, Math.max(0, (p * stSpans.length - i) / 1.5));
+    s.style.opacity = 0.15 + cp * 0.85;
+  });
+}
+window.addEventListener('scroll', updateStatement, { passive: true });
+
+/* ===== 全局滚动进度条 ===== */
+const progress = document.getElementById('progress');
+function updateProgress() {
+  const h = document.documentElement;
+  const max = h.scrollHeight - h.clientHeight;
+  progress.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
+}
+window.addEventListener('scroll', updateProgress, { passive: true });
+updateProgress();
+
+/* ===== Demo 视图切换 ===== */
+function switchView(name) {
+  document.getElementById('view-home').classList.toggle('on', name === 'home');
+  document.getElementById('view-blog').classList.toggle('on', name === 'blog');
+  document.getElementById('sw-home').classList.toggle('on', name === 'home');
+  document.getElementById('sw-blog').classList.toggle('on', name === 'blog');
+  window.scrollTo(0, 0);
+  updateStatement();
+  updateProgress();
+  if (name === 'blog' && window.__redrawCovers) {
+    requestAnimationFrame(window.__redrawCovers);
+  }
+}
+document.getElementById('sw-home').addEventListener('click', () => switchView('home'));
+document.getElementById('sw-blog').addEventListener('click', () => switchView('blog'));
+if (location.hash === '#blog') switchView('blog');
+
+/* ===== 明暗切换 ===== */
+document.getElementById('theme-btn').addEventListener('click', () => {
+  document.documentElement.classList.toggle('dark');
+});
+if (location.search.includes('dark')) document.documentElement.classList.add('dark');
+
+/* ===== 兜底：截图/虚拟时间环境下强制可见视图首屏元素到终态 ===== */
+setTimeout(() => {
+  const force = (el) => {
+    el.style.transition = 'none';
+    el.style.opacity = '1'; el.style.transform = 'none'; el.style.filter = 'none';
+  };
+  document.querySelectorAll('.view.on .reveal.in').forEach(force);
+  if (document.getElementById('view-home').classList.contains('on'))
+    document.querySelectorAll('#hero-title .w').forEach(force);
+}, 2200);
+</script>
+</body>
+</html>

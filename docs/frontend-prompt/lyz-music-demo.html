@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI前沿量子港 · 音乐 — Demo</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-elev: #14141c;
+    --bg-card: #181822;
+    --bg-card-hover: #22222e;
+    --fg: #f5f5f7;
+    --fg-2: #a3a3ad;
+    --fg-3: #6b6b76;
+    --accent: #818cf8;
+    --accent-strong: #4f46e5;
+    --accent-soft: rgba(129, 140, 248, 0.12);
+    --border: rgba(255, 255, 255, 0.08);
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --player-h: 76px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: "Inter", -apple-system, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-size: 14px; line-height: 1.6;
+    padding-bottom: var(--player-h);
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  #field { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .6; }
+  .wrap { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* ===== 顶栏 ===== */
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(10, 10, 15, 0.75); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .header-inner { display: flex; align-items: center; gap: 16px; height: 56px; }
+  .wordmark { font-weight: 700; font-size: 15px; }
+  .wordmark span { color: var(--fg-3); font-weight: 400; }
+  .back-home { margin-left: auto; font-size: 12.5px; color: var(--fg-2); padding: 6px 14px; border: 1px solid var(--border); border-radius: 999px; transition: all .2s; }
+  .back-home:hover { color: var(--fg); border-color: var(--accent); }
+
+  /* ===== 艺术家头 ===== */
+  .artist-hero {
+    position: relative; margin: 24px 0 8px; padding: 56px 40px 36px;
+    border-radius: 20px; overflow: hidden;
+    background: linear-gradient(160deg, #312e81 0%, #4f46e5 45%, #0f0f1a 100%);
+  }
+  .artist-hero::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(600px circle at 85% 20%, rgba(167,139,250,.35), transparent 60%);
+    pointer-events: none;
+  }
+  .artist-hero .inner { position: relative; z-index: 2; display: flex; align-items: flex-end; gap: 28px; }
+  .artist-avatar {
+    width: 148px; height: 148px; border-radius: 50%; flex: none;
+    border: 3px solid rgba(255,255,255,.25);
+    box-shadow: 0 12px 40px rgba(0,0,0,.5);
+    background:
+      radial-gradient(circle at 35% 30%, #c7d2fe 0%, transparent 45%),
+      radial-gradient(circle at 65% 70%, #8052ff 0%, transparent 55%),
+      linear-gradient(140deg, #1e1b4b, #4f46e5);
+    display: grid; place-items: center; font-size: 40px;
+  }
+  .artist-tag { font-size: 11px; letter-spacing: .2em; color: rgba(255,255,255,.7); text-transform: uppercase; margin-bottom: 8px; }
+  .artist-tag b { color: #ffb829; }
+  .artist-name { font-size: clamp(34px, 5vw, 56px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+  .artist-meta { margin-top: 10px; font-size: 13px; color: rgba(255,255,255,.65); }
+  .artist-actions { display: flex; gap: 12px; margin-top: 20px; }
+  .btn-play-big {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 44px; padding: 0 26px; border-radius: 999px;
+    background: var(--accent); color: #0a0a0f; font-weight: 700; font-size: 14px;
+    transition: all .2s var(--ease);
+  }
+  .btn-play-big:hover { transform: scale(1.04); background: #a5b4fc; }
+  .btn-ghost {
+    height: 44px; padding: 0 22px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.3); color: #fff; font-size: 13px;
+    transition: all .2s;
+  }
+  .btn-ghost:hover { border-color: #fff; }
+
+  /* ===== 区块标题 ===== */
+  .sec-title { display: flex; align-items: baseline; gap: 10px; margin: 36px 0 16px; }
+  .sec-title h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  .sec-title span { font-size: 12px; color: var(--fg-3); }
+
+  /* ===== 专辑网格 ===== */
+  .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 18px; }
+  .album-card {
+    background: var(--bg-card); border-radius: 12px; padding: 14px;
+    cursor: pointer; transition: background .25s var(--ease), transform .25s var(--ease);
+    position: relative;
+  }
+  .album-card:hover { background: var(--bg-card-hover); transform: translateY(-3px); }
+  .album-cover {
+    position: relative; width: 100%; aspect-ratio: 1; border-radius: 8px; overflow: hidden;
+    margin-bottom: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  }
+  .album-cover canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .album-cover .play-fab {
+    position: absolute; right: 10px; bottom: 10px;
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--accent); color: #0a0a0f;
+    display: grid; place-items: center; font-size: 15px;
+    box-shadow: 0 6px 16px rgba(0,0,0,.5);
+    opacity: 0; transform: translateY(8px);
+    transition: all .25s var(--ease);
+  }
+  .album-card:hover .play-fab { opacity: 1; transform: none; }
+  .album-name { font-weight: 650; font-size: 14.5px; }
+  .album-sub { font-size: 12px; color: var(--fg-3); margin-top: 3px; }
+
+  /* ===== 专辑详情（视图切换） ===== */
+  .album-detail { display: none; }
+  .album-detail.on { display: block; }
+  .detail-head { display: flex; gap: 28px; align-items: flex-end; margin: 28px 0; flex-wrap: wrap; }
+  .detail-cover { width: 200px; height: 200px; border-radius: 12px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.5); position: relative; flex: none; }
+  .detail-cover canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .detail-type { font-size: 11px; letter-spacing: .18em; color: var(--fg-3); text-transform: uppercase; }
+  .detail-name { font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing: -0.02em; margin: 8px 0; }
+  .detail-meta { font-size: 13px; color: var(--fg-2); }
+  .back-link { font-size: 13px; color: var(--fg-2); cursor: pointer; display: inline-flex; gap: 6px; align-items: center; margin-top: 20px; }
+  .back-link:hover { color: var(--fg); }
+
+  /* ===== 曲目表 ===== */
+  .track-list { margin-top: 8px; }
+  .track-row {
+    display: grid; grid-template-columns: 32px 1fr auto auto; gap: 14px; align-items: center;
+    padding: 9px 14px; border-radius: 8px; cursor: pointer;
+    transition: background .15s;
+  }
+  .track-row:hover { background: var(--bg-card-hover); }
+  .track-row.playing { background: var(--accent-soft); }
+  .track-row.playing .track-name { color: var(--accent); }
+  .track-idx { color: var(--fg-3); font-size: 13px; text-align: center; font-variant-numeric: tabular-nums; }
+  .track-name { font-weight: 550; font-size: 14.5px; }
+  .track-sub { font-size: 12px; color: var(--fg-3); margin-top: 1px; }
+  .track-dur { color: var(--fg-3); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .eq { display: none; align-items: flex-end; gap: 2px; height: 14px; }
+  .eq i { width: 3px; background: var(--accent); animation: eq-b 0.9s ease-in-out infinite; }
+  .eq i:nth-child(2) { animation-delay: .25s; }
+  .eq i:nth-child(3) { animation-delay: .5s; }
+  .track-row.playing .eq { display: inline-flex; }
+  .track-row.playing .idx-num { display: none; }
+  @keyframes eq-b { 0%,100% { height: 4px; } 50% { height: 14px; } }
+  .paused .eq i { animation-play-state: paused; height: 4px; }
+
+  /* ===== 底部播放器 ===== */
+  .player {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; height: var(--player-h);
+    background: rgba(20, 20, 28, 0.92); backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: minmax(180px, 1fr) minmax(320px, 2fr) minmax(160px, 1fr);
+    align-items: center; gap: 16px; padding: 0 20px;
+  }
+  .np { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .np-cover { width: 48px; height: 48px; border-radius: 6px; overflow: hidden; position: relative; flex: none; }
+  .np-cover canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .np-title { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .np-artist { font-size: 11.5px; color: var(--fg-3); }
+  .np-like { color: var(--fg-3); margin-left: 6px; transition: color .2s; flex: none; }
+  .np-like.on, .np-like:hover { color: #ff6b8a; }
+  .pc { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .pc-btns { display: flex; align-items: center; gap: 22px; }
+  .pc-btns button { color: var(--fg-2); font-size: 16px; transition: color .15s, transform .15s; }
+  .pc-btns button:hover { color: var(--fg); transform: scale(1.08); }
+  .pc-play {
+    width: 38px; height: 38px; border-radius: 50%; background: #fff; color: #0a0a0f !important;
+    display: grid; place-items: center; font-size: 15px;
+  }
+  .pc-play:hover { transform: scale(1.06) !important; }
+  .pc-bar { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 520px; }
+  .pc-time { font-size: 11px; color: var(--fg-3); font-variant-numeric: tabular-nums; width: 36px; }
+  .pc-time:last-child { text-align: right; }
+  .seek { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.18); cursor: pointer; position: relative; }
+  .seek .fill { position: absolute; inset: 0 auto 0 0; width: 0%; border-radius: 2px; background: var(--accent); }
+  .seek:hover .fill { background: #a5b4fc; }
+  .vol { display: flex; align-items: center; gap: 8px; justify-content: flex-end; color: var(--fg-3); }
+  .vol input { width: 88px; accent-color: var(--accent); }
+  @media (max-width: 760px) {
+    .player { grid-template-columns: 1fr auto; }
+    .vol { display: none; }
+    .artist-hero .inner { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="field"></canvas>
+
+<header>
+  <div class="wrap header-inner">
+    <div class="wordmark">刘酝泽 <span>/ MUSIC</span></div>
+    <a class="back-home" href="lyz-home-blog-demo.html">← 返回博客</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 艺术家页 -->
+  <section id="view-artist">
+    <div class="artist-hero">
+      <div class="inner">
+        <div class="artist-avatar">🌌</div>
+        <div>
+          <div class="artist-tag"><b>◉ 认证音乐人</b> · 汽水音乐</div>
+          <h1 class="artist-name">AI前沿量子港</h1>
+          <div class="artist-meta">3 张作品 · 14 首曲目 · AI 生成音乐 · 每月听众 1,024</div>
+          <div class="artist-actions">
+            <button class="btn-play-big" id="play-all">▶ 播放全部</button>
+            <button class="btn-ghost" id="goto-soda">在汽水音乐中打开 ↗</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-title"><h2>作品</h2><span>专辑与单曲</span></div>
+    <div class="album-grid" id="album-grid"></div>
+  </section>
+
+  <!-- 专辑详情页 -->
+  <section id="view-album" class="album-detail">
+    <a class="back-link" id="back-artist">← 全部作品</a>
+    <div class="detail-head">
+      <div class="detail-cover"><canvas id="detail-cover-cv"></canvas></div>
+      <div>
+        <div class="detail-type" id="detail-type">专辑</div>
+        <h1 class="detail-name" id="detail-name"></h1>
+        <div class="detail-meta" id="detail-meta"></div>
+        <div class="artist-actions" style="margin-top:16px">
+          <button class="btn-play-big" id="play-album">▶ 播放</button>
+        </div>
+      </div>
+    </div>
+    <div class="track-list" id="track-list"></div>
+  </section>
+
+</div>
+
+<!-- 底部播放器 -->
+<div class="player" id="player">
+  <div class="np">
+    <div class="np-cover"><canvas id="np-cover-cv"></canvas></div>
+    <div style="min-width:0">
+      <div class="np-title" id="np-title">未在播放</div>
+      <div class="np-artist">AI前沿量子港</div>
+    </div>
+    <button class="np-like" id="np-like" title="喜欢">♥</button>
+  </div>
+  <div class="pc">
+    <div class="pc-btns">
+      <button id="prev" title="上一首">⏮</button>
+      <button class="pc-play" id="play-toggle" title="播放/暂停">▶</button>
+      <button id="next" title="下一首">⏭</button>
+    </div>
+    <div class="pc-bar">
+      <span class="pc-time" id="t-cur">0:00</span>
+      <div class="seek" id="seek"><div class="fill" id="seek-fill"></div></div>
+      <span class="pc-time" id="t-dur">0:00</span>
+    </div>
+  </div>
+  <div class="vol">
+    <span>🔊</span>
+    <input type="range" id="volume" min="0" max="100" value="70">
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   数据层 —— 专辑/曲目（演示数据；上线时替换为汽水音乐真实作品）
+   注意：audio 字段为 null 时用内置合成器试播；
+   正式版应放汽水音乐官方分享链接或经授权的音频地址。
+   ========================================================= */
+const ARTIST = 'AI前沿量子港';
+const ALBUMS = [
+  {
+    id: 'neural-tides',
+    type: '专辑',
+    name: '神经潮汐 Neural Tides',
+    year: 2026,
+    hue: 242,
+    tracks: [
+      { id: 't1', name: '量子涨落', sub: 'Quantum Fluctuation', dur: 34 },
+      { id: 't2', name: '梯度流', sub: 'Gradient Flow', dur: 30 },
+      { id: 't3', name: '注意力之上', sub: 'Beyond Attention', dur: 38 },
+      { id: 't4', name: '潜空间漫步', sub: 'Latent Walk', dur: 28 },
+      { id: 't5', name: '潮汐回声中', sub: 'Tidal Echo', dur: 32 },
+    ],
+  },
+  {
+    id: 'silicon-dawn',
+    type: '专辑',
+    name: '硅基黎明 Silicon Dawn',
+    year: 2026,
+    hue: 199,
+    tracks: [
+      { id: 't6', name: '点亮', sub: 'Power On', dur: 26 },
+      { id: 't7', name: '编译晨光', sub: 'Compiling Dawn', dur: 33 },
+      { id: 't8', name: '拓扑排序', sub: 'Topo Sort', dur: 29 },
+    ],
+  },
+  {
+    id: 'amber-loop',
+    type: '单曲',
+    name: '琥珀循环 Amber Loop',
+    year: 2026,
+    hue: 32,
+    tracks: [
+      { id: 't9', name: '琥珀循环', sub: 'Amber Loop', dur: 31 },
+    ],
+  },
+];
+
+/* =========================================================
+   生成封面（与博客同一套生成艺术语言）
+   ========================================================= */
+function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function rng(seed) { let a = seed; return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+
+function drawCover(cv, hue, seedStr) {
+  const parent = cv.parentElement;
+  const r = parent.getBoundingClientRect();
+  if (!r.width) return;
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  cv.width = r.width * dpr; cv.height = r.height * dpr;
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const W = r.width, H = r.height;
+  const rand = rng(hash(seedStr));
+
+  const g = ctx.createLinearGradient(0, 0, W, H);
+  g.addColorStop(0, `hsl(${hue} 65% 42%)`);
+  g.addColorStop(.6, `hsl(${(hue + 30) % 360} 62% 52%)`);
+  g.addColorStop(1, `hsl(${(hue + 65) % 360} 60% 60%)`);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+  // 声波条纹（音乐感签名元素）
+  const bars = 28;
+  for (let i = 0; i < bars; i++) {
+    const x = (W / bars) * i + W / bars / 2;
+    const h = H * (0.12 + rand() * 0.4);
+    ctx.fillStyle = `rgba(255,255,255,${0.10 + rand() * 0.25})`;
+    ctx.beginPath();
+    ctx.roundRect(x - 2, H * 0.62 - h / 2, 4, h, 2);
+    ctx.fill();
+  }
+  // 星点
+  for (let i = 0; i < 24; i++) {
+    ctx.fillStyle = `rgba(255,255,255,${0.25 + rand() * 0.5})`;
+    ctx.beginPath(); ctx.arc(rand() * W, rand() * H * 0.5, 0.8 + rand() * 1.4, 0, Math.PI * 2); ctx.fill();
+  }
+  const hl = ctx.createRadialGradient(W * .3, H * .2, 0, W * .3, H * .2, W * .8);
+  hl.addColorStop(0, 'rgba(255,255,255,.3)'); hl.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = hl; ctx.fillRect(0, 0, W, H);
+}
+
+/* =========================================================
+   全局星座场（暗色，延续站点品牌）
+   ========================================================= */
+(function () {
+  const cv = document.getElementById('field');
+  const ctx = cv.getContext('2d');
+  const P = ['129,140,248', '128,82,255', '45,212,191', '244,114,182', '255,184,41'];
+  let stars = [];
+  function build() {
+    cv.width = innerWidth; cv.height = innerHeight;
+    stars = Array.from({ length: 70 }, () => ({
+      x: Math.random() * innerWidth, y: Math.random() * innerHeight,
+      vx: (Math.random() - .5) * .1, vy: (Math.random() - .5) * .1,
+      s: .8 + Math.random() * 1.6, c: P[Math.floor(Math.random() * P.length)],
+      a: .08 + Math.random() * .2, ph: Math.random() * 6.28,
+    }));
+  }
+  build();
+  addEventListener('resize', build);
+  (function loop() {
+    const t = performance.now() / 1000;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    for (const s of stars) {
+      s.x += s.vx; s.y += s.vy;
+      if (s.x < -10) s.x = cv.width + 10; if (s.x > cv.width + 10) s.x = -10;
+      if (s.y < -10) s.y = cv.height + 10; if (s.y > cv.height + 10) s.y = -10;
+      ctx.fillStyle = `rgba(${s.c},${s.a * (0.6 + 0.4 * Math.sin(t + s.ph))})`;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, Math.PI * 2); ctx.fill();
+    }
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* =========================================================
+   合成试播器（Demo 用：Web Audio 生成环境音景，真实可听）
+   正式版请替换为经授权的音频文件 / 汽水音乐官方嵌入
+   ========================================================= */
+const synth = {
+  ctx: null, master: null, timer: null, startedAt: 0, playing: false, track: null,
+  ensure() {
+    if (this.ctx) return;
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.master = this.ctx.createGain();
+    this.master.gain.value = 0.7;
+    // 简易混响感：双延迟反馈
+    const d1 = this.ctx.createDelay(1); d1.delayTime.value = 0.28;
+    const d2 = this.ctx.createDelay(1); d2.delayTime.value = 0.41;
+    const fb = this.ctx.createGain(); fb.gain.value = 0.25;
+    this.master.connect(this.ctx.destination);
+    this.master.connect(d1); d1.connect(fb); fb.connect(d2); d2.connect(this.ctx.destination);
+  },
+  note(t, freq, dur, type, gain) {
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(gain, t + dur * 0.3);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g); g.connect(this.master);
+    o.start(t); o.stop(t + dur + 0.05);
+  },
+  start(track, offset = 0) {
+    this.ensure();
+    this.ctx.resume();
+    this.stop(false);
+    this.track = track;
+    this.playing = true;
+    this.startedAt = this.ctx.currentTime - offset;
+    // 每轨用种子生成确定性的环境旋律（五声音阶 + 低频垫）
+    const rand = rng(hash(track.id));
+    const base = 164.81 * (1 + (hash(track.id) % 5) * 0.125); // E3 起步
+    const scale = [0, 3, 5, 7, 10, 12, 15];
+    const tick = () => {
+      if (!this.playing) return;
+      const now = this.ctx.currentTime;
+      const elapsed = now - this.startedAt;
+      if (elapsed >= track.dur) { Player.next(); return; }
+      // 低音垫（每 4s）
+      if (Math.floor(elapsed) % 4 === 0 && elapsed - Math.floor(elapsed) < 0.06) {
+        this.note(now, base / 2, 4.2, 'sine', 0.10);
+        this.note(now, base / 2 * 1.5, 4.2, 'sine', 0.05);
+      }
+      // 旋律音（随机步进）
+      if (rand() < 0.7) {
+        const st = scale[Math.floor(rand() * scale.length)];
+        const f = base * Math.pow(2, st / 12) * (rand() < 0.3 ? 2 : 1);
+        this.note(now + 0.02, f, 1.2 + rand() * 1.6, rand() < 0.5 ? 'sine' : 'triangle', 0.05 + rand() * 0.04);
+      }
+    };
+    this.timer = setInterval(tick, 380);
+  },
+  pause() { if (this.ctx) this.ctx.suspend(); this.playing = false; clearInterval(this.timer); },
+  resume() { if (!this.track) return; this.ensure(); this.ctx.resume(); this.playing = true; this.start(this.track, this.ctx.currentTime - this.startedAt); },
+  stop(clearTrack = true) { this.playing = false; clearInterval(this.timer); if (clearTrack) this.track = null; },
+  elapsed() { return this.ctx && this.track ? Math.min(this.track.dur, this.ctx.currentTime - this.startedAt) : 0; },
+};
+
+/* =========================================================
+   播放器状态机 + UI
+   ========================================================= */
+const Player = {
+  queue: [], index: -1, albumCtx: null,
+  current() { return this.queue[this.index] ?? null; },
+  playQueue(tracks, startIdx, album) {
+    this.queue = tracks; this.album = album; this.index = startIdx;
+    this.loadTrack();
+  },
+  loadTrack() {
+    const t = this.current();
+    if (!t) return;
+    synth.start(t);
+    UI.onTrackChange(t);
+  },
+  toggle() {
+    if (!synth.track) {
+      if (this.queue.length) this.loadTrack();
+      return;
+    }
+    if (synth.playing) synth.pause(); else synth.resume();
+    UI.onPlayState();
+  },
+  next() { if (!this.queue.length) return; this.index = (this.index + 1) % this.queue.length; this.loadTrack(); },
+  prev() {
+    if (!this.queue.length) return;
+    if (synth.elapsed() > 3) { synth.start(this.current()); return; }
+    this.index = (this.index - 1 + this.queue.length) % this.queue.length;
+    this.loadTrack();
+  },
+};
+
+const $ = (id) => document.getElementById(id);
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+const UI = {
+  onTrackChange(track) {
+    $('np-title').textContent = track.name;
+    drawCover($('np-cover-cv'), this.albumHue ?? 242, Player.album?.id ?? 'x');
+    document.querySelectorAll('.track-row').forEach((r) => {
+      r.classList.toggle('playing', r.dataset.tid === track.id);
+    });
+    this.onPlayState();
+  },
+  onPlayState() {
+    $('play-toggle').textContent = synth.playing ? '⏸' : '▶';
+    $('play-all').textContent = synth.playing ? '⏸ 暂停' : '▶ 播放全部';
+    document.getElementById('player').classList.toggle('paused', !synth.playing);
+  },
+  albumHue: 242,
+};
+
+/* ===== 视图：艺术家 / 专辑详情 ===== */
+function showArtist() {
+  $('view-artist').style.display = 'block';
+  $('view-album').classList.remove('on');
+  scrollTo(0, 0);
+}
+function showAlbum(album) {
+  $('view-artist').style.display = 'none';
+  $('view-album').classList.add('on');
+  $('detail-type').textContent = album.type;
+  $('detail-name').textContent = album.name;
+  $('detail-meta').textContent = `${ARTIST} · ${album.year} · ${album.tracks.length} 首`;
+  drawCover($('detail-cover-cv'), album.hue, album.id);
+  UI.albumHue = album.hue;
+  const list = $('track-list');
+  list.innerHTML = '';
+  album.tracks.forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'track-row';
+    row.dataset.tid = t.id;
+    row.innerHTML = `
+      <span class="track-idx"><span class="idx-num">${i + 1}</span><span class="eq"><i></i><i></i><i></i></span></span>
+      <span><div class="track-name">${t.name}</div><div class="track-sub">${t.sub}</div></span>
+      <span></span>
+      <span class="track-dur">${fmt(t.dur)}</span>`;
+    row.onclick = () => Player.playQueue(album.tracks, i, album);
+    list.appendChild(row);
+  });
+  $('play-album').onclick = () => Player.playQueue(album.tracks, 0, album);
+  scrollTo(0, 0);
+}
+
+/* ===== 渲染专辑网格 ===== */
+ALBUMS.forEach((al) => {
+  const card = document.createElement('div');
+  card.className = 'album-card';
+  card.innerHTML = `
+    <div class="album-cover"><canvas></canvas><button class="play-fab">▶</button></div>
+    <div class="album-name">${al.name}</div>
+    <div class="album-sub">${al.year} · ${al.type} · ${al.tracks.length} 首</div>`;
+  card.querySelector('canvas');
+  card.onclick = (e) => {
+    if (e.target.closest('.play-fab')) { Player.playQueue(al.tracks, 0, al); return; }
+    showAlbum(al);
+  };
+  $('album-grid').appendChild(card);
+  drawCover(card.querySelector('canvas'), al.hue, al.id);
+});
+
+/* ===== 控件绑定 ===== */
+$('back-artist').onclick = showArtist;
+$('play-all').onclick = () => {
+  if (synth.playing) { synth.pause(); UI.onPlayState(); return; }
+  const all = ALBUMS.flatMap((a) => a.tracks);
+  Player.playQueue(all, 0, ALBUMS[0]);
+};
+$('play-toggle').onclick = () => Player.toggle();
+$('next').onclick = () => Player.next();
+$('prev').onclick = () => Player.prev();
+$('np-like').onclick = (e) => e.target.classList.toggle('on');
+$('goto-soda').onclick = () => alert('正式版：跳转汽水音乐 · AI前沿量子港 音乐人主页');
+$('volume').oninput = (e) => { if (synth.master) synth.master.gain.value = e.target.value / 100; };
+
+/* 进度条：rAF 驱动 + 点击seek（仅 UI；合成器从头重播近似） */
+$('seek').onclick = (e) => {
+  const t = synth.track;
+  if (!t) return;
+  const r = e.currentTarget.getBoundingClientRect();
+  const ratio = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+  synth.start(t, ratio * t.dur);
+};
+(function tickUI() {
+  if (synth.track) {
+    $('t-cur').textContent = fmt(synth.elapsed());
+    $('t-dur').textContent = fmt(synth.track.dur);
+    $('seek-fill').style.width = `${(synth.elapsed() / synth.track.dur) * 100}%`;
+  }
+  requestAnimationFrame(tickUI);
+})();
+</script>
+</body>
+</html>

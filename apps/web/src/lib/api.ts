@@ -11,6 +11,7 @@ export interface PostSummary {
   coverImage: string | null
   readingTime: number | null
   viewCount?: number
+  featured?: boolean
   series: string | null
   seriesOrder: number | null
 }
@@ -22,6 +23,7 @@ export interface PostDetail extends PostSummary {
   toc: TocItem[]
   publishedAt: string
   updatedAt: string
+  viewCount: number
 }
 
 export interface Comment {
@@ -120,13 +122,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   listPosts: (
-    params: { page?: number; tag?: string; category?: string; q?: string } = {},
+    params: { page?: number; tag?: string; category?: string; q?: string; featured?: boolean } = {},
   ) => {
     const sp = new URLSearchParams()
     if (params.page) sp.set('page', String(params.page))
     if (params.tag) sp.set('tag', params.tag)
     if (params.category) sp.set('category', params.category)
     if (params.q) sp.set('q', params.q)
+    if (params.featured) sp.set('featured', '1')
     const qs = sp.toString()
     return request<PostListResponse>(`/posts${qs ? `?${qs}` : ''}`)
   },
@@ -190,6 +193,31 @@ export const api = {
   statsPosts: (limit = 20) => request<{ data: PostPv[] }>(`/admin/stats/posts?limit=${limit}`),
   statsReferrers: (limit = 10) => request<{ data: ReferrerStat[] }>(`/admin/stats/referrers?limit=${limit}`),
   stats404s: (limit = 20) => request<{ data: NotFoundStat[] }>(`/admin/stats/404s?limit=${limit}`),
+
+  /**
+   * 上报一次页面访问。SPA 路由跳转时由 PageTracker 自动调用。
+   * 后端 60 秒内同 IP+path+slug 去重；postSlug 给定时同时给 posts.view_count +1。
+   * 失败静默吞掉（不阻塞页面渲染）。
+   */
+  trackPageView: (data: { path: string; postSlug?: string; status?: number; referrer?: string }) => {
+    try {
+      // 用 keepalive 低优先级请求；不 await，不抛错
+      void fetch(`${API_BASE}/track`, {
+        method: 'POST',
+        credentials: 'include',
+        keepalive: true,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          path: data.path,
+          postSlug: data.postSlug,
+          status: data.status,
+          referrer: data.referrer ?? (typeof document !== 'undefined' ? document.referrer : undefined),
+        }),
+      }).catch(() => {})
+    } catch {
+      // 静默
+    }
+  },
 }
 
 export async function batchDownload(slugs: string[]): Promise<void> {

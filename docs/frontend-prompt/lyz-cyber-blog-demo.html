@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LYZ Cyber Blog — UI Demo</title>
+<style>
+  :root {
+    --bg: #0a0f0a;
+    --matrix: #00ff41;
+    --cyan: #00d9ff;
+    --dim-green: #008f11;
+    --text: #e0ffe0;
+    --text-dim: #4d7c4d;
+    --pink: #ff2a6d;
+    --header-h: 40px;
+    --mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    overflow: hidden;
+  }
+  ::selection { background: var(--matrix); color: #000; }
+
+  /* ===== 数字雨背景 ===== */
+  #cyber-rain {
+    position: fixed; inset: 0; z-index: 0;
+    opacity: 0.28; /* 内容区建议 0.15–0.35 */
+    pointer-events: none;
+  }
+
+  /* ===== 扫描线 / CRT 氛围 ===== */
+  .scanlines {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom, transparent 0 2px, rgba(0, 255, 65, 0.025) 2px 4px);
+    mix-blend-mode: screen;
+  }
+
+  /* ===== 页头 ===== */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); z-index: 10;
+    display: flex; align-items: center; gap: 16px; padding: 0 16px;
+    background: rgba(0, 0, 0, 0.72); backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0, 255, 65, 0.35);
+    box-shadow: 0 0 12px rgba(0, 255, 65, 0.15);
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .wordmark { color: var(--matrix); text-shadow: 0 0 8px rgba(0,255,65,.7); font-weight: 700; white-space: nowrap; }
+  .wordmark span { color: var(--text-dim); font-weight: 400; }
+  nav { display: flex; gap: 14px; margin-left: 8px; }
+  nav a {
+    color: var(--text-dim); text-decoration: none; transition: color .2s, text-shadow .2s;
+  }
+  nav a:hover, nav a.active { color: var(--cyan); text-shadow: 0 0 8px rgba(0,217,255,.8); }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .lang-toggle { display: flex; border: 1px solid rgba(0,255,65,.4); }
+  .lang-toggle button {
+    background: transparent; border: 0; color: var(--text-dim);
+    font: inherit; letter-spacing: inherit; padding: 2px 8px; cursor: pointer;
+  }
+  .lang-toggle button.on { background: rgba(0,255,65,.18); color: var(--matrix); text-shadow: 0 0 6px rgba(0,255,65,.8); }
+  .rain-ctl { display: flex; align-items: center; gap: 6px; color: var(--text-dim); }
+  .rain-ctl input { width: 80px; accent-color: var(--matrix); }
+
+  /* ===== 三栏外壳 ===== */
+  .shell {
+    position: relative; z-index: 5;
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr) 260px;
+    gap: 16px;
+    height: 100vh;
+    padding: calc(var(--header-h) + 16px) 16px 16px;
+  }
+  .col { overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--dim-green) transparent; }
+  .col::-webkit-scrollbar { width: 6px; }
+  .col::-webkit-scrollbar-thumb { background: var(--dim-green); }
+
+  /* ===== 霓虹卡片 ===== */
+  .card {
+    background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    box-shadow: 0 0 14px rgba(0, 255, 65, 0.08), inset 0 0 24px rgba(0, 255, 65, 0.03);
+    padding: 16px; margin-bottom: 16px;
+    transition: border-color .25s, box-shadow .25s, transform .25s;
+  }
+  .card:hover {
+    border-color: rgba(0, 255, 65, 0.75);
+    box-shadow: 0 0 22px rgba(0, 255, 65, 0.28), inset 0 0 24px rgba(0, 255, 65, 0.05);
+  }
+  a.post-card { display: block; color: inherit; text-decoration: none; }
+  a.post-card:hover { transform: translateX(4px); }
+
+  /* ===== Glitch 标题 ===== */
+  .glitch {
+    position: relative; font-size: 22px; font-weight: 700;
+    color: var(--matrix); text-shadow: 0 0 10px rgba(0,255,65,.7);
+    letter-spacing: .12em;
+  }
+  .glitch::before, .glitch::after {
+    content: attr(data-text); position: absolute; inset: 0; overflow: hidden;
+  }
+  .glitch::before { color: var(--cyan); animation: glitch-a 2.4s infinite steps(2, end); clip-path: inset(20% 0 55% 0); }
+  .glitch::after  { color: var(--pink); animation: glitch-b 3.1s infinite steps(2, end); clip-path: inset(60% 0 15% 0); }
+  @keyframes glitch-a {
+    0%, 92% { transform: none; opacity: 0; }
+    93% { transform: translate(-3px, -1px); opacity: .8; }
+    96% { transform: translate(3px, 1px); opacity: .8; }
+    100% { transform: none; opacity: 0; }
+  }
+  @keyframes glitch-b {
+    0%, 88% { transform: none; opacity: 0; }
+    89% { transform: translate(3px, 1px); opacity: .7; }
+    94% { transform: translate(-3px, -1px); opacity: .7; }
+    100% { transform: none; opacity: 0; }
+  }
+
+  /* ===== 左栏：资料 ===== */
+  .avatar {
+    width: 96px; height: 96px; margin: 0 auto 12px;
+    border: 1px solid rgba(0,255,65,.6); box-shadow: 0 0 18px rgba(0,255,65,.35);
+    background:
+      radial-gradient(circle at 50% 38%, rgba(0,255,65,.5) 0 18%, transparent 19%),
+      radial-gradient(circle at 50% 110%, rgba(0,255,65,.35) 0 55%, transparent 56%),
+      #02120a;
+    display: block;
+  }
+  .profile-name { text-align: center; color: var(--matrix); letter-spacing: .2em; font-weight: 700; }
+  .profile-sub { text-align: center; color: var(--text-dim); font-size: 11px; letter-spacing: .14em; margin-bottom: 10px; }
+  .bio { color: var(--text); opacity: .85; font-size: 12px; }
+  .socials { display: flex; gap: 8px; margin-top: 12px; }
+  .socials a {
+    flex: 1; text-align: center; padding: 4px 0; font-size: 11px; letter-spacing: .12em;
+    color: var(--cyan); border: 1px solid rgba(0,217,255,.35); text-decoration: none;
+    transition: box-shadow .2s, border-color .2s;
+  }
+  .socials a:hover { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,217,255,.4); }
+
+  /* ===== 中栏：文章流 ===== */
+  .year-badge {
+    display: inline-block; margin: 4px 0 10px; padding: 1px 10px;
+    color: #000; background: var(--matrix); font-weight: 700; font-size: 11px;
+    letter-spacing: .3em; box-shadow: 0 0 14px rgba(0,255,65,.5);
+  }
+  .post-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .post-card:hover .post-title { color: var(--matrix); text-shadow: 0 0 8px rgba(0,255,65,.7); }
+  .post-sub {
+    color: var(--text-dim); font-size: 12px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .post-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+  .tag {
+    font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--cyan); border: 1px solid rgba(0,217,255,.4); padding: 0 6px;
+  }
+  .cursor-line { color: var(--dim-green); font-size: 11px; }
+  .cursor-line::after { content: "▊"; animation: blink 1s steps(1) infinite; color: var(--matrix); }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ===== 右栏：CV / 标签 ===== */
+  .cv-cat {
+    color: var(--cyan); font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    border-bottom: 1px dashed rgba(0,217,255,.35); padding-bottom: 4px; margin-bottom: 8px;
+  }
+  .cv-entry { margin-bottom: 10px; font-size: 12px; }
+  .cv-entry .t { color: var(--text); }
+  .cv-entry .s { color: var(--text-dim); font-size: 11px; }
+  .cv-entry .y { color: var(--dim-green); font-size: 11px; float: right; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat { border: 1px solid rgba(0,255,65,.25); padding: 8px; text-align: center; }
+  .stat b { display: block; color: var(--matrix); font-size: 18px; text-shadow: 0 0 8px rgba(0,255,65,.6); }
+  .stat i { font-style: normal; color: var(--text-dim); font-size: 10px; letter-spacing: .14em; }
+
+  .pink { color: var(--pink); }
+
+  @media (max-width: 980px) {
+    body { overflow: auto; }
+    .shell { grid-template-columns: 1fr; height: auto; }
+    .col { overflow: visible; }
+    nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="cyber-rain"></canvas>
+<div class="scanlines"></div>
+
+<header>
+  <div class="wordmark">LYZSNIPER<span> // BLOG</span></div>
+  <nav>
+    <a href="#" class="active" data-zh="数据流" data-en="STREAM">数据流</a>
+    <a href="#" data-zh="归档" data-en="ARCHIVE">归档</a>
+    <a href="#" data-zh="留言板" data-en="GUESTBOOK">留言板</a>
+    <a href="#" data-zh="关于" data-en="ABOUT">关于</a>
+  </nav>
+  <div class="header-right">
+    <label class="rain-ctl">
+      <span data-zh="雨强" data-en="RAIN">雨强</span>
+      <input id="rain-opacity" type="range" min="10" max="60" value="28">
+    </label>
+    <div class="lang-toggle">
+      <button id="btn-zh" class="on">中</button>
+      <button id="btn-en">EN</button>
+    </div>
+  </div>
+</header>
+
+<main class="shell">
+
+  <!-- 左栏：个人资料 -->
+  <aside class="col">
+    <div class="card">
+      <div class="avatar"></div>
+      <div class="profile-name">刘酝泽</div>
+      <div class="profile-sub">FULL-STACK · AI · 赛博修行</div>
+      <p class="bio" data-zh="在 0 与 1 的雨中写代码。关注 AI 工程化、全栈架构与一切会发光的东西。"
+                       data-en="Coding in the rain of 0s and 1s. Into AI engineering, full-stack architecture and everything that glows.">
+        在 0 与 1 的雨中写代码。关注 AI 工程化、全栈架构与一切会发光的东西。
+      </p>
+      <div class="socials">
+        <a href="#">GITHUB</a><a href="#">EMAIL</a><a href="#">RSS</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="cv-cat" data-zh="// 系统状态" data-en="// SYS STATUS">// 系统状态</div>
+      <div class="stat-grid">
+        <div class="stat"><b>37</b><i data-zh="文章" data-en="POSTS">文章</i></div>
+        <div class="stat"><b>12</b><i data-zh="项目" data-en="PROJECTS">项目</i></div>
+        <div class="stat"><b>365</b><i data-zh="连续提交" data-en="STREAK">连续提交</i></div>
+        <div class="stat"><b>∞</b><i data-zh="咖啡因" data-en="CAFFEINE">咖啡因</i></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 中栏：文章流 -->
+  <section class="col">
+    <div class="card">
+      <div class="glitch" data-text="接入数据流_" data-zh-text="接入数据流_" data-en-text="JACK IN_">接入数据流_</div>
+      <div class="cursor-line" data-zh="正在从神经接口同步最新文章……" data-en="Syncing latest posts from the neural link...">
+        正在从神经接口同步最新文章……
+      </div>
+    </div>
+
+    <div class="year-badge">2026</div>
+
+    <a class="card post-card" href="#">
+      <div class="post-title" data-zh="用 pnpm Monorepo 重构我的博客" data-en="Rebuilding My Blog with pnpm Monorepo">用 pnpm Monorepo 重构我的博客</div>
+      <div class="post-sub" data-zh="从 Hexo 静态站到 React + Fastify 全栈平台的完整迁移记录"
+                          data-en="A full migration log from Hexo static site to a React + Fastify platform">
+        从 Hexo 静态站到 React + Fastify 全栈平台的完整迁移记录
+      </div>
+      <div class="post-meta"><span class="tag" data-zh="架构" data-en="ARCH">架构</span><span class="cursor-line" style="color:var(--dim-green)">07-21</span></div>
+    </a>
+
+    <a class="card post-card" href="#">
+      <div class="post-title" data-zh="SQLite WAL 模式下的博客写入优化" data-en="Blog Write Tuning Under SQLite WAL">SQLite WAL 模式下的博客写入优化</div>
+      <div class="post-sub" data-zh="轻量数据库也能扛起内容管线的并发读写"
+                          data-en="A lightweight database can still survive a concurrent content pipeline">
+        轻量数据库也能扛起内容管线的并发读写
+      </div>
+      <div class="post-meta"><span class="tag" data-zh="后端" data-en="BACKEND">后端</span><span class="cursor-line" style="color:var(--dim-green)">07-02</span></div>
+    </a>
+
+    <a class="card post-card" href="#">
+      <div class="post-title" data-zh="赛博雨背景的性能陷阱" data-en="Performance Pitfalls of a Matrix Rain Background">赛博雨背景的性能陷阱</div>
+      <div class="post-sub" data-zh="Canvas 拖尾渐隐、rAF 节流与低端机降级策略"
+                          data-en="Canvas trail fading, rAF throttling and low-end fallbacks">
+        Canvas 拖尾渐隐、rAF 节流与低端机降级策略
+      </div>
+      <div class="post-meta"><span class="tag">CANVAS</span><span class="cursor-line" style="color:var(--dim-green)">06-18</span></div>
+    </a>
+
+    <div class="year-badge">2025</div>
+
+    <a class="card post-card" href="#">
+      <div class="post-title" data-zh="Obsidian + AI：我的第二大脑工作流" data-en="Obsidian + AI: My Second-Brain Workflow">Obsidian + AI：我的第二大脑工作流</div>
+      <div class="post-sub" data-zh="笔记、文献与代码片段如何汇入同一条数据流"
+                          data-en="How notes, papers and snippets flow into one data stream">
+        笔记、文献与代码片段如何汇入同一条数据流
+      </div>
+      <div class="post-meta"><span class="tag">AI</span><span class="cursor-line" style="color:var(--dim-green)">11-30</span></div>
+    </a>
+
+    <a class="card post-card" href="#">
+      <div class="post-title" data-zh="Nginx + PM2 部署个人全栈站" data-en="Deploying a Full-Stack Site with Nginx + PM2">Nginx + PM2 部署个人全栈站</div>
+      <div class="post-sub" data-zh="从零到 HTTPS 上线的最小可行部署清单"
+                          data-en="A minimal viable checklist from zero to HTTPS">
+        从零到 HTTPS 上线的最小可行部署清单
+      </div>
+      <div class="post-meta"><span class="tag" data-zh="运维" data-en="OPS">运维</span><span class="cursor-line" style="color:var(--dim-green)">09-14</span></div>
+    </a>
+  </section>
+
+  <!-- 右栏：CV -->
+  <aside class="col">
+    <div class="card">
+      <div class="cv-cat" data-zh="// 项目" data-en="// PROJECTS">// 项目</div>
+      <div class="cv-entry"><span class="y">2026</span><div class="t">lyzsniper.github.io</div><div class="s" data-zh="全栈博客平台 · React/Fastify" data-en="Full-stack blog · React/Fastify">全栈博客平台 · React/Fastify</div></div>
+      <div class="cv-entry"><span class="y">2025</span><div class="t">MedSci Skills</div><div class="s" data-zh="医学科研 Agent 技能集" data-en="Agent skills for medical research">医学科研 Agent 技能集</div></div>
+      <div class="cv-entry"><span class="y">2025</span><div class="t">K3 Dashboard</div><div class="s" data-zh="数据可视化控制台" data-en="Data-viz dashboard">数据可视化控制台</div></div>
+    </div>
+    <div class="card">
+      <div class="cv-cat" data-zh="// 技能矩阵" data-en="// SKILL MATRIX">// 技能矩阵</div>
+      <div class="cv-entry"><div class="t">TypeScript / React / Node</div><div class="s">████████░░ 80%</div></div>
+      <div class="cv-entry"><div class="t">Python / AI 工程化</div><div class="s">███████░░░ 70%</div></div>
+      <div class="cv-entry"><div class="t">DevOps / Nginx / Docker</div><div class="s">██████░░░░ 60%</div></div>
+    </div>
+    <div class="card">
+      <div class="cv-cat" data-zh="// 信号" data-en="// SIGNAL">// 信号</div>
+      <div class="cv-entry"><div class="t pink" data-zh="「矩阵无处不在。」" data-en="&quot;The Matrix is everywhere.&quot;">「矩阵无处不在。」</div>
+      <div class="s" data-zh="—— 墨菲斯（大概）" data-en="— Morpheus, probably">—— 墨菲斯（大概）</div></div>
+    </div>
+  </aside>
+
+</main>
+
+<script>
+/* ===== CyberRain：数字雨核心组件 =====
+   字符集混合片假名/拉丁/数字/符号；头部高亮、拖尾用半透明黑矩形渐隐；
+   rAF 驱动 + resize 自适应；opacity 可由页头滑杆调节。 */
+(function () {
+  const canvas = document.getElementById('cyber-rain');
+  const ctx = canvas.getContext('2d');
+  const CHARS = 'アイウエオカキクケコサシスセソタチツテト0123456789ABCDEF<>+-*/=';
+  const FONT_SIZE = 16;
+  let cols, drops, speeds, rafId, last = 0;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    cols = Math.floor(canvas.width / FONT_SIZE);
+    drops = Array.from({ length: cols }, () => Math.floor(Math.random() * -50));
+    speeds = Array.from({ length: cols }, () => 0.5 + Math.random() * 0.8);
+    ctx.fillStyle = '#0a0f0a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function frame(ts) {
+    rafId = requestAnimationFrame(frame);
+    if (ts - last < 50) return; // ~20fps，性能友好
+    last = ts;
+
+    // 半透明黑矩形叠加 → 拖尾渐隐（非整帧清空）
+    ctx.fillStyle = 'rgba(10, 15, 10, 0.12)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = FONT_SIZE + 'px monospace';
+
+    for (let i = 0; i < cols; i++) {
+      const ch = CHARS[Math.floor(Math.random() * CHARS.length)];
+      const x = i * FONT_SIZE;
+      const y = drops[i] * FONT_SIZE;
+
+      // 头部字符高亮（白绿），其余 Matrix 绿
+      ctx.fillStyle = Math.random() > 0.975 ? '#e0ffe0' : '#00ff41';
+      ctx.shadowColor = '#00ff41';
+      ctx.shadowBlur = 6;
+      ctx.fillText(ch, x, y);
+      ctx.shadowBlur = 0;
+
+      drops[i] += speeds[i];
+      if (y > canvas.height && Math.random() > 0.98) drops[i] = 0;
+    }
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  rafId = requestAnimationFrame(frame);
+
+  // 页头「雨强」滑杆 → 调节背景不透明度（0.10–0.60）
+  document.getElementById('rain-opacity').addEventListener('input', function () {
+    canvas.style.opacity = (this.value / 100).toFixed(2);
+  });
+
+  // 页面隐藏时暂停动画，省电省帧
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) cancelAnimationFrame(rafId);
+    else rafId = requestAnimationFrame(frame);
+  });
+})();
+
+/* ===== 中 / EN 切换（demo 级 i18n：data-zh / data-en 属性驱动） ===== */
+(function () {
+  const btnZh = document.getElementById('btn-zh');
+  const btnEn = document.getElementById('btn-en');
+
+  function setLang(lang) {
+    document.documentElement.lang = lang === 'zh' ? 'zh' : 'en';
+    document.querySelectorAll('[data-zh]').forEach(function (el) {
+      el.textContent = el.dataset[lang];
+    });
+    document.querySelectorAll('.glitch').forEach(function (el) {
+      const t = lang === 'zh' ? el.dataset.zhText : el.dataset.enText;
+      el.dataset.text = t;
+      el.textContent = t;
+    });
+    btnZh.classList.toggle('on', lang === 'zh');
+    btnEn.classList.toggle('on', lang === 'en');
+  }
+
+  btnZh.addEventListener('click', function () { setLang('zh'); });
+  btnEn.addEventListener('click', function () { setLang('en'); });
+})();
+</script>
+</body>
+</html>

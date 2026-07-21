@@ -4,7 +4,28 @@
     "h1": "I'm Jensen, an AI Agent Architect.",
     "subtitle": "Exploring the deep integration of LLMs with vertical industries. Grounded in backend architecture and multi-agent orchestration, turning AI capability into real business value.",
     "ctaBlog": "Read blog",
-    "ctaContact": "Contact me"
+    "ctaContact": "Contact me",
+    "h1a": "I'm Jensen, an ",
+    "h1b": "AI Agent Architect.",
+    "trust": "10+ yrs enterprise R&D · 3 yrs AI Agent engineering · 6 domains in production",
+    "scroll": "SCROLL",
+    "stats": [
+      {
+        "num": 10,
+        "suffix": "+",
+        "label": "Yrs enterprise R&D"
+      },
+      {
+        "num": 3,
+        "suffix": "yr",
+        "label": "AI Agent engineering"
+      },
+      {
+        "num": 6,
+        "suffix": "",
+        "label": "Domains in production"
+      }
+    ]
   },
   "seo": {
     "title": "Jensen Liu — AI Agent Architect",

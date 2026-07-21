@@ -54,6 +54,7 @@ export async function ingestMarkdownFile(
     publishAt?: string
     cover?: string
     category?: string
+    featured?: boolean | string
   }
 
   const title = fm.title ?? filename.replace(/\.md$/, '')
@@ -61,6 +62,8 @@ export async function ingestMarkdownFile(
     fm.slug ?? opts.targetSlug ?? toSlug(filename.replace(/\.md$/, ''))
   const status = fm.status ?? 'published'
   const category = fm.category ?? null
+  const featured =
+    fm.featured === true || fm.featured === 'true' ? 1 : 0
   const tags = Array.isArray(fm.tags)
     ? fm.tags
     : typeof fm.tags === 'string'
@@ -96,6 +99,7 @@ export async function ingestMarkdownFile(
       reading_time: parsed.readingTime,
       cover_image: fm.cover ?? null,
       category,
+      featured,
     })
   } else {
     post = postRepo.create({
@@ -110,6 +114,7 @@ export async function ingestMarkdownFile(
       reading_time: parsed.readingTime,
       cover_image: fm.cover ?? null,
       category,
+      featured,
     })
   }
 
