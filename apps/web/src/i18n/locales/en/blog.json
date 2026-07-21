@@ -17,5 +17,10 @@
   "download": "Download ({{count}})",
   "category": "Category",
   "filter": "Filter",
-  "clear": "Clear"
+  "clear": "Clear",
+  "featured": "Featured",
+  "latest": "Latest posts",
+  "featuredNote": "Featured posts shown above are not repeated here",
+  "statement": "No hype — only what I've verified in production.",
+  "readMore": "Read more"
 }

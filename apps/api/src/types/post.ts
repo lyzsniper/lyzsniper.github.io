@@ -16,6 +16,7 @@ export interface PostRow {
   category: string | null
   series: string | null
   series_order: number | null
+  featured: number
 }
 
 export interface PostSummaryRow {
@@ -30,6 +31,8 @@ export interface PostSummaryRow {
   category: string | null
   series: string | null
   series_order: number | null
+  featured: number
+  view_count: number
 }
 
 export interface PostDetailRow extends PostRow {
@@ -43,6 +46,7 @@ export interface PostListFilter {
   category?: string
   status?: PostRow['status']
   q?: string
+  featured?: boolean
 }
 
 export interface CreatePostInput {
@@ -59,6 +63,7 @@ export interface CreatePostInput {
   category?: string | null
   series?: string | null
   series_order?: number | null
+  featured?: number
 }
 
 export interface UpdatePostInput {
@@ -74,4 +79,5 @@ export interface UpdatePostInput {
   category?: string | null
   series?: string | null
   series_order?: number | null
+  featured?: number
 }

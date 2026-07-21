@@ -30,6 +30,18 @@
   --accent-soft-hover: rgba(79, 70, 229, 0.10);
   --accent-fg: #ffffff;
 
+  --warm-card: #fbe1d1;
+  --warm-fg: #5d2a1a;
+
+  /* hero 文字（亮色模式：深字浮在浅色星座场上） */
+  --hero-fg: #0a0a0a;
+  --hero-accent: #4f46e5;
+  --hero-sub-c: rgba(10, 10, 10, 0.66);
+  --hero-pill-c: rgba(10, 10, 10, 0.55);
+  --hero-pill-b: rgba(0, 0, 0, 0.16);
+  --hero-trust-c: rgba(10, 10, 10, 0.38);
+  --hero-trust-b: rgba(10, 10, 10, 0.6);
+
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
   --shadow-floating: 0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
@@ -60,6 +72,18 @@
   --accent-soft: rgba(129, 140, 248, 0.10);
   --accent-soft-hover: rgba(129, 140, 248, 0.16);
   --accent-fg: #0a0a0a;
+
+  --warm-card: #2a1e1a;
+  --warm-fg: #f0c4ae;
+
+  /* hero 文字（暗色模式：白字浮在彩色星座场上） */
+  --hero-fg: #f5f5f7;
+  --hero-accent: #a5b4fc;
+  --hero-sub-c: rgba(245, 245, 247, 0.72);
+  --hero-pill-c: rgba(245, 245, 247, 0.6);
+  --hero-pill-b: rgba(255, 255, 255, 0.18);
+  --hero-trust-c: rgba(245, 245, 247, 0.38);
+  --hero-trust-b: rgba(245, 245, 247, 0.62);
 
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.30), 0 1px 2px rgba(0, 0, 0, 0.20);
   --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.40), 0 2px 4px rgba(0, 0, 0, 0.30);
@@ -124,7 +148,10 @@
 
   /* ============ Surface ============ */
   .surface-card {
-    background-color: var(--bg-elevated);
+    /* 全局星座场之上：92% 不透明 + 背景模糊，保证可读性 */
+    background-color: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     border: 1px solid var(--border-subtle);
     border-radius: theme('borderRadius.xl');
     box-shadow: var(--shadow-card);
@@ -219,6 +246,283 @@
   /* ============ Avatar squircle ============ */
   .avatar-squircle {
     @apply rounded-xl overflow-hidden;
+  }
+
+  /* ============ Hero 全屏舞台（透明底，浮在全局星座场上） ============ */
+  .hero-stage {
+    position: relative;
+    min-height: calc(100vh - 56px);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+  .hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding-top: 120px;
+    padding-bottom: clamp(56px, 9vh, 104px);
+  }
+  .hero-eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-semibold uppercase;
+    color: #ffb829;
+    letter-spacing: 0.14em;
+  }
+  .hero-eyebrow .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ffb829;
+    box-shadow: 0 0 10px rgba(255, 184, 41, 0.8);
+  }
+  .hero-h1 {
+    font-size: clamp(2.9rem, 7vw, 5.6rem);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+    color: var(--hero-fg);
+  }
+  .hero-h1 .accent {
+    color: var(--hero-accent);
+    display: inline-block; /* 整段不换行，避免 accent 短语被拆到两行 */
+  }
+  /* 逐字/逐词入场（delay 由组件内联设置） */
+  .hero-h1 .w {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(8px);
+    transition:
+      opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+      filter 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .hero-stage.play .hero-h1 .w {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .hero-sub {
+    font-size: clamp(15px, 1.6vw, 18px);
+    font-weight: 300;
+    color: var(--hero-sub-c);
+    max-width: 560px;
+  }
+  .pill-ghost-dark {
+    background: color-mix(in srgb, var(--bg-elevated) 55%, transparent);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: var(--hero-pill-c);
+    border: 1px solid var(--hero-pill-b);
+  }
+  .pill-ghost-dark:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .btn-ghost-dark {
+    background: color-mix(in srgb, var(--bg-elevated) 55%, transparent);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: var(--hero-fg);
+    border: 1px solid var(--hero-pill-b);
+  }
+  .btn-ghost-dark:hover {
+    border-color: var(--border-strong);
+    background: var(--accent-soft);
+  }
+  .btn-gradient {
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--accent), var(--accent)) padding-box,
+      linear-gradient(114deg, #c7d2fe, var(--accent) 45%, #a5b4fc) border-box;
+  }
+  .btn-gradient:hover {
+    background:
+      linear-gradient(var(--accent-hover), var(--accent-hover)) padding-box,
+      linear-gradient(114deg, #e0e7ff, var(--accent-hover) 45%, #c7d2fe) border-box;
+  }
+  .hero-trust {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--hero-trust-c);
+    letter-spacing: 0.04em;
+  }
+  .hero-trust b {
+    color: var(--hero-trust-b);
+    font-weight: 500;
+  }
+  .scroll-cue {
+    position: absolute;
+    right: 40px;
+    bottom: 28px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--hero-trust-c);
+    writing-mode: vertical-rl;
+  }
+  .scroll-cue .line {
+    width: 1px;
+    height: 44px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: cue-drop 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+  @keyframes cue-drop {
+    0% { transform: scaleY(0); transform-origin: top; }
+    45% { transform: scaleY(1); transform-origin: top; }
+    55% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  /* ============ 超大数字统计带（hero 底部） ============ */
+  .stats-band {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    margin-top: 44px;
+  }
+  .stat-num {
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--hero-fg);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-num .suffix {
+    font-size: 0.42em;
+    font-weight: 600;
+    color: var(--hero-accent);
+    margin-left: 2px;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--hero-trust-c);
+    margin-top: 8px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ============ CTA 弹性微交互（scale 独立属性，可与其他 transform 叠加） ============ */
+  .btn {
+    transition: scale 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn:hover {
+    scale: 1.03;
+  }
+  .btn:active {
+    scale: 0.95;
+  }
+
+  /* ============ 全局滚动进度条 ============ */
+  .scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    height: 2px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), #a78bfa, #38bdf8);
+    box-shadow: 0 0 8px rgba(129, 140, 248, 0.5);
+    transition: width 0.12s linear;
+    pointer-events: none;
+  }
+
+  /* ============ 衬线展示字（衬线管情绪） ============ */
+  .serif-display {
+    font-family: Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
+    font-weight: 500;
+  }
+
+  /* ============ 分类色点（颜色即分类法，--cc 由映射表内联） ============ */
+  .cat-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--cc, var(--accent));
+    flex: none;
+    display: inline-block;
+  }
+
+  /* ============ 光标光晕卡（--mx/--my 由事件委托写入） ============ */
+  .glow-card {
+    position: relative;
+  }
+  .glow-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), var(--accent-soft-hover), transparent 65%);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    z-index: 0;
+  }
+  .glow-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    pointer-events: none;
+    background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), var(--accent), transparent 70%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    z-index: 1;
+  }
+  .glow-card:hover::before { opacity: 1; }
+  .glow-card:hover::after { opacity: 0.55; }
+  .glow-card > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ============ 精选区暖色 pill（每页唯一） ============ */
+  .pill-featured {
+    background-color: var(--warm-card);
+    color: var(--warm-fg);
+    border-color: transparent;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  /* ============ 滚动逐字揭示 ============ */
+  .statement {
+    font-family: Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
+    font-weight: 500;
+  }
+  .statement span {
+    opacity: 0.15;
+    transition: opacity 0.2s linear;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-h1 .w {
+      opacity: 1;
+      transform: none;
+      filter: none;
+      transition: none;
+    }
+    .scroll-cue .line {
+      animation: none;
+    }
+    .statement span {
+      opacity: 1;
+    }
   }
 }
 

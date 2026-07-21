@@ -46,6 +46,9 @@
     "readingTime": "{{count}} min read",
     "views": "{{count}} views",
     "deleteConfirm": "Delete \"{{slug}}\"? This cannot be undone.",
-    "deleteFailed": "Delete failed: {{msg}}"
+    "deleteFailed": "Delete failed: {{msg}}",
+    "featured": "Featured",
+    "feature": "Mark as featured",
+    "unfeature": "Remove from featured"
   }
 }

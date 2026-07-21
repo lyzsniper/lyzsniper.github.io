@@ -3,7 +3,10 @@ import { useSearchParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Search, PackageOpen, X, FileText } from 'lucide-react'
 import { api, batchDownload, type PostListResponse, type PostSummary, type CategoryInfo } from '@/lib/api'
+import { categoryVisual } from '@/lib/categoryColor'
 import PostCard from '@/components/PostCard'
+import FeaturedPosts from '@/components/FeaturedPosts'
+import ScrollStatement from '@/components/ScrollStatement'
 import { useAuthStore } from '@/store/auth'
 
 export default function Blog() {
@@ -17,11 +20,16 @@ export default function Blog() {
   const [downloading, setDownloading] = useState(false)
   const [categories, setCategories] = useState<CategoryInfo[]>([])
   const [searchInput, setSearchInput] = useState('')
+  const [featuredPosts, setFeaturedPosts] = useState<PostSummary[]>([])
 
   const page = Number(params.get('page') ?? 1)
   const tag = params.get('tag') ?? undefined
   const category = params.get('category') ?? undefined
   const q = params.get('q') ?? undefined
+
+  const hasFilter = !!(category || tag || q)
+  // 精选区仅在无过滤、无搜索的第 1 页显示
+  const showFeatured = page === 1 && !hasFilter
 
   useEffect(() => {
     setSearchInput(q ?? '')
@@ -39,6 +47,20 @@ export default function Blog() {
       .then(setData)
       .catch((e) => setError(e instanceof Error ? e.message : t('blog:loadFailed')))
   }, [page, tag, category, q])
+
+  // 精选文章（frontmatter featured: true 驱动，取前 3 篇）
+  useEffect(() => {
+    if (!showFeatured) {
+      setFeaturedPosts([])
+      return
+    }
+    let cancelled = false
+    api
+      .listPosts({ featured: true })
+      .then((r) => { if (!cancelled) setFeaturedPosts(r.posts.slice(0, 3)) })
+      .catch(() => { if (!cancelled) setFeaturedPosts([]) })
+    return () => { cancelled = true }
+  }, [showFeatured])
 
   const setPage = (p: number) => {
     const next = new URLSearchParams(params)
@@ -93,7 +115,12 @@ export default function Blog() {
     categories.filter((c) => c.depth > 1 && c.name.startsWith(parent + '/'))
 
   const totalPosts = data?.total ?? 0
-  const hasFilter = !!(category || tag || q)
+
+  // 精选文章从常规列表去重（仅精选区展示时）
+  const featuredSlugs = new Set(featuredPosts.map((p) => p.slug))
+  const listPosts = showFeatured && featuredPosts.length > 0 && data
+    ? data.posts.filter((p) => !featuredSlugs.has(p.slug))
+    : data?.posts ?? []
 
   return (
     <div className="container-page py-12 md:py-16">
@@ -152,12 +179,15 @@ export default function Blog() {
             {topCategories.map((cat) => {
               const children = childrenOf(cat.name)
               const active = category === cat.name || (category?.startsWith(cat.name + '/') ?? false)
+              const catColor = categoryVisual(cat.name).color
               return (
                 <div key={cat.name} className="flex items-center gap-1.5 flex-wrap">
                   <Link
                     to={active ? '/blog' : `/blog?category=${encodeURIComponent(cat.name)}`}
                     className={`pill ${active ? 'pill-accent' : ''}`}
+                    style={{ ['--cc' as string]: catColor }}
                   >
+                    <span className="cat-dot" />
                     {cat.name.split('/').pop()} <span className="opacity-60">{cat.count}</span>
                   </Link>
                   {active &&
@@ -166,6 +196,7 @@ export default function Blog() {
                         key={c.name}
                         to={`/blog?category=${encodeURIComponent(c.name)}`}
                         className={`pill ${category === c.name ? 'pill-accent' : ''}`}
+                        style={{ ['--cc' as string]: catColor }}
                       >
                         {c.name.split('/').pop()} <span className="opacity-60">{c.count}</span>
                       </Link>
@@ -203,8 +234,20 @@ export default function Blog() {
         </div>
       )}
 
+      {/* 精选区（仅无过滤第 1 页） */}
+      {showFeatured && featuredPosts.length > 0 && (
+        <>
+          <FeaturedPosts posts={featuredPosts} />
+          <ScrollStatement text={t('blog:statement')} className="mb-10" />
+          <div className="flex items-baseline gap-3 mb-4 border-t pt-8" style={{ borderColor: 'var(--border-subtle)' }}>
+            <h2 className="text-xl font-bold tracking-tight text-[var(--fg-primary)]">{t('blog:latest')}</h2>
+            <span className="text-xs text-[var(--fg-quaternary)]">{t('blog:featuredNote')}</span>
+          </div>
+        </>
+      )}
+
       {/* 文章列表 */}
-      {data && data.posts.length === 0 && (
+      {data && listPosts.length === 0 && (
         <div className="surface-card p-16 text-center">
           <p className="text-sm text-[var(--fg-secondary)]">
             {hasFilter ? t('blog:emptySearch') : t('blog:noPosts')}
@@ -212,9 +255,9 @@ export default function Blog() {
         </div>
       )}
 
-      {data && data.posts.length > 0 && (
+      {data && listPosts.length > 0 && (
         <div className="space-y-3">
-          {data.posts.map((post: PostSummary) => (
+          {listPosts.map((post: PostSummary) => (
             <PostCard key={post.id} post={post} selectable selected={selected.has(post.slug)} onToggleSelect={toggleSelect} />
           ))}
         </div>

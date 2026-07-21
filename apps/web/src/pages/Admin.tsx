@@ -10,6 +10,7 @@ import {
   RefreshCw,
   FileText,
   BarChart3,
+  Star,
 } from 'lucide-react'
 import type { PostSummary } from '@/lib/api'
 import { useTranslation } from 'react-i18next'
@@ -67,6 +68,22 @@ export default function Admin() {
       setPosts((prev) => prev.filter((p) => p.slug !== slug))
     } catch (e) {
       alert(t('postList.deleteFailed', { msg: e instanceof Error ? e.message : String(e) }))
+    }
+  }
+
+  // 精选开关：PUT 写库后本地同步
+  const onToggleFeatured = async (slug: string, featured: boolean) => {
+    try {
+      const res = await fetch(`/api/posts/${encodeURIComponent(slug)}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ featured }),
+      })
+      if (!res.ok) throw new Error(await res.text())
+      setPosts((prev) => prev.map((p) => (p.slug === slug ? { ...p, featured } : p)))
+    } catch (e) {
+      alert(e instanceof Error ? e.message : String(e))
     }
   }
 
@@ -306,6 +323,11 @@ export default function Admin() {
                   >
                     {p.status === 'published' ? t('postList.published') : t('postList.draft')}
                   </span>
+                  {p.featured && (
+                    <span className="pill pill-featured !h-5 !text-[10px]">
+                      ★ {t('postList.featured')}
+                    </span>
+                  )}
                 </div>
                 <div className="text-xs text-[var(--fg-tertiary)] mt-1 flex items-center gap-3 flex-wrap">
                   <span className="font-mono">{new Date(p.date).toLocaleDateString('zh-CN')}</span>
@@ -325,6 +347,15 @@ export default function Admin() {
               </div>
 
               <div className="flex gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => void onToggleFeatured(p.slug, !p.featured)}
+                  className={`btn btn-ghost btn-sm ${p.featured ? 'text-[#f59e0b]' : ''}`}
+                  aria-label={p.featured ? t('postList.unfeature') : t('postList.feature')}
+                  title={p.featured ? t('postList.unfeature') : t('postList.feature')}
+                >
+                  <Star size={13} fill={p.featured ? 'currentColor' : 'none'} />
+                </button>
                 <Link
                   to={`/admin/editor/${encodeURIComponent(p.slug)}`}
                   className="btn btn-ghost btn-sm"

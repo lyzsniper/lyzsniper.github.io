@@ -19,7 +19,7 @@ export default function PostCard({ post, selectable, selected, onToggleSelect }:
   })
 
   return (
-    <article className="surface-card-interactive p-5 flex gap-4">
+    <article className="surface-card-interactive glow-card p-5 flex gap-4">
       {selectable && (
         <input
           type="checkbox"
@@ -33,6 +33,7 @@ export default function PostCard({ post, selectable, selected, onToggleSelect }:
       <div className="flex-1 min-w-0">
         <Link to={`/blog/${post.slug}`} className="block group">
           <h2 className="text-base font-semibold text-[var(--fg-primary)] group-hover:text-[var(--accent)] transition-colors">
+            {post.featured && <span className="pill pill-featured !h-5 !text-[10px] mr-2 align-middle">★</span>}
             {post.title}
           </h2>
           {post.summary && (

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -11,8 +11,35 @@ import {
   Github,
   type LucideIcon,
 } from 'lucide-react'
-import BackgroundFX from '@/components/BackgroundFX'
 import { useHead } from '@/lib/useHead'
+
+/** hero 统计数字：count-up 入场（easeOutExpo） */
+function StatNum({ target, suffix }: { target: number; suffix: string }) {
+  const [val, setVal] = useState(0)
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setVal(target)
+      return
+    }
+    let raf = 0
+    const DURATION = 1400
+    const START_DELAY = 700
+    const t0 = performance.now()
+    const step = (now: number) => {
+      const p = Math.min(1, Math.max(0, (now - t0 - START_DELAY) / DURATION))
+      setVal(Math.round(target * (1 - Math.pow(2, -10 * p))))
+      if (p < 1) raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [target])
+  return (
+    <div className="stat-num">
+      {val}
+      <span className="suffix">{suffix}</span>
+    </div>
+  )
+}
 
 const SkillGraph3D = lazy(() => import('@/components/SkillGraph3D'))
 
@@ -230,42 +257,124 @@ export default function Home() {
     },
   })
 
+  const heroRef = useRef<HTMLElement>(null)
+
+  // hero 逐字/逐词入场：挂载后加 .play 触发
+  useEffect(() => {
+    const el = heroRef.current
+    if (!el) return
+    const raf = requestAnimationFrame(() =>
+      requestAnimationFrame(() => el.classList.add('play')),
+    )
+    return () => cancelAnimationFrame(raf)
+  }, [])
+
+  // 中文逐字、英文逐词；连续的 ASCII 字母/数字聚合为词，避免单词内断行
+  const isZh = !i18n.language?.startsWith('en')
+  const splitTitle = (s: string): string[] => {
+    if (!isZh) {
+      return s.split(' ').map((w, i, arr) => (i < arr.length - 1 ? `${w}\u00A0` : w))
+    }
+    const tokens: string[] = []
+    let buf = ''
+    for (const c of Array.from(s)) {
+      if (/[A-Za-z0-9]/.test(c)) {
+        buf += c
+        continue
+      }
+      if (buf) {
+        tokens.push(buf)
+        buf = ''
+      }
+      tokens.push(c === ' ' ? '\u00A0' : c)
+    }
+    if (buf) tokens.push(buf)
+    return tokens
+  }
+  const titleA = splitTitle(t('home:hero.h1a'))
+  const titleB = splitTitle(t('home:hero.h1b'))
+
+  // hero 统计带（i18n 返回对象数组）
+  const heroStats = t('home:hero.stats', { returnObjects: true }) as {
+    num: number
+    suffix: string
+    label: string
+  }[]
+
   return (
     <>
-      <BackgroundFX />
+      {/* ===== HERO（全屏透明舞台：浮在全局星座场上，左下锚定） ===== */}
+      <section ref={heroRef} className="hero-stage">
+        <div className="hero-content container-page">
+          <div className="max-w-3xl">
+            <div className="hero-eyebrow reveal">
+              <span className="dot" />
+              {t('home:hero.eyebrow')}
+            </div>
 
-      {/* ===== HERO ===== */}
-      <section className="container-page pt-16 md:pt-24 pb-20 md:pb-28">
-        <div className="max-w-3xl">
-          <div className="eyebrow mb-6 reveal">
-            <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
-            {t('home:hero.eyebrow')}
-          </div>
-
-          <h1 className="reveal text-display-xl text-[var(--fg-primary)] mb-6">
-            {t('home:hero.h1')}
-          </h1>
-
-          <p className="reveal text-body-lg text-[var(--fg-secondary)] max-w-2xl mb-8">
-            {t('home:hero.subtitle')}
-          </p>
-
-          <div className="reveal flex flex-wrap gap-2 mb-10">
-            {expertise.map((t) => (
-              <span key={t} className="pill">
-                {t}
+            <h1
+              className="hero-h1 mt-5 mb-5"
+              aria-label={`${t('home:hero.h1a')}${t('home:hero.h1b')}`}
+            >
+              {titleA.map((ch, i) => (
+                <span
+                  key={`a-${i}`}
+                  className="w"
+                  style={{ transitionDelay: `${100 + i * 55}ms` }}
+                  aria-hidden="true"
+                >
+                  {ch}
+                </span>
+              ))}
+              <span className="accent">
+                {titleB.map((ch, i) => (
+                  <span
+                    key={`b-${i}`}
+                    className="w"
+                    style={{ transitionDelay: `${100 + (titleA.length + i) * 55}ms` }}
+                    aria-hidden="true"
+                  >
+                    {ch}
+                  </span>
+                ))}
               </span>
-            ))}
-          </div>
+            </h1>
 
-          <div className="reveal flex items-center gap-3 flex-wrap">
-            <Link to="/blog" className="btn btn-primary">
-              {t('home:hero.ctaBlog')} <ArrowRight size={14} />
-            </Link>
-            <a href="mailto:jensenlyz@163.com" className="btn btn-secondary">
-              <Mail size={14} /> {t('home:hero.ctaContact')}
-            </a>
+            <p className="hero-sub reveal mb-7" style={{ transitionDelay: '0.3s' }}>
+              {t('home:hero.subtitle')}
+            </p>
+
+            <div className="reveal flex flex-wrap gap-2 mb-9" style={{ transitionDelay: '0.45s' }}>
+              {expertise.map((tag) => (
+                <span key={tag} className="pill pill-ghost-dark">
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            <div className="reveal flex items-center gap-3 flex-wrap" style={{ transitionDelay: '0.6s' }}>
+              <Link to="/blog" className="btn btn-primary btn-gradient">
+                {t('home:hero.ctaBlog')} <ArrowRight size={14} />
+              </Link>
+              <a href="mailto:jensenlyz@163.com" className="btn btn-ghost-dark">
+                <Mail size={14} /> {t('home:hero.ctaContact')}
+              </a>
+            </div>
+
+            <div className="stats-band reveal" style={{ transitionDelay: '0.75s' }}>
+              {heroStats.map((s, i) => (
+                <div key={i} className="stat">
+                  <StatNum target={s.num} suffix={s.suffix} />
+                  <div className="stat-label">{s.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
+        </div>
+
+        <div className="scroll-cue" aria-hidden="true">
+          {t('home:hero.scroll')}
+          <span className="line" />
         </div>
       </section>
 
@@ -433,7 +542,7 @@ export default function Home() {
                 </span>
               </div>
               <blockquote
-                className="text-display-md text-[var(--fg-primary)] leading-snug mb-6 pl-[calc(0.75rem+1.5rem)]"
+                className="text-display-md serif-display text-[var(--fg-primary)] leading-snug mb-6 pl-[calc(0.75rem+1.5rem)]"
                 style={{ letterSpacing: '-0.02em' }}
               >
                 "{t(`home:principles.items.${p.no}.quote`)}"

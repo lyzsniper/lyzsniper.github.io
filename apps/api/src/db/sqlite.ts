@@ -124,6 +124,7 @@ export function initDb(): DatabaseSync {
   ensureColumn(db, 'posts', 'category', 'TEXT')
   ensureColumn(db, 'posts', 'series', 'TEXT')
   ensureColumn(db, 'posts', 'series_order', 'INTEGER')
+  ensureColumn(db, 'posts', 'featured', 'INTEGER NOT NULL DEFAULT 0')
   ensureColumn(db, 'tags', 'color', 'TEXT')
   ensureColumn(db, 'tags', 'description', 'TEXT')
   ensureColumn(db, 'tags', 'created_at', "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP")
