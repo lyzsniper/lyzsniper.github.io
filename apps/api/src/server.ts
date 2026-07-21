@@ -14,6 +14,7 @@ import { agentRoutes } from './routes/agent.js'
 import { feedRoutes } from './routes/feed.js'
 import { commentRoutes } from './routes/comments.js'
 import { statsRoutes } from './routes/stats.js'
+import { trackRoutes } from './routes/track.js'
 import { seoRoutes } from './routes/seo.js'
 import { trackPageView } from './services/tracker.js'
 import { inboxRoutes } from './routes/inbox.js'
@@ -61,6 +62,7 @@ async function buildServer() {
   await app.register(feedRoutes, { prefix: '/api' })
   await app.register(commentRoutes, { prefix: '/api/comments' })
   await app.register(statsRoutes, { prefix: '/api/admin/stats' })
+  await app.register(trackRoutes, { prefix: '/api' })
   await app.register(seoRoutes, { prefix: '' })
 
   // 追踪页面访问（onResponse hook，所有已匹配路由）

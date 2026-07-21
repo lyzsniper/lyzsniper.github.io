@@ -32,6 +32,8 @@ import zhInbox from './locales/zh/inbox.json'
 import enInbox from './locales/en/inbox.json'
 import zhTagmanage from './locales/zh/tagmanage.json'
 import enTagmanage from './locales/en/tagmanage.json'
+import zhAdminstats from './locales/zh/adminstats.json'
+import enAdminstats from './locales/en/adminstats.json'
 
 export const supportedLngs = ['zh', 'en'] as const
 export const fallbackLng = 'zh'
@@ -44,7 +46,7 @@ void i18n
     fallbackLng,
     defaultNS,
     supportedLngs: [...supportedLngs],
-    ns: ['common', 'header', 'footer', 'postcard', 'home', 'blog', 'post', 'search', 'tags', 'notfound', 'login', 'admin', 'editor', 'inbox', 'tagmanage'],
+    ns: ['common', 'header', 'footer', 'postcard', 'home', 'blog', 'post', 'search', 'tags', 'notfound', 'login', 'admin', 'editor', 'inbox', 'tagmanage', 'adminstats'],
     detection: {
       order: ['path', 'localStorage', 'navigator'],
       lookupFromPathIndex: 0,
@@ -85,5 +87,7 @@ i18n.addResourceBundle('zh', 'inbox', zhInbox, true, true)
 i18n.addResourceBundle('en', 'inbox', enInbox, true, true)
 i18n.addResourceBundle('zh', 'tagmanage', zhTagmanage, true, true)
 i18n.addResourceBundle('en', 'tagmanage', enTagmanage, true, true)
+i18n.addResourceBundle('zh', 'adminstats', zhAdminstats, true, true)
+i18n.addResourceBundle('en', 'adminstats', enAdminstats, true, true)
 
 export default i18n
