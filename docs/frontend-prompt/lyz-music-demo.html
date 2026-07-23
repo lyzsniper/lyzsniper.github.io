@@ -49,28 +49,22 @@
   .artist-hero {
     position: relative; margin: 24px 0 8px; padding: 56px 40px 36px;
     border-radius: 20px; overflow: hidden;
-    background: linear-gradient(160deg, #312e81 0%, #4f46e5 45%, #0f0f1a 100%);
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
   }
-  .artist-hero::after {
-    content: ""; position: absolute; inset: 0;
-    background: radial-gradient(600px circle at 85% 20%, rgba(167,139,250,.35), transparent 60%);
-    pointer-events: none;
-  }
+  .artist-hero::after { display: none; }
   .artist-hero .inner { position: relative; z-index: 2; display: flex; align-items: flex-end; gap: 28px; }
   .artist-avatar {
     width: 148px; height: 148px; border-radius: 50%; flex: none;
     border: 3px solid rgba(255,255,255,.25);
     box-shadow: 0 12px 40px rgba(0,0,0,.5);
-    background:
-      radial-gradient(circle at 35% 30%, #c7d2fe 0%, transparent 45%),
-      radial-gradient(circle at 65% 70%, #8052ff 0%, transparent 55%),
-      linear-gradient(140deg, #1e1b4b, #4f46e5);
+    background: hsl(242 48% 30%);
     display: grid; place-items: center; font-size: 40px;
   }
-  .artist-tag { font-size: 11px; letter-spacing: .2em; color: rgba(255,255,255,.7); text-transform: uppercase; margin-bottom: 8px; }
+  .artist-tag { font-size: 11px; letter-spacing: .2em; color: var(--fg-2); text-transform: uppercase; margin-bottom: 8px; }
   .artist-tag b { color: #ffb829; }
   .artist-name { font-size: clamp(34px, 5vw, 56px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
-  .artist-meta { margin-top: 10px; font-size: 13px; color: rgba(255,255,255,.65); }
+  .artist-meta { margin-top: 10px; font-size: 13px; color: var(--fg-2); }
   .artist-actions { display: flex; gap: 12px; margin-top: 20px; }
   .btn-play-big {
     display: inline-flex; align-items: center; gap: 8px;
@@ -81,7 +75,7 @@
   .btn-play-big:hover { transform: scale(1.04); background: #a5b4fc; }
   .btn-ghost {
     height: 44px; padding: 0 22px; border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.3); color: #fff; font-size: 13px;
+    border: 1px solid var(--border); color: var(--fg); font-size: 13px;
     transition: all .2s;
   }
   .btn-ghost:hover { border-color: #fff; }
@@ -335,11 +329,11 @@ function drawCover(cv, hue, seedStr) {
   const W = r.width, H = r.height;
   const rand = rng(hash(seedStr));
 
-  const g = ctx.createLinearGradient(0, 0, W, H);
-  g.addColorStop(0, `hsl(${hue} 65% 42%)`);
-  g.addColorStop(.6, `hsl(${(hue + 30) % 360} 62% 52%)`);
-  g.addColorStop(1, `hsl(${(hue + 65) % 360} 60% 60%)`);
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  // 平面纯色底（无渐变）
+  ctx.fillStyle = `hsl(${hue} 48% 34%)`;
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.beginPath(); ctx.arc(W * .85, H * .15, W * .45, 0, Math.PI * 2); ctx.fill();
 
   // 声波条纹（音乐感签名元素）
   const bars = 28;
@@ -356,9 +350,7 @@ function drawCover(cv, hue, seedStr) {
     ctx.fillStyle = `rgba(255,255,255,${0.25 + rand() * 0.5})`;
     ctx.beginPath(); ctx.arc(rand() * W, rand() * H * 0.5, 0.8 + rand() * 1.4, 0, Math.PI * 2); ctx.fill();
   }
-  const hl = ctx.createRadialGradient(W * .3, H * .2, 0, W * .3, H * .2, W * .8);
-  hl.addColorStop(0, 'rgba(255,255,255,.3)'); hl.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = hl; ctx.fillRect(0, 0, W, H);
+
 }
 
 /* =========================================================

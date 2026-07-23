@@ -107,10 +107,35 @@ export interface CategoryInfo {
   depth: number
 }
 
+export interface TrackInfo {
+  id: number
+  title: string
+  subtitle: string | null
+  duration: number | null
+  audioUrl: string | null
+  sortOrder: number
+}
+
+export interface AlbumInfo {
+  slug: string
+  title: string
+  type: 'album' | 'ep' | 'single'
+  description: string | null
+  hue: number
+  year: number | null
+  coverUrl: string | null
+  tracks: TrackInfo[]
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  // DELETE 等请求无 body 时不要带 Content-Type，否则 Fastify 报 FST_ERR_CTP_EMPTY_JSON_BODY
+  if (init?.method && init.method !== 'GET' && init.method !== 'HEAD' && !init.body) {
+    delete headers['Content-Type']
+  }
   const res = await fetch(`${API_BASE}${path}`, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     ...init,
   })
   if (!res.ok) {
@@ -193,6 +218,73 @@ export const api = {
   statsPosts: (limit = 20) => request<{ data: PostPv[] }>(`/admin/stats/posts?limit=${limit}`),
   statsReferrers: (limit = 10) => request<{ data: ReferrerStat[] }>(`/admin/stats/referrers?limit=${limit}`),
   stats404s: (limit = 20) => request<{ data: NotFoundStat[] }>(`/admin/stats/404s?limit=${limit}`),
+
+  // ===== 音乐 =====
+  listAlbums: () => request<{ albums: AlbumInfo[] }>('/music/albums'),
+  getAlbum: (slug: string) =>
+    request<AlbumInfo>(`/music/albums/${encodeURIComponent(slug)}`),
+  createAlbum: (data: {
+    title: string
+    slug?: string
+    type?: AlbumInfo['type']
+    description?: string
+    hue?: number
+    year?: number
+  }) =>
+    request<AlbumInfo>('/music/albums', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateAlbum: (
+    slug: string,
+    data: Partial<{
+      title: string
+      type: AlbumInfo['type']
+      description: string
+      hue: number
+      year: number
+    }>,
+  ) =>
+    request<AlbumInfo>(`/music/albums/${encodeURIComponent(slug)}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  deleteAlbum: (slug: string) =>
+    request<{ ok: boolean }>(`/music/albums/${encodeURIComponent(slug)}`, {
+      method: 'DELETE',
+    }),
+  uploadAlbumCover: (slug: string, file: File) => {
+    const fd = new FormData()
+    fd.append('file', file)
+    return fetch(`${API_BASE}/music/albums/${encodeURIComponent(slug)}/cover`, {
+      method: 'POST',
+      credentials: 'include',
+      body: fd,
+    }).then(async (res) => {
+      if (!res.ok) throw new Error(await res.text())
+      return res.json() as Promise<AlbumInfo>
+    })
+  },
+  uploadTrack: (
+    albumSlug: string,
+    payload: { file: File; title: string; subtitle?: string; duration?: number },
+  ) => {
+    const fd = new FormData()
+    fd.append('title', payload.title)
+    if (payload.subtitle) fd.append('subtitle', payload.subtitle)
+    if (payload.duration) fd.append('duration', String(Math.round(payload.duration)))
+    fd.append('file', payload.file)
+    return fetch(`${API_BASE}/music/albums/${encodeURIComponent(albumSlug)}/tracks`, {
+      method: 'POST',
+      credentials: 'include',
+      body: fd,
+    }).then(async (res) => {
+      if (!res.ok) throw new Error(await res.text())
+      return res.json() as Promise<{ id: number }>
+    })
+  },
+  deleteTrack: (id: number) =>
+    request<{ ok: boolean }>(`/music/tracks/${id}`, { method: 'DELETE' }),
 
   /**
    * 上报一次页面访问。SPA 路由跳转时由 PageTracker 自动调用。

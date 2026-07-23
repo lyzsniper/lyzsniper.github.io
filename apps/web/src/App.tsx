@@ -13,6 +13,8 @@ import Editor from './pages/Editor'
 import Inbox from './pages/Inbox'
 import TagManage from './pages/TagManage'
 import AdminStats from './pages/AdminStats'
+import Music from './pages/Music'
+import AdminMusic from './pages/AdminMusic'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 import { useAuthStore } from './store/auth'
@@ -45,7 +47,16 @@ export default function App() {
         <Route path="/tags" element={<Tags />} />
         <Route path="/tags/:tag" element={<Tags />} />
         <Route path="/search" element={<Search />} />
+        <Route path="/music" element={<Music />} />
         <Route path="/login" element={<Login />} />
+        <Route
+          path="/admin/music"
+          element={
+            <ProtectedRoute>
+              <AdminMusic />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/admin"
           element={
@@ -103,7 +114,16 @@ export default function App() {
         <Route path="/en/tags" element={<Tags />} />
         <Route path="/en/tags/:tag" element={<Tags />} />
         <Route path="/en/search" element={<Search />} />
+        <Route path="/en/music" element={<Music />} />
         <Route path="/en/login" element={<Login />} />
+        <Route
+          path="/en/admin/music"
+          element={
+            <ProtectedRoute>
+              <AdminMusic />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/en/admin"
           element={
