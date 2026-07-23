@@ -11,6 +11,7 @@ const navItems = [
   { to: '/', labelKey: 'header:nav.home' },
   { to: '/blog', labelKey: 'header:nav.blog' },
   { to: '/tags', labelKey: 'header:nav.tags' },
+  { to: '/music', labelKey: 'header:nav.music' },
 ]
 
 export default function Header() {

@@ -34,6 +34,10 @@
     "stats": {
       "title": "Statistics",
       "desc": "PV/UV, top posts, 404s"
+    },
+    "music": {
+      "title": "Music",
+      "desc": "Upload albums and tracks, edit descriptions"
     }
   },
   "postList": {

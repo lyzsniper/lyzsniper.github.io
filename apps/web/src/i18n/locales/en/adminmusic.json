@@ -1,0 +1,23 @@
+{
+  "eyebrow": "Admin",
+  "title": "Music Manager",
+  "createTitle": "New release",
+  "fieldTitle": "Title",
+  "fieldType": "Type",
+  "fieldYear": "Year",
+  "fieldHue": "Cover hue (0-360)",
+  "fieldDesc": "Description",
+  "descPlaceholder": "Tell the story of this release…",
+  "create": "Create",
+  "creating": "Creating…",
+  "deleteAlbumConfirm": "Delete album {{slug}} and all its tracks?",
+  "noDesc": "No description yet",
+  "tracks": "Tracks",
+  "noTracks": "No tracks yet — upload below",
+  "uploadTrack": "Upload track",
+  "uploading": "Uploading…",
+  "trackCount_one": "{{count}} track",
+  "trackCount_other": "{{count}} tracks",
+  "uploadCover": "Upload cover",
+  "coverHint": "Square image, ≥800×800 recommended"
+}

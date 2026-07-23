@@ -12,6 +12,9 @@ interface Props {
   category: string | null
   seed: string
   pattern?: 'constellation' | 'waves' | 'orbits'
+  hue?: number
+  /** flat=true 时纯色底 + 白色图案，不用渐变（平面化设计） */
+  flat?: boolean
   className?: string
 }
 
@@ -35,7 +38,7 @@ function mulberry32(seed: number): () => number {
   }
 }
 
-export default function GenCover({ category, seed, pattern, className }: Props) {
+export default function GenCover({ category, seed, pattern, hue: hueProp, flat, className }: Props) {
   const ref = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -55,21 +58,31 @@ export default function GenCover({ category, seed, pattern, className }: Props) 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       const W = rect.width
       const H = rect.height
-      const { hue } = categoryVisual(category, seed)
+      const { hue } = hueProp !== undefined ? { hue: hueProp } : categoryVisual(category, seed)
       const rand = mulberry32(hash(seed))
 
-      const g = ctx.createLinearGradient(0, 0, W, H)
-      g.addColorStop(0, `hsl(${hue} 62% 48%)`)
-      g.addColorStop(0.55, `hsl(${(hue + 28) % 360} 60% 56%)`)
-      g.addColorStop(1, `hsl(${(hue + 60) % 360} 58% 64%)`)
-      ctx.fillStyle = g
-      ctx.fillRect(0, 0, W, H)
+      if (flat) {
+        // 平面模式：纯色底 + 白色高光弧线，零渐变
+        ctx.fillStyle = `hsl(${hue} 48% 34%)`
+        ctx.fillRect(0, 0, W, H)
+        ctx.fillStyle = 'rgba(255,255,255,0.06)'
+        ctx.beginPath()
+        ctx.arc(W * 0.85, H * 0.15, W * 0.45, 0, Math.PI * 2)
+        ctx.fill()
+      } else {
+        const g = ctx.createLinearGradient(0, 0, W, H)
+        g.addColorStop(0, `hsl(${hue} 62% 48%)`)
+        g.addColorStop(0.55, `hsl(${(hue + 28) % 360} 60% 56%)`)
+        g.addColorStop(1, `hsl(${(hue + 60) % 360} 58% 64%)`)
+        ctx.fillStyle = g
+        ctx.fillRect(0, 0, W, H)
 
-      const hl = ctx.createRadialGradient(W * 0.25, H * 0.15, 0, W * 0.25, H * 0.15, W * 0.7)
-      hl.addColorStop(0, 'rgba(255,255,255,0.28)')
-      hl.addColorStop(1, 'rgba(255,255,255,0)')
-      ctx.fillStyle = hl
-      ctx.fillRect(0, 0, W, H)
+        const hl = ctx.createRadialGradient(W * 0.25, H * 0.15, 0, W * 0.25, H * 0.15, W * 0.7)
+        hl.addColorStop(0, 'rgba(255,255,255,0.28)')
+        hl.addColorStop(1, 'rgba(255,255,255,0)')
+        ctx.fillStyle = hl
+        ctx.fillRect(0, 0, W, H)
+      }
 
       const p = pattern ?? coverPattern(category, seed)
 
@@ -159,7 +172,7 @@ export default function GenCover({ category, seed, pattern, className }: Props) 
       clearTimeout(rz)
       window.removeEventListener('resize', onResize)
     }
-  }, [category, seed, pattern])
+  }, [category, seed, pattern, hueProp, flat])
 
   return (
     <canvas

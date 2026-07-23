@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import cookie from '@fastify/cookie'
 import multipart from '@fastify/multipart'
+import fastifyStatic from '@fastify/static'
 import { config } from './config.js'
 import { initDb, closeDb } from './db/sqlite.js'
 import { healthRoutes } from './routes/healthz.js'
@@ -19,6 +20,8 @@ import { seoRoutes } from './routes/seo.js'
 import { trackPageView } from './services/tracker.js'
 import { inboxRoutes } from './routes/inbox.js'
 import { categoryRoutes } from './routes/categories.js'
+import { musicRoutes } from './routes/music.js'
+import path from 'node:path'
 import { startInboxWatcher, stopInboxWatcher } from './services/inbox-watcher.js'
 import { startScheduler, stopScheduler } from './services/scheduler.js'
 import { startSearchIndex } from './services/search.js'
@@ -43,7 +46,14 @@ async function buildServer() {
 
   // Multipart (file upload)
   await app.register(multipart, {
-    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+    limits: { fileSize: 60 * 1024 * 1024 }, // 60MB（音频文件）
+  })
+
+  // 静态服务：音频等媒体文件（/api/media/music/xxx.mp3，支持 Range 拖动播放）
+  // 挂在 /api 前缀下：dev 走 vite 代理、生产走 nginx /api 反代，无需额外配置
+  await app.register(fastifyStatic, {
+    root: path.join(config.uploadsDir),
+    prefix: '/api/media/',
   })
 
   // 初始化 DB
@@ -62,6 +72,7 @@ async function buildServer() {
   await app.register(feedRoutes, { prefix: '/api' })
   await app.register(commentRoutes, { prefix: '/api/comments' })
   await app.register(statsRoutes, { prefix: '/api/admin/stats' })
+  await app.register(musicRoutes, { prefix: '/api/music' })
   await app.register(trackRoutes, { prefix: '/api' })
   await app.register(seoRoutes, { prefix: '' })
 
@@ -74,7 +85,7 @@ async function buildServer() {
   // 给所有需要鉴权的 admin 路由加 onRequest 钩子
   // 匹配写到 /api/posts, /api/tags, /api/files, /api/inbox 的请求
   const writeMethods = new Set(['POST', 'PUT', 'DELETE', 'PATCH'])
-  const adminPrefixes = ['/api/posts', '/api/tags', '/api/files', '/api/inbox', '/api/admin']
+  const adminPrefixes = ['/api/posts', '/api/tags', '/api/files', '/api/inbox', '/api/admin', '/api/music']
   app.addHook('onRequest', async (req, reply) => {
     if (!writeMethods.has(req.method)) return
     const url = req.url.split('?')[0]

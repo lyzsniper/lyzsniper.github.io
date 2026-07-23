@@ -115,6 +115,28 @@ export function initDb(): DatabaseSync {
       expires_at  INTEGER NOT NULL         -- unix ms，懒清理
     );
 
+    CREATE TABLE IF NOT EXISTS albums (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      slug        TEXT UNIQUE NOT NULL,
+      title       TEXT NOT NULL,
+      type        TEXT NOT NULL DEFAULT 'album',  -- album | ep | single
+      description TEXT,
+      hue         INTEGER NOT NULL DEFAULT 242,   -- 生成封面色相
+      year        INTEGER,
+      created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS tracks (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      album_id    INTEGER NOT NULL REFERENCES albums(id) ON DELETE CASCADE,
+      title       TEXT NOT NULL,
+      subtitle    TEXT,
+      duration    INTEGER,                        -- 秒
+      file_path   TEXT,                           -- data/uploads/music/<file>
+      sort_order  INTEGER NOT NULL DEFAULT 0,
+      created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE INDEX IF NOT EXISTS idx_posts_status_date ON posts(status, created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_post_tags_tag ON post_tags(tag_id);
     CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
@@ -125,6 +147,7 @@ export function initDb(): DatabaseSync {
   ensureColumn(db, 'posts', 'series', 'TEXT')
   ensureColumn(db, 'posts', 'series_order', 'INTEGER')
   ensureColumn(db, 'posts', 'featured', 'INTEGER NOT NULL DEFAULT 0')
+  ensureColumn(db, 'albums', 'cover_path', 'TEXT')
   ensureColumn(db, 'tags', 'color', 'TEXT')
   ensureColumn(db, 'tags', 'description', 'TEXT')
   ensureColumn(db, 'tags', 'created_at', "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP")
@@ -134,6 +157,7 @@ export function initDb(): DatabaseSync {
   db.exec('CREATE INDEX IF NOT EXISTS idx_comments_post ON comments(post_id, created_at DESC)')
   db.exec('CREATE INDEX IF NOT EXISTS idx_page_views_created ON page_views(created_at DESC)')
   db.exec('CREATE INDEX IF NOT EXISTS idx_page_views_path ON page_views(path)')
+  db.exec('CREATE INDEX IF NOT EXISTS idx_tracks_album ON tracks(album_id, sort_order)')
 
   return db
 }

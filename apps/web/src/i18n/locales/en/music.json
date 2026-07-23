@@ -1,0 +1,19 @@
+{
+  "eyebrow": "Music · Soda Music",
+  "subtitle": "{{albums}} releases · {{tracks}} tracks · AI-generated music",
+  "works": "Releases",
+  "empty": "No music uploaded yet.",
+  "playAll": "Play all",
+  "pause": "Pause",
+  "play": "Play",
+  "back": "All releases",
+  "trackCount_one": "{{count}} track",
+  "trackCount_other": "{{count}} tracks",
+  "nothing": "Nothing playing",
+  "upNext": "Up next",
+  "queue": "Queue",
+  "mute": "Mute",
+  "unmute": "Unmute",
+  "collapse": "Collapse player",
+  "expand": "Expand player"
+}

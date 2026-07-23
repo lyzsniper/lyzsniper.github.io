@@ -1,0 +1,22 @@
+{
+  "eyebrow": "管理",
+  "title": "音乐管理",
+  "createTitle": "新建专辑",
+  "fieldTitle": "专辑名称",
+  "fieldType": "类型",
+  "fieldYear": "年份",
+  "fieldHue": "封面色相 (0-360)",
+  "fieldDesc": "专辑介绍",
+  "descPlaceholder": "写点关于这张专辑的故事……",
+  "create": "创建专辑",
+  "creating": "创建中…",
+  "deleteAlbumConfirm": "确定删除专辑 {{slug}} 及其全部曲目？",
+  "noDesc": "暂无介绍",
+  "tracks": "曲目",
+  "noTracks": "暂无曲目，点击下方上传",
+  "uploadTrack": "上传曲目",
+  "uploading": "上传中…",
+  "trackCount": "{{count}} 首",
+  "uploadCover": "上传封面",
+  "coverHint": "建议正方形，≥800×800"
+}

@@ -647,6 +647,68 @@
 .prose pre .hljs-attr { color: #86efac; }
 .prose pre .hljs-number,
 .prose pre .hljs-literal { color: #fcd34d; }
+
+/* ============ 音乐播放器 ============ */
+/* 进度条 / 音量滑条：拖拽时禁用文字选中，保证体验一致 */
+.player-slider {
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* 进度条填充：非拖拽时平滑过渡，拖拽时即时跟随 */
+.player-slider .player-fill {
+  transition: width 0.1s linear;
+}
+.player-slider.dragging .player-fill {
+  transition: none;
+}
+/* 展开播放器入场动画 */
+@keyframes player-slide-up {
+  from { transform: translateY(100%); opacity: 0.3; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.player-expanded-enter {
+  animation: player-slide-up 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* EQ 均衡器动画 */
+@keyframes eq-bar {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+.animate-eq {
+  animation: eq-bar 0.8s ease-in-out infinite;
+}
+/* 封面旋转（播放中） */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+/* 专辑卡悬浮发光 */
+@keyframes card-glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+/* 播放器能量脉冲 */
+@keyframes energy-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+/* 频谱条平滑 */
+@keyframes spectrum-flow {
+  0% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+  100% { transform: scaleY(0.3); }
+}
+/* 艺术家头像旋转光环 */
+@keyframes ring-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+/* 浮动音符 */
+@keyframes float-note {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  20% { opacity: 0.6; }
+  100% { transform: translateY(-40px) rotate(15deg); opacity: 0; }
+}
 .prose pre .hljs-comment { color: #737373; font-style: italic; }
 .prose pre .hljs-function .hljs-title,
 .prose pre .hljs-title { color: #93c5fd; }

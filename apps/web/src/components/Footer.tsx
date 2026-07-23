@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Github, Mail, MapPin } from 'lucide-react'
+import { Github, Mail, MapPin, Music2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 /** 小红书官方风格 logo（红底白字） */
@@ -108,6 +108,18 @@ export default function Footer() {
                   className="hover:text-[var(--fg-primary)] transition"
                 >
                   AI前沿量子港
+                </a>
+              </li>
+              <li className="flex items-center gap-2 text-[var(--fg-secondary)]">
+                <Music2 size={13} strokeWidth={1.75} className="text-[var(--fg-tertiary)]" />
+                {/* TODO: 替换为汽水音乐「AI前沿量子港」音乐人主页的真实分享链接 */}
+                <a
+                  href="https://qishui.douyin.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[var(--fg-primary)] transition"
+                >
+                  汽水音乐 · AI前沿量子港
                 </a>
               </li>
             </ul>

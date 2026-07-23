@@ -34,6 +34,10 @@
     "stats": {
       "title": "数据统计",
       "desc": "PV/UV、热门文章、404"
+    },
+    "music": {
+      "title": "音乐管理",
+      "desc": "上传专辑与曲目，编辑介绍"
     }
   },
   "postList": {
