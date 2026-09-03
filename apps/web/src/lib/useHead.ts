@@ -13,6 +13,7 @@ interface HeadOptions {
 }
 
 const SITE_NAME = 'Jensen.lyz'
+const TITLE_SUFFIX = '个人主页与博客'
 const ABSOLUTE = (p: string) => (p.startsWith('http') ? p : `${window.location.origin}${p}`)
 
 /** 轻量 head 标签管理 — 不需要额外依赖 */
@@ -23,7 +24,7 @@ export function useHead(opts: HeadOptions) {
 
     // 标题
     if (opts.title) {
-      const full = opts.title.includes(SITE_NAME) ? opts.title : `${opts.title} — ${SITE_NAME}`
+      const full = opts.title.includes(SITE_NAME) ? opts.title : `${opts.title} — ${SITE_NAME} · ${TITLE_SUFFIX}`
       document.title = full
       cleanups.push(() => { document.title = '' })
     }

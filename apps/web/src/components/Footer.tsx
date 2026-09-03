@@ -131,6 +131,14 @@ export default function Footer() {
           style={{ borderTop: '1px solid var(--border-subtle)' }}
         >
           <span>© {year} Jensen.lyz. All rights reserved.</span>
+          <a
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[var(--fg-secondary)] transition"
+          >
+            网站备案号：湘ICP备2024090762号
+          </a>
           <span>{t('footer:builtWith')}</span>
         </div>
       </div>
